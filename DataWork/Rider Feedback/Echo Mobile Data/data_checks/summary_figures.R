@@ -102,10 +102,33 @@ data_comp[!(data_comp$date %in% as.Date(c("2020-06-26", "2020-06-27"))),] %>%
          height = 4, width =7)
 
 # 10 Min Interval Bus 22 -------------------------------------------------------
-data_2627_v22 <- data_comp[data_comp$date %in% as.Date(c("2020-06-26", "2020-06-27")),] 
-data_2627_v22 <- data_2627_v22[data_2627_v22$matatu_num %in% "22",]
+data_comp %>%
+  filter(matatu_num %in% "22") %>%
+  filter(date %in% as.Date(c("2020-06-26", "2020-06-27"))) %>%
+  mutate(complete_date_r = complete_date %>% 
+           ymd_hm(tz = "Africa/Nairobi") %>% 
+           lubridate::round_date("10 minutes")) %>%
+  group_by(complete_date_r) %>%
+  summarise(N = n()) %>%
+  ggplot() +
+  geom_col(aes(x = complete_date_r, y = N), fill = "dodgerblue4") +
+  theme_minimal() +
+  labs(title = "June 26 and 27") +
+  ggsave(filename = file.path(echo_figures, "v22_by_10min_interval_2627.png"),
+         height = 4, width =12)
 
-data_2627_v22$min_round <- round(data_2627_v22$minute / 10)
-
-data_2627_v22$complete_date_r <- data_2627_v22$complete_date %>% ymd_hm() %>% lubridate::round_date("15 minutes") 
+data_comp %>%
+  filter(matatu_num %in% "22") %>%
+  filter(!(date %in% as.Date(c("2020-06-26", "2020-06-27")))) %>%
+  mutate(complete_date_r = complete_date %>% 
+           ymd_hm(tz = "Africa/Nairobi") %>% 
+           lubridate::round_date("10 minutes")) %>%
+  group_by(complete_date_r) %>%
+  summarise(N = n()) %>%
+  ggplot() +
+  geom_col(aes(x = complete_date_r, y = N), fill = "dodgerblue4") +
+  theme_minimal() +
+  labs(title = "June 28 Onwards") +
+  ggsave(filename = file.path(echo_figures, "v22_by_10min_interval_not2627.png"),
+         height = 4, width =12)
 
