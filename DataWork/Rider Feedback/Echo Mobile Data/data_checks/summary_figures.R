@@ -81,6 +81,18 @@ data_comp %>%
   ggsave(filename = file.path(echo_figures, "matatu_number_daily.png"),
          height = 4, width =7)
 
+### Survey award amount
+data_comp %>%
+  filter(matatu_num_correct %in% T) %>%
+  group_by(date, award) %>%
+  summarise(N = n()) %>%
+  ggplot() +
+  geom_col(aes(x = date, y = N, group = award, fill = award)) +
+  theme_minimal() +
+  labs(fill = "Award \n Amount") +
+  ggsave(filename = file.path(echo_figures, "award_daily.png"),
+         height = 4, width =7)
+
 data_comp$matatu_num_correct %>% mean()
 data_comp$matatu_num[data_comp$matatu_num_correct %in% F] %>% table %>% View()
 
@@ -95,6 +107,7 @@ data_comp %>%
   theme_minimal() +
   ggsave(filename = file.path(echo_figures, "by_hour.png"),
          height = 4, width =7)
+
 
 data_comp[data_comp$date %in% as.Date(c("2020-06-26", "2020-06-27")),] %>%
   group_by(hour) %>%
@@ -204,6 +217,23 @@ data_comp_veh <- data_comp %>%
   mutate(N_veh = n()) %>%
   ungroup() 
 
+data_comp_hour <- data_comp %>%
+  group_by(hour) %>%
+  mutate(N_hour = n()) %>%
+  ungroup()
+
+#Hourly response by vehicle
+# By hour by matatu
+data_comp_veh %>%
+  group_by(hour, matatu_num) %>%
+  summarise(N = n()) %>%
+  ggplot() +
+  geom_col(aes(x = hour, y = N, group = matatu_num, fill = matatu_num)) +
+  theme_minimal() +
+  ggsave(filename = file.path(echo_figures, "by_hour_matatu.png"),
+         height = 4, width =7)
+
+
 data_comp_veh %>%
   group_by(DRIVER.RATING._L, matatu_num, N_veh) %>%
   summarise(N = n()) %>%
@@ -261,7 +291,18 @@ data_comp_veh %>%
   ggsave(filename = file.path(echo_figures, "matatu_covidmeasure_rate_byveh.png"),
          height = 3, width =6)
 
-
-
-
+# covid response by hour
+data_comp_hour %>%
+  group_by(PASSENGER.HAND.SANITISATION_L, hour, N_hour) %>%
+  summarise(N = n()) %>%
+  mutate(N = N / N_hour) %>%
+  ggplot(aes(x = hour, y = N, group=PASSENGER.HAND.SANITISATION_L, fill=PASSENGER.HAND.SANITISATION_L)) +
+  geom_col(color="black") +
+  labs(x="", y="",
+       title = "Did the matatu take measures to prevent spread of COVID?") +
+  theme_minimal() +
+  coord_flip() +
+  labs(x = "Hour of the day", y = "Proportion", fill = "") +
+  ggsave(filename = file.path(echo_figures, "matatu_covidmeasure_rate_byhour.png"),
+         height = 3, width =6)
 
