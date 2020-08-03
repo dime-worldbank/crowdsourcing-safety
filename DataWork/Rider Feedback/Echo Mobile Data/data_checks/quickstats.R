@@ -26,3 +26,18 @@ data$MATATU.AMENITIES._R
 
 
 data$start_date %>% as.Date() %>% table()
+
+
+
+data <- data[data$how_identif %in% "reg no",]
+data$MATATU.NUMBER._R <- data$MATATU.NUMBER._R %>% tolower() %>% str_replace_all(" ", "") 
+data <- data[data$MATATU.NUMBER._R %in% "kbm199t",]
+data$start_date_r <- data$start_date %>% ymd_hm() %>% round_date(unit = "hour")
+
+data <- data %>%
+  group_by(start_date_r) %>%
+  dplyr::summarise(N = n())
+
+
+kbm119t
+

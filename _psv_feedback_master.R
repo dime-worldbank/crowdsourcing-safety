@@ -10,9 +10,6 @@ if(Sys.info()[["user"]] == "WB521633") onedrive_file_path <- "C:/Users/wb521633/
 #### From Main
 echo_figures <- file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "Outputs", "figures")
 
-
-
-
 # Packages ---------------------------------------------------------------------
 library(tidyverse)
 library(dplyr)
