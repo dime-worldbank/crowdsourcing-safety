@@ -14,8 +14,19 @@ data$award <- data$award %>% as.factor()
 
 data$MATATU.NUMBER._L <- data$MATATU.NUMBER._L %>% tolower() %>% str_squish()
 
+
+data$MATATU.NUMBER._L <- str_replace_all(data$MATATU.NUMBER._L, fixed(" "), "")
 data$matatu_num <- data$MATATU.NUMBER._L
-data$matatu_num_correct <- data$matatu_num %in% paste0(20:31)
+bus_numbers <- c("kbm119t",   "kbw613j", "kcm436k", "kbu592k",  "kbl783e",  
+                 "kcr574k",  "kbk582j", "kbs089s",   "kbb512l", "kch349e", "kaz619z", "kbr133v", "kbb681k",
+                 "kbl187z",
+                 "kbk715u")
+
+
+data$matatu_num_correct <- data$matatu_num %in% paste0(20:31) | data$matatu_num %in% bus_numbers
+numbers_only <- function(x) !grepl("\\D", x)
+data$number_check <- numbers_only(data$matatu_num)
+data_sub <- subset(data, select = c("number_check", "matatu_num"))
 
 ## Factors
 data$DRIVER.RATING._L <- data$DRIVER.RATING._L %>% str_squish() %>%
@@ -30,13 +41,37 @@ data$MATATU.OCCUPANCY_L <- data$MATATU.OCCUPANCY_L %>% str_squish() %>%
 data$PASSENGER.HAND.SANITISATION_L <- data$PASSENGER.HAND.SANITISATION_L %>% str_squish() %>%
   factor(levels = c("Yes, effective", "Yes, but seemed limited", "Same number of people as seats", "No"))
 
-data$WHEREGOING_R %>% table() %>% View()
+data_comp$WHEREGOING_R %>% table() %>%  View()
+data_comp$FEEDBACK_L %>% table() %>%  View()
 
 # Subset -----------------------------------------------------------------------
-data <- data %>%
-  filter(date >= "2020-06-26")
+#data <- data %>%
+ # filter(date >= "2020-06-26")
 
+# Distribution of responses of surveys that were not completed
+
+#subset to get incomplete surveys
+data_incomp <- data[data$completed %in% F,]
+data_subset <- subset(data_incomp, select = c("MATATU.NUMBER._L","DRIVER.RATING._L",
+                                       "SPEED.RATING._L", "MATATU.OCCUPANCY_L",
+                                       "PASSENGER.HAND.SANITISATION_L", "WHEREGOING_L",
+                                        "FEEDBACK_L"))
+
+
+data_subset[data_subset==""] <- NA
+data_subset$total <- rowSums(!is.na(data_subset[(1:7)]))
+
+barplot(prop.table(table(data_subset$total)), xlab= "Number of questions answered", ylab = "Share of respondents", ylim = c(0,1)) 
+png(file.path(echo_figures, "distribution_incomplete_survey.png"))
+
+#-------------------------------------------------------------------------------
+
+#Complete data
 data_comp <- data[data$completed %in% T,]
+table(data$completed)
+
+#check frequency of questions
+
 
 # By Day -----------------------------------------------------------------------
 #### Completion Daily
@@ -107,6 +142,7 @@ data_comp %>%
   theme_minimal() +
   ggsave(filename = file.path(echo_figures, "by_hour.png"),
          height = 4, width =7)
+
 
 
 data_comp[data_comp$date %in% as.Date(c("2020-06-26", "2020-06-27")),] %>%
@@ -222,16 +258,25 @@ data_comp_hour <- data_comp %>%
   mutate(N_hour = n()) %>%
   ungroup()
 
-#Hourly response by vehicle
-# By hour by matatu
-data_comp_veh %>%
-  group_by(hour, matatu_num) %>%
-  summarise(N = n()) %>%
-  ggplot() +
-  geom_col(aes(x = hour, y = N, group = matatu_num, fill = matatu_num)) +
-  theme_minimal() +
-  ggsave(filename = file.path(echo_figures, "by_hour_matatu.png"),
-         height = 4, width =7)
+# Feedback
+
+#Feedback question
+phrases_pos <- c("Compliments| Compliment|COMPLEMENT|Good|GOOD|Great|GREAT|nice|clean|okay|responsible|safe|SAFE")
+phrases_neg <- c("report|REPORT|Report|unsafe|fast|insufficient|bad|speed|careless|unhealthy")
+phrases_covid <- c("COVID19|covid19|Covid|covid|sanitizer|distance|crowd")
+phrases_notimp<- c("A|a|B|b|c|C|comment")
+
+data_comp$report_imp_pos <- str_detect(data_comp$FEEDBACK_L, phrases_pos)
+data_comp$report_imp_neg <- str_detect(data_comp$FEEDBACK_L, phrases_neg)
+data_comp$report_imp_covid <- str_detect(data_comp$FEEDBACK_L, phrases_covid)
+data_comp$report_notimp <- str_detect(data_comp$FEEDBACK_L, phrases_notimp)
+
+data_sub <- subset(data_comp, select= c("FEEDBACK_L", "report_notimp"))
+
+table(data_comp$report_imp_pos)
+table(data_comp$report_imp)
+
+
 
 
 data_comp_veh %>%
@@ -305,4 +350,17 @@ data_comp_hour %>%
   labs(x = "Hour of the day", y = "Proportion", fill = "") +
   ggsave(filename = file.path(echo_figures, "matatu_covidmeasure_rate_byhour.png"),
          height = 3, width =6)
+
+#By hour by matatu in Jule
+data_july <- subset(data_comp_veh, data_comp_veh$start_date >= as.Date("2020-07-01"))
+data_july %>%
+  group_by(hour, matatu_num) %>%
+  summarise(N = n()) %>%
+  ggplot() +
+  geom_col(aes(x = hour, y = N, group=matatu_num, fill = matatu_num)) +
+  theme_minimal() +
+  title("Hourly survey rate in July") +
+  ggsave(filename = file.path(echo_figures, "by_hour_matatu.png"),
+         height = 4, width =7)
+
 
