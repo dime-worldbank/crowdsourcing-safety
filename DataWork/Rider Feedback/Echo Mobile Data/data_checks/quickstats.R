@@ -1,6 +1,5 @@
 # PSV Rider Feedback
 
-
 data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "RawData", 
                           "echo_data.Rds"))
 
@@ -30,7 +29,6 @@ data$start_date %>% as.Date() %>% table()
 
 data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "RawData", 
                           "echo_data.Rds"))
-
 
 data <- data[data$how_identif %in% "reg no",]
 data$MATATU.NUMBER._R <- data$MATATU.NUMBER._R %>% tolower() %>% str_replace_all(" ", "") 

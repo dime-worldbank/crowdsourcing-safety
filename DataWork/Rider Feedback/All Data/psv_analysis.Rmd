@@ -1,0 +1,74 @@
+---
+title: "PSV Analysis"
+author: DIME
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
+    toc_fold: TRUE
+    highlight: tango
+    keep_md: yes
+    theme: cosmo
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r dataprep, echo=FALSE, include=FALSE}
+# Setup ------------------------------------------------------------------------
+if(Sys.info()[["user"]] == "robmarty") github <- "~/Documents/Github/PSV-Rider-Feedback/"
+
+source(file.path(github, "_psv_feedback_master.R"))
+
+# Parameters -------------------------------------------------------------------
+PILOT_1_DATE <- "2020-06-26"
+PILOT_2_DATE <- "2020-07-28"
+
+# Load Data --------------------------------------------------------------------
+data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback",
+                          "Echo Mobile Data", "RawData", "echo_data.Rds"))
+
+# Prep Data --------------------------------------------------------------------
+data$date <- data$start_date %>% as.Date()
+data$hour <- data$start_date %>% hour()
+
+data <- data %>%
+  filter(date >= "2020-06-26")
+
+```
+
+# Number of Responses
+```{r, fig.height=4}
+data %>%
+  group_by(date) %>%
+  dplyr::summarise(N = n()) %>%
+  ggplot() +
+  geom_col(aes(x=date, y=N)) +
+  geom_vline(xintercept = as.Date(PILOT_2_DATE),
+             color = "red") +
+  theme_ipsum()
+```
+
+
+
+
+
+## R Markdown
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
