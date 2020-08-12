@@ -62,7 +62,9 @@ data <- data %>%
          complete_date = complete_date %>% ymd_hm) %>%
   mutate(date = start_date %>% as.Date(),
          hour = start_date %>% hour(),
-         time_to_complete_mins = difftime(start_date, complete_date, units = "mins"))
+         time_to_complete_mins = difftime(start_date, complete_date, units = "mins")) %>%
+  mutate(week = start_date %>% week) %>%
+  mutate(week_date = ymd( "2020-01-01") + lubridate::weeks(week - 1))
 
 data$reg_no_raw <- NA
 data$reg_no_raw[data$how_identif %in% "reg no"] <-

@@ -155,7 +155,7 @@ data %>%
   ungroup() %>%
   dplyr::mutate(prop = (round(N / sum(N),2)*100) %>% paste0("%")) %>%
   ggplot(aes(x = N_qs_answered, y = N)) +
-  geom_col() +
+  geom_col(fill = "deepskyblue4", color = "black") +
   geom_text(aes(label = prop), nudge_y = 150) +
   labs(x = "Number of Questions Answered") +
   theme_ipsum()
@@ -196,8 +196,51 @@ data %>%
 
 ![](psv_analysis_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
+# Time Distribution
+
+## Timeline - Response by Hour
 
 
+```r
+# TODO
+# 1. Color by active award or not
+
+data %>%
+  mutate(datetime = complete_date %>% round_date(unit = "hour")) %>%
+  group_by(datetime, week_date) %>%
+  dplyr::summarise(N = n()) %>%
+  mutate(week_date = paste("Week of", week_date)) %>%
+  ggplot() +
+  geom_col(aes(x = datetime, y = N),
+           fill = "deepskyblue4") +
+  labs(title = "Completed Responses per Hour") +
+  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
+  theme_minimal()
+```
+
+```
+## Warning: Removed 7 rows containing missing values (position_stack).
+```
+
+![](psv_analysis_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
+## Histogram - Response by Hour
+
+
+```r
+data %>%
+  group_by(hour, week_date) %>%
+  dplyr::summarise(N = n()) %>%
+  mutate(week_date = paste("Week of", week_date)) %>%
+  ggplot() +
+  geom_col(aes(x = hour, y = N),
+           fill = "deepskyblue4", color = "black") +
+  labs(title = "Completed Responses per Hour") +
+  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
+  theme_minimal()
+```
+
+![](psv_analysis_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 
 
