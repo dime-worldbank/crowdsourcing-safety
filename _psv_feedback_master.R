@@ -14,8 +14,9 @@ echo_figures <- file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mob
 library(tidyverse)
 library(dplyr)
 library(lubridate)
-library(haven)
+library(gridExtra)
 library(hrbrthemes)
 library(readxl)
 library(labelled)
 library(haven)
+

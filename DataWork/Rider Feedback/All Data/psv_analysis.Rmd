@@ -43,11 +43,81 @@ data <- data %>%
 data %>%
   group_by(date) %>%
   dplyr::summarise(N = n()) %>%
-  ggplot() +
-  geom_col(aes(x=date, y=N)) +
+  ggplot(aes(x=date, y=N)) +
+  geom_col(fill = "dodgerblue4") +
+  geom_text(aes(label=N), nudge_y = 50, color = "black", size=2) +
   geom_vline(xintercept = as.Date(PILOT_2_DATE),
              color = "red") +
   theme_ipsum()
+```
+
+# Questions by Vehicle
+
+```{r, fig.height=20}
+
+data_long <- data %>%
+  dplyr::select(matatu_no_clean, 
+                driver_rating, speed_rating, occupancy, covid_measures) %>%
+  pivot_longer(-matatu_no_clean) %>%
+  
+  filter(value != "") %>%
+  
+  # Number of responses per question, per vehicle
+  group_by(matatu_no_clean, name) %>%
+  mutate(N_veh = n()) %>%
+  ungroup() %>%
+  
+  # Aggregate
+  group_by(name, value, matatu_no_clean, N_veh) %>%
+  summarise(N = n()) %>%
+  ungroup()  %>%
+  
+  # Clean variables
+  mutate(matatu_no_clean = paste0(matatu_no_clean, " - ", N_veh)) %>%
+  mutate(N = N/N_veh)
+
+data_long$name[data_long$name %in% "driver_rating"] <- "How would you rate your Matatu driver?"
+data_long$name[data_long$name %in% "covid_measures"] <- "Were measures taken to prevent spread of COVID-19?"
+data_long$name[data_long$name %in% "occupancy"] <- "On the Matatu, are there"
+data_long$name[data_long$name %in% "speed_rating"] <- "How would you describe your Matatu driver's speed?"
+
+data_long$value <- data_long$value %>% str_squish()
+
+data_long$value <- factor(data_long$value, levels = c("No",
+                                                      "Yes, but seemed limited",
+                                                      "Yes, effective",
+                                                      
+                                                      "Very Unsafe",
+                                                      "Unsafe",
+                                                      "Safe",
+                                                      "Very Safe",
+                                                      
+                                                      "Less people than seats",
+                                                      "Same number of people as seats",
+                                                      "More people than seats",
+                                                      "More people than can fit",
+                                                      
+                                                      "Too slow",
+                                                      "Okay",
+                                                      "Fast",
+                                                      "Dangerously Fast"))
+
+out_plot <- lapply(data_long$name %>% unique, function(i){
+  
+  data_long %>%
+    filter(name %in% i) %>%
+    ggplot(aes(x = reorder(matatu_no_clean, N_veh), # 
+               y = N, group=value, fill=value)) +
+    geom_col(color="black") +
+    labs(x="", y="",
+         title = i) +
+    theme_minimal() +
+    coord_flip() +
+    labs(x = "Matatu & Number of Responses", y = "Proportion", fill = "") 
+  
+}) 
+
+do.call(grid.arrange, c(out_plot, ncol=1))
 ```
 
 
