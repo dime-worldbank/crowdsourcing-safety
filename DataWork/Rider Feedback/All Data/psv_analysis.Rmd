@@ -30,12 +30,9 @@ PILOT_2_DATE <- "2020-07-28"
 
 # Load Data --------------------------------------------------------------------
 data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback",
-                          "Echo Mobile Data", "RawData", "echo_data.Rds"))
+                          "Echo Mobile Data", "FinalData", "echo_data.Rds"))
 
 # Prep Data --------------------------------------------------------------------
-data$date <- data$start_date %>% as.Date()
-data$hour <- data$start_date %>% hour()
-
 data <- data %>%
   filter(date >= "2020-06-26")
 
@@ -55,20 +52,3 @@ data %>%
 
 
 
-
-
-## R Markdown
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
