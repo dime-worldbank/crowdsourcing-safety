@@ -126,7 +126,6 @@ do.call(grid.arrange, c(out_plot, ncol=1))
 ```{r}
 # TO DO: Put into buckets and show % -- use geom_col
 data %>%
-  mutate(feedback_nwords = feedback %>% str_count("\\S+")) %>%
   filter(feedback_nwords > 0) %>%
   ggplot() +
   geom_histogram(aes(x = feedback_nwords),
@@ -137,7 +136,72 @@ data %>%
   theme_ipsum()
 ```
 
-## Word Cloud
+## Responses
+
+```{r}
+data %>%
+  filter(feedback_nwords > 0) %>%
+  arrange(desc(feedback_nwords)) %>%
+  dplyr::select(feedback, matatu_no_clean) %>%
+  dplyr::rename("Matatu" = matatu_no_clean,
+                Feedback = feedback) %>%
+  paged_table()
+```
+
+# Number of Questions Answered
+
+## Overall
+
+```{r}
+
+data %>%
+  group_by(N_qs_answered) %>%
+  dplyr::summarise(N = n()) %>%
+  ungroup() %>%
+  dplyr::mutate(prop = (round(N / sum(N),2)*100) %>% paste0("%")) %>%
+  ggplot(aes(x = N_qs_answered, y = N)) +
+  geom_col() +
+  geom_text(aes(label = prop), nudge_y = 150) +
+  labs(x = "Number of Questions Answered") +
+  theme_ipsum()
+
+```
+
+## By Vehicle
+
+```{r}
+
+data %>%
+  
+  mutate(N_qs_answered = N_qs_answered %>% as.factor() %>% fct_rev) %>%
+  
+  # Number of responses per question, per vehicle
+  group_by(matatu_no_clean) %>%
+  mutate(N_veh = n()) %>%
+  ungroup() %>%
+  
+  group_by(N_qs_answered, matatu_no_clean, N_veh) %>%
+  dplyr::summarise(N = n()) %>%
+  ungroup() %>%
+  
+  mutate(prop = N / N_veh) %>%
+  
+  mutate(matatu_no_clean = paste0(matatu_no_clean, " - ", N_veh)) %>%
+  
+  ggplot(aes(x = reorder(matatu_no_clean, N_veh), y = prop, 
+             group = N_qs_answered,
+             fill = N_qs_answered)) +
+  geom_col(color = "black") +
+  labs(x = "Vehicle & Number of Responses", y = "Proportion",
+       fill = "Number of\nQuestions Answered") +
+  coord_flip() +
+  theme_ipsum()
+
+```
+
+
+
+
 
 
 

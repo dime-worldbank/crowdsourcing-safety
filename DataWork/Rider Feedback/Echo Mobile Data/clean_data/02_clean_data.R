@@ -4,13 +4,14 @@
 data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "RawData", 
                           "echo_data.Rds"))
 
-charc_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
-                                "Characteristics", "RawData", "vehicle_basic_info.xlsx"))
-charc_df <- charc_df %>%
-  mutate(plate      = plate %>% str_replace_all(" ", "") %>% tolower(),
-         psv_number = psv_number %>% str_replace_all(" ", "") %>% tolower())
+# charc_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
+#                                 "Characteristics", "RawData", "vehicle_basic_info.xlsx"))
+# charc_df <- charc_df %>%
+#   mutate(plate      = plate %>% str_replace_all(" ", "") %>% tolower(),
+#          psv_number = psv_number %>% str_replace_all(" ", "") %>% tolower())
 
 # Select variables and clean names ---------------------------------------------
+## Select useful variables
 data <- data %>%
   dplyr::select(start_date, invite_date, complete_date,
                 MATATU.NUMBER._R,
@@ -23,6 +24,7 @@ data <- data %>%
                 phone_hash,
                 file) 
 
+## Clean names
 names(data) <- names(data) %>% 
   tolower() %>% 
   str_replace_all("._r|._l", "") %>%
@@ -34,6 +36,9 @@ data <- data %>%
                 where_going = wheregoin,
                 feedback = feedbac,
                 matatu_no = matatu_number)
+
+## Replace "" with NA
+for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
 
 # Add Type Variables -----------------------------------------------------------
 #### Award Amount
@@ -68,6 +73,15 @@ data$reg_no_clean <- data$reg_no_raw %>%
   str_squish() %>%
   str_replace_all(" ", "")
 
+data <- data %>%
+  mutate(feedback_nwords = feedback %>% str_count("\\S+"))
+
+# Number of questions answered, out of questions always asked
+data$N_qs_answered <- data %>%
+  dplyr::select(c("matatu_no", "driver_rating", "speed_rating", 
+                  "occupancy", "covid_measures", "feedback")) %>%
+  apply(1, function(x) sum(!is.na(x)))
+  
 # Closest Plate Match ----------------------------------------------------------
 plates <- charc_df$psv_number[charc_df$pilot_number %in% 2]
 
