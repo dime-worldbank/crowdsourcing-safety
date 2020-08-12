@@ -120,5 +120,24 @@ out_plot <- lapply(data_long$name %>% unique, function(i){
 do.call(grid.arrange, c(out_plot, ncol=1))
 ```
 
+# Feedback
+
+## Number of Words - Histogram
+```{r}
+# TO DO: Put into buckets and show % -- use geom_col
+data %>%
+  mutate(feedback_nwords = feedback %>% str_count("\\S+")) %>%
+  filter(feedback_nwords > 0) %>%
+  ggplot() +
+  geom_histogram(aes(x = feedback_nwords),
+                 bins = 50,
+                 fill = "dodgerblue") +
+  labs(x = "N Words", 
+       y = "N Responses") +
+  theme_ipsum()
+```
+
+## Word Cloud
+
 
 

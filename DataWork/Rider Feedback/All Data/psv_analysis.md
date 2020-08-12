@@ -105,5 +105,26 @@ do.call(grid.arrange, c(out_plot, ncol=1))
 
 ![](psv_analysis_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
+# Feedback
+
+## Number of Words - Histogram
+
+```r
+data %>%
+  mutate(feedback_nwords = feedback %>% str_count("\\S+")) %>%
+  filter(feedback_nwords > 0) %>%
+  ggplot() +
+  geom_histogram(aes(x = feedback_nwords),
+                 bins = 50,
+                 fill = "dodgerblue") +
+  labs(x = "N Words", 
+       y = "N Responses") +
+  theme_ipsum()
+```
+
+![](psv_analysis_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+## Word Cloud
+
 
 
