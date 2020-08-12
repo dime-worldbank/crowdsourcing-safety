@@ -39,17 +39,135 @@ data <- data %>%
 ```
 
 # Number of Responses
+
+## Daily - By Award Type
 ```{r, fig.height=4}
-data %>%
+
+data_award <- data %>%
+  group_by(date, award_actual_getwin) %>%
+  dplyr::summarise(N = n()) 
+
+data_total <- data %>%
   group_by(date) %>%
-  dplyr::summarise(N = n()) %>%
-  ggplot(aes(x=date, y=N)) +
-  geom_col(fill = "dodgerblue4") +
-  geom_text(aes(label=N), nudge_y = 50, color = "black", size=2) +
+  dplyr::summarise(N_total = n()) %>%
+  ungroup() 
+
+ggplot() +
+  geom_col(data = data_award, 
+           aes(x=date, y=N,
+               fill = award_actual_getwin,
+               group = award_actual_getwin)) +
+  geom_text(data = data_total,
+            aes(x=date, y=N_total,
+                label = N_total), nudge_y = 50, color = "black", size=2) +
   geom_vline(xintercept = as.Date(PILOT_2_DATE),
              color = "red") +
+  labs(fill = "Award") +
   theme_ipsum()
 ```
+
+## Daily - By Vehicle
+```{r}
+
+data_veh <- data %>%
+  group_by(date, matatu_no_clean) %>%
+  dplyr::summarise(N = n()) 
+
+data_total <- data %>%
+  group_by(date) %>%
+  dplyr::summarise(N_total = n()) %>%
+  ungroup() 
+
+ggplot() +
+  geom_col(data = data_veh, 
+           aes(x=date, y=N,
+               fill = matatu_no_clean,
+               group = matatu_no_clean)) +
+  geom_text(data = data_total,
+            aes(x=date, y=N_total,
+                label = N_total), nudge_y = 50, color = "black", size=2) +
+  geom_vline(xintercept = as.Date(PILOT_2_DATE),
+             color = "red") +
+  labs(fill = "Award") +
+  theme_ipsum()
+
+```
+
+## Vehicle - Overall
+```{r}
+
+data %>%
+  filter(!is.na(matatu_no)) %>%
+  group_by(matatu_no_clean) %>%
+  dplyr::summarise(N = n()) %>%
+  ggplot(aes(x = reorder(matatu_no_clean, N), y = N)) +
+  geom_col(fill = "deepskyblue", alpha=0.8) +
+  geom_text(aes(label = N), nudge_y = 50) +
+  labs(x = "Matatu", y = "N") +
+  coord_flip() +
+  theme_ipsum()
+
+```
+
+## Hourly - By Vehicle
+```{r, fig.height=20}
+data %>%
+  mutate(datetime = complete_date %>% round_date(unit = "hour")) %>%
+  filter(!is.na(datetime)) %>%
+  group_by(datetime, week_date, matatu_no_clean) %>%
+  dplyr::summarise(N = n()) %>%
+  ungroup() %>%
+  mutate(week_date = paste("Week of", week_date)) %>%
+  ggplot() +
+  geom_col(aes(x = datetime, y = N,
+               group = matatu_no_clean,
+               fill = matatu_no_clean)) +
+  labs(title = "Completed Responses per Hour",
+       fill = "Award") +
+  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
+  theme_minimal()
+```
+
+
+## Response by Hour Histogram
+
+```{r, fig.height=20}
+
+data %>%
+  group_by(hour, week_date, matatu_no_clean) %>%
+  dplyr::summarise(N = n()) %>%
+  ungroup() %>%
+  mutate(week_date = paste("Week of", week_date)) %>%
+  ggplot() +
+  geom_col(aes(x = hour, y = N,
+               fill = matatu_no_clean,
+               group = matatu_no_clean)) +
+  labs(title = "Completed Responses per Hour") +
+  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
+  theme_minimal()
+```
+
+
+## When enter reg no, how incorrect?
+```{r}
+
+data %>%
+  filter(how_identif %in% "reg no",
+         !is.na(reg_no_raw)) %>%
+  group_by(reg_no_closest_dist) %>%
+  dplyr::summarise(N = n()) %>%
+  mutate(percent = (N/sum(N)*100) %>% round(1) %>% paste("%")) %>%
+  ggplot(aes(x = reg_no_closest_dist, y = N)) +
+  geom_col(fill = "dodgerblue", color = "black") +
+  geom_text(aes(label = percent), nudge_y = 100) +
+  labs(x = "Character difference to valid plate number",
+       title = "Number of character differences to valid plate number") +
+  theme_ipsum()
+  
+
+```
+
+
 
 # Questions by Vehicle
 
@@ -125,18 +243,35 @@ do.call(grid.arrange, c(out_plot, ncol=1))
 ## Number of Words - Histogram
 ```{r}
 # TO DO: Put into buckets and show % -- use geom_col
+
+data$feedback_nwords_bin <- NA
+data$feedback_nwords_bin[data$feedback_nwords %in% 1] <- "1"
+data$feedback_nwords_bin[data$feedback_nwords %in% 2] <- "2"
+data$feedback_nwords_bin[data$feedback_nwords %in% 3:5] <- "3 - 5"
+data$feedback_nwords_bin[data$feedback_nwords %in% 6:10] <- "6 - 10"
+data$feedback_nwords_bin[data$feedback_nwords %in% 11:20] <- "11 - 20"
+data$feedback_nwords_bin[data$feedback_nwords %in% 21:9999] <- ">20"
+
+data$feedback_nwords_bin <- data$feedback_nwords_bin %>%
+  factor(levels = c("1", "2", "3 - 5", 
+                    "6 - 10", "11 - 20", ">20"))
+
 data %>%
   filter(feedback_nwords > 0) %>%
-  ggplot() +
-  geom_histogram(aes(x = feedback_nwords),
-                 bins = 50,
-                 fill = "dodgerblue") +
+  group_by(feedback_nwords_bin) %>%
+  dplyr::summarise(N = n()) %>%
+  ungroup() %>%
+  mutate(percent = (N/sum(N)*100) %>% round(1) %>% paste("%")) %>%
+  ggplot(aes(x = feedback_nwords_bin,
+               y = N)) +
+  geom_col(fill = "dodgerblue", color = "black") +
+  geom_text(aes(label = percent), nudge_y = 100) +
   labs(x = "N Words", 
        y = "N Responses") +
   theme_ipsum()
 ```
 
-## Responses
+## Responses - All
 
 ```{r}
 data %>%
@@ -147,6 +282,21 @@ data %>%
                 Feedback = feedback) %>%
   paged_table()
 ```
+
+## Responses - Driver Unsafe or Very Unsafe
+
+```{r}
+data %>%
+  filter(feedback_nwords > 0,
+         driver_rating %in% c("Unsafe", "Very Unsafe")) %>%
+  arrange(desc(feedback_nwords)) %>%
+  dplyr::select(feedback, matatu_no_clean) %>%
+  dplyr::rename("Matatu" = matatu_no_clean,
+                Feedback = feedback) %>%
+  paged_table()
+```
+
+
 
 # Number of Questions Answered
 
@@ -198,45 +348,8 @@ data %>%
   theme_ipsum()
 ```
 
-# Time Distribution
 
-## Timeline - Response by Hour
 
-```{r, fig.height=20}
-
-# TODO
-# 1. Color by active award or not
-
-data %>%
-  mutate(datetime = complete_date %>% round_date(unit = "hour")) %>%
-  group_by(datetime, week_date) %>%
-  dplyr::summarise(N = n()) %>%
-  mutate(week_date = paste("Week of", week_date)) %>%
-  ggplot() +
-  geom_col(aes(x = datetime, y = N),
-           fill = "deepskyblue4") +
-  labs(title = "Completed Responses per Hour") +
-  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
-  theme_minimal()
-
-```
-
-## Histogram - Response by Hour
-
-```{r, fig.height=20}
-
-data %>%
-  group_by(hour, week_date) %>%
-  dplyr::summarise(N = n()) %>%
-  mutate(week_date = paste("Week of", week_date)) %>%
-  ggplot() +
-  geom_col(aes(x = hour, y = N),
-           fill = "deepskyblue4", color = "black") +
-  labs(title = "Completed Responses per Hour") +
-  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
-  theme_minimal()
-
-```
 
 
 

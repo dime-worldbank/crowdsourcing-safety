@@ -4,11 +4,11 @@
 data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "RawData", 
                           "echo_data.Rds"))
 
-# charc_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
-#                                 "Characteristics", "RawData", "vehicle_basic_info.xlsx"))
-# charc_df <- charc_df %>%
-#   mutate(plate      = plate %>% str_replace_all(" ", "") %>% tolower(),
-#          psv_number = psv_number %>% str_replace_all(" ", "") %>% tolower())
+charc_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
+                                "Characteristics", "RawData", "vehicle_basic_info.xlsx"))
+charc_df <- charc_df %>%
+  mutate(plate      = plate %>% str_replace_all(" ", "") %>% tolower(),
+         psv_number = psv_number %>% str_replace_all(" ", "") %>% tolower())
 
 # Select variables and clean names ---------------------------------------------
 ## Select useful variables
@@ -42,15 +42,30 @@ for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
 
 # Add Type Variables -----------------------------------------------------------
 #### Award Amount
-data$award <- NA
-data$award[grepl("100_KES", data$file)] <- 100
-data$award[grepl("200_KES", data$file)] <- 200
-data$award[grepl("Get_Airtime", data$file)] <- 50
-data$award[grepl("Win_Airtime", data$file)] <- 50
+data$award_posted <- NA
+data$award_posted[grepl("100_KES", data$file)] <- 100
+data$award_posted[grepl("200_KES", data$file)] <- 200
+data$award_posted[grepl("Get_Airtime", data$file)] <- 50
+data$award_posted[grepl("Win_Airtime", data$file)] <- 50
+
+#### Award Actual
+data$award_actual <- data$award_posted
+data$award_actual[data$award_actual %in% c(100, 200) & data$start_date >= "2020-06-28"] <- 20
+data$award_actual[data$start_date >= "2020-07-20" & data$award_actual %in% 20] <- 0
+data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% 50] <- 0
 
 #### Get or Win Award
-data$win_get_award[grepl("Win_Airtime", data$file)] <- "win"
+data$win_get_award[grepl("Win_Airtime", data$file)] <- "Win"
 data$win_get_award[is.na(data$win_get_award)] <- "Get"
+
+#### Award Actual - Get Win
+data$award_actual_getwin <- paste(data$win_get_award, data$award_actual, "KES")
+data$award_actual_getwin[grepl("\\b0\\b", data$award_actual_getwin)] <- "None"
+data$award_actual_getwin <- data$award_actual_getwin %>%
+  factor(levels = c("None", "Win 50 KES", "Get 20 KES", "Get 50 KES",
+                    "Get 100 KES", "Get 200 KES"))
+
+data$award_actual_getwin %>% unique()
 
 #### How Identify Vehicle
 data$how_identif <- "number"
@@ -72,6 +87,7 @@ data$reg_no_raw[data$how_identif %in% "reg no"] <-
 
 data$reg_no_clean <- data$reg_no_raw %>%
   tolower() %>%
+  str_replace_all("[[:punct:]]", "") %>%
   str_squish() %>%
   str_replace_all(" ", "")
 
@@ -83,7 +99,7 @@ data$N_qs_answered <- data %>%
   dplyr::select(c("matatu_no", "driver_rating", "speed_rating", 
                   "occupancy", "covid_measures", "feedback")) %>%
   apply(1, function(x) sum(!is.na(x)))
-  
+
 # Closest Plate Match ----------------------------------------------------------
 plates <- charc_df$psv_number[charc_df$pilot_number %in% 2]
 
@@ -139,7 +155,7 @@ var_label(data$covid_measures) <- "Were measures taken to prevent spread of COVI
 var_label(data$where_going) <- "Where are you traveling to? (e.g., stage or location where you'll get off the matatu)"
 var_label(data$feedback) <- "Would you like to leave a comment about the matatu or ride?"
 var_label(data$phone_hash) <- "Phone number (hashed)"
-var_label(data$award) <- "Award amount (posted on sticker)"
+var_label(data$award_posted) <- "Award amount (posted on sticker)"
 var_label(data$win_get_award) <- "Win or get award?"
 var_label(data$how_identif) <- "How identify matatu on shortcode"
 var_label(data$date) <- "Survey date"
@@ -154,9 +170,9 @@ var_label(data$time_to_complete_mins) <- "Time to complete survey (minutes)"
 
 # Export -----------------------------------------------------------------------
 saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
-                          "echo_data.Rds"))
+                        "echo_data.Rds"))
 write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
-                  "echo_data.dta"))
+                          "echo_data.dta"))
 
 
 
