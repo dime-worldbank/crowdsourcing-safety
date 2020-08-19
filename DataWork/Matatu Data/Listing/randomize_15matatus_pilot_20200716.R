@@ -2,7 +2,7 @@
 
 set.seed(42)
 
-# Read Data --------------------------------------------------------------------
+# Load Data --------------------------------------------------------------------
 matatu_df <- readRDS(file.path(dropbox_file_path, "Data", "Matatu Data", "Listing", "FinalData", 
                              "listing.Rds"))
 matatu_df <- matatu_df[matatu_df$listing_provided %in% as.Date("2020-07-16"),]
@@ -35,7 +35,9 @@ matatu_15$reg_number_lwr_nospc <- matatu_15$reg_number_lwr %>% str_replace_all("
 
 # Export -----------------------------------------------------------------------
 write.csv(matatu_15, file.path(dropbox_file_path, "Data", "Matatu Data", "Listing", "FinalData", 
-                          "pilot_matatus_20200716.csv"), row.names = F)
+                               "randomization",
+                          "randomization_20200716.csv"), 
+          row.names = F)
 
 
 

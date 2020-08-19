@@ -24,3 +24,6 @@ library(rmarkdown)
 library(wesanderson)
 
 
+#df <-read_excel(file.path(dropbox_file_path, "Data", "Matatu Data", "Characteristics", "RawData", "vehicle_basic_info.xlsx"))
+#df$plate %>% str_replace_all(" ", "") %>% tolower() %>% table() %>% table()
+

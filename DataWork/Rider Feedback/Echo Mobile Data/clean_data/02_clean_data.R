@@ -47,12 +47,18 @@ data$award_posted[grepl("100_KES", data$file)] <- 100
 data$award_posted[grepl("200_KES", data$file)] <- 200
 data$award_posted[grepl("Get_Airtime", data$file)] <- 50
 data$award_posted[grepl("Win_Airtime", data$file)] <- 50
+data$award_posted[grepl("SHORT", data$file)] <- 10
 
 #### Award Actual
 data$award_actual <- data$award_posted
 data$award_actual[data$award_actual %in% c(100, 200) & data$start_date >= "2020-06-28"] <- 20
 data$award_actual[data$start_date >= "2020-07-20" & data$award_actual %in% 20] <- 0
 data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% 50] <- 0
+data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% 10] <- 0
+
+#### N Questions
+data$N_questions <- 6
+data$N_questions[grepl("SHORT", data$file)] <- 3
 
 #### Get or Win Award
 data$win_get_award[grepl("Win_Airtime", data$file)] <- "Win"
@@ -62,7 +68,7 @@ data$win_get_award[is.na(data$win_get_award)] <- "Get"
 data$award_actual_getwin <- paste(data$win_get_award, data$award_actual, "KES")
 data$award_actual_getwin[grepl("\\b0\\b", data$award_actual_getwin)] <- "None"
 data$award_actual_getwin <- data$award_actual_getwin %>%
-  factor(levels = c("None", "Win 50 KES", "Get 20 KES", "Get 50 KES",
+  factor(levels = c("None", "Get 10 KES", "Win 50 KES", "Get 20 KES", "Get 50 KES",
                     "Get 100 KES", "Get 200 KES"))
 
 data$award_actual_getwin %>% unique()
@@ -173,6 +179,10 @@ saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobil
                         "echo_data.Rds"))
 write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
                           "echo_data.dta"))
+
+
+data$matatu_no_clean %>% table %>% View()
+data[data$matatu_no_clean %in% "kbm119t",] %>% View()
 
 
 
