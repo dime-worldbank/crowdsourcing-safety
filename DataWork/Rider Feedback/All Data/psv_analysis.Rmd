@@ -17,21 +17,21 @@ output:
 This document summarizes results from piloting the Matatu Rider Feedback project. So far, there have been 2 pilots:
 
 * __Pilot 1__ 
-  * 15 Vehicles involved. 
-  * 8 vehicles had stickers advertising that riders receive 200 KES after completing the survey 
-  * 7 vehicles advertised receiving 100 KES after completing the survey.
-  * We received a large number of responses after only a couple days of running the pilot. Consequently, we lowered the award for types to 20 KES. The lower award was advertised in the survey. 
-  * In the shortcode, to identify the vehicle, users entered a 2 digit number that was put on the stickers. 
-  * The pilot started on June 28, and the stickers indicated that the award expired on July 20.
+* 15 Vehicles involved. 
+* 8 vehicles had stickers advertising that riders receive 200 KES after completing the survey 
+* 7 vehicles advertised receiving 100 KES after completing the survey.
+* We received a large number of responses after only a couple days of running the pilot. Consequently, we lowered the award for types to 20 KES. The lower award was advertised in the survey. 
+* In the shortcode, to identify the vehicle, users entered a 2 digit number that was put on the stickers. 
+* The pilot started on June 28, and the stickers indicated that the award expired on July 20.
 
 * __Pilot 2__ 
-  * 15 vehicles involved. 
-  * 9 vehicles had stickers advertising that riders received 50 KES after completing the survey (6 had both the shortcode and QR code, while 3 only had the QR code)  
-  * 6 vehicles advertised winning 50 KES in airtime. 
-  * Instead of a two digit number, the licence plate was put on the sticker and riders entered the plate number in the shortcode survey.
-  * As with the previous pilot, we received a large number of responses in the first couple days. We paused the shortcode survey where a rider automatically recieved the 50 KES award due to large costs. 
-  * On August 12, we restarted the survey -- only asking 3 questions and lowered the award to 10 KES.
-  * The stickers were installedon July 28 and the stickers indicate that the award offer expires on August 31.
+* 15 vehicles involved. 
+* 9 vehicles had stickers advertising that riders received 50 KES after completing the survey (6 had both the shortcode and QR code, while 3 only had the QR code)  
+* 6 vehicles advertised winning 50 KES in airtime. 
+* Instead of a two digit number, the licence plate was put on the sticker and riders entered the plate number in the shortcode survey.
+* As with the previous pilot, we received a large number of responses in the first couple days. We paused the shortcode survey where a rider automatically recieved the 50 KES award due to large costs. 
+* On August 12, we restarted the survey -- only asking 3 questions and lowered the award to 10 KES.
+* The stickers were installedon July 28 and the stickers indicate that the award offer expires on August 31.
 
 
 ```{r setup, include=FALSE}
@@ -88,6 +88,81 @@ ggplot() +
   labs(fill = "Award") +
   theme_ipsum()
 ```
+
+## Daily/By Week - By Actual Award Type
+```{r, fig.height=21}
+
+data_award <- data %>%
+  filter(!is.na(complete_date)) %>%
+  group_by(date, week_date, award_actual_getwin) %>%
+  dplyr::summarise(N = n()) 
+
+data_total <- data %>%
+  filter(!is.na(complete_date)) %>%
+  group_by(date, week_date) %>%
+  dplyr::summarise(N_total = n()) %>%
+  ungroup() 
+
+data_total <- seq(from = min(data_total$date),
+                  to = max(data_total$date),
+                  by = 1) %>%
+  as.data.frame() %>%
+  dplyr::rename(date = ".") %>%
+  left_join(data_total, by = "date") %>%
+  mutate(N_total = replace_na(N_total, 0)) %>%
+  mutate(week_date = ymd( "2020-01-01") + lubridate::weeks(week(date) - 1))
+
+
+ggplot() +
+  geom_col(data = data_award, 
+           aes(x=date, y=N,
+               fill = award_actual_getwin,
+               group = award_actual_getwin)) +
+  geom_text(data = data_total,
+            aes(x=date, y=N_total,
+                label = N_total), nudge_y = 2, color = "black", size=4) +
+  labs(fill = "Award") +
+  theme_ipsum() +
+  facet_wrap(~week_date, scales = "free", ncol=1)
+```
+
+## Daily/By Week - By Posted Award Type
+```{r, fig.height=21}
+
+data_award <- data %>%
+  filter(!is.na(complete_date)) %>%
+  group_by(date, week_date, award_posted_getwin) %>%
+  dplyr::summarise(N = n()) 
+
+data_total <- data %>%
+  filter(!is.na(complete_date)) %>%
+  group_by(date, week_date) %>%
+  dplyr::summarise(N_total = n()) %>%
+  ungroup() 
+
+data_total <- seq(from = min(data_total$date),
+                  to = max(data_total$date),
+                  by = 1) %>%
+  as.data.frame() %>%
+  dplyr::rename(date = ".") %>%
+  left_join(data_total, by = "date") %>%
+  mutate(N_total = replace_na(N_total, 0)) %>%
+  mutate(week_date = ymd( "2020-01-01") + lubridate::weeks(week(date) - 1))
+
+
+ggplot() +
+  geom_col(data = data_award, 
+           aes(x=date, y=N,
+               fill = award_posted_getwin,
+               group = award_posted_getwin)) +
+  geom_text(data = data_total,
+            aes(x=date, y=N_total,
+                label = N_total), nudge_y = 2, color = "black", size=4) +
+  labs(fill = "Award") +
+  theme_ipsum() +
+  facet_wrap(~week_date, scales = "free", ncol=1)
+```
+
 
 
 ## Overall - Award Type
@@ -159,7 +234,7 @@ data %>%
 ## Hourly - By Vehicle
 ```{r, fig.height=20}
 data %>%
-    filter(!is.na(complete_date)) %>%
+  filter(!is.na(complete_date)) %>%
   mutate(datetime = complete_date %>% round_date(unit = "hour")) %>%
   filter(!is.na(datetime)) %>%
   group_by(datetime, week_date, matatu_no_clean) %>%
@@ -172,7 +247,7 @@ data %>%
                fill = matatu_no_clean)) +
   labs(title = "Completed Responses per Hour",
        fill = "Award") +
-  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
+  facet_wrap(~week_date, ncol = 1, scale = "free") +
   theme_minimal()
 ```
 
@@ -181,7 +256,7 @@ data %>%
 ```{r, fig.height=20}
 
 data %>%
-    filter(!is.na(complete_date)) %>%
+  filter(!is.na(complete_date)) %>%
   group_by(hour, week_date, matatu_no_clean) %>%
   dplyr::summarise(N = n()) %>%
   ungroup() %>%
@@ -342,6 +417,27 @@ data %>%
 ```
 
 
+```{r}
+# n_grams <- data %>%
+#   filter(feedback_nwords > 0) %>%
+#   pull(feedback) %>%
+#   str_squish() %>%
+#   tolower() %>%
+#   
+#   tokens(remove_punct = T) %>%
+#   tokens_ngrams(n = 3:5) %>%
+#   
+#   as.character() %>% 
+#   str_replace_all("_", " ") %>%
+#   
+#   table %>%
+#   as.data.frame() %>%
+#   dplyr::rename(phrase = ".") %>%
+#   filter(!is.na(phrase)) %>%
+#   arrange(-Freq)
+  
+```
+
 
 # Number of Questions Answered
 
@@ -400,7 +496,7 @@ data %>%
 After realizing we are low on funds after the 50 KES, we lowered the award to 10 KES and the number of questions to 3. This is clearly indicated at the start of the survey. The first message received in the shortcode is:
 
 _"Welcome to this 3 question survey. \*\*We've lowered the award to 10 KES\*\*_
-
+           
 _What is the matatu reg. number? (Written on sticker)."_
 
 ```{r}

@@ -40,25 +40,23 @@ data <- data %>%
 ## Replace "" with NA
 for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
 
-# Add Type Variables -----------------------------------------------------------
+# Award Variables --------------------------------------------------------------
 #### Award Amount
-data$award_posted <- NA
-data$award_posted[grepl("100_KES", data$file)] <- 100
-data$award_posted[grepl("200_KES", data$file)] <- 200
-data$award_posted[grepl("Get_Airtime", data$file)] <- 50
-data$award_posted[grepl("Win_Airtime", data$file)] <- 50
-data$award_posted[grepl("SHORT", data$file)] <- 10
+data$award_posted <- ""
+data$award_posted[grepl("100_KES", data$file)] <- "100"
+data$award_posted[grepl("200_KES", data$file)] <- "200"
+data$award_posted[grepl("Get_Airtime", data$file)] <- "50"
+data$award_posted[grepl("Win_Airtime", data$file)] <- "50"
+data$award_posted[grepl("SHORT", data$file) & grepl("Get_Airtime", data$file)] <- "50" # Unspecified?
 
 #### Award Actual
 data$award_actual <- data$award_posted
-data$award_actual[data$award_actual %in% c(100, 200) & data$start_date >= "2020-06-28"] <- 20
-data$award_actual[data$start_date >= "2020-07-20" & data$award_actual %in% 20] <- 0
-data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% 50] <- 0
-data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% 10] <- 0
-
-#### N Questions
-data$N_questions <- 6
-data$N_questions[grepl("SHORT", data$file)] <- 3
+data$award_actual[data$award_actual %in% c("100", "200") & data$start_date >= "2020-06-28"] <- "20"
+data$award_actual[data$start_date >= "2020-07-20" & data$award_actual %in% "20"] <- "0"
+data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% "50"] <- "0"
+data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% "Unspecified"] <- "0"
+data$award_actual[grepl("SHORT", data$file) & grepl("Get_Airtime", data$file)] <- "10" # Unspecified?
+data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% "10"] <- "0"
 
 #### Get or Win Award
 data$win_get_award[grepl("Win_Airtime", data$file)] <- "Win"
@@ -68,10 +66,18 @@ data$win_get_award[is.na(data$win_get_award)] <- "Get"
 data$award_actual_getwin <- paste(data$win_get_award, data$award_actual, "KES")
 data$award_actual_getwin[grepl("\\b0\\b", data$award_actual_getwin)] <- "None"
 data$award_actual_getwin <- data$award_actual_getwin %>%
-  factor(levels = c("None", "Get 10 KES", "Win 50 KES", "Get 20 KES", "Get 50 KES",
+  factor(levels = c("None",  "Get 10 KES", "Win 50 KES", "Get 20 KES", "Get 50 KES",
                     "Get 100 KES", "Get 200 KES"))
 
-data$award_actual_getwin %>% unique()
+#### Award Posted - Get Win
+data$award_posted_getwin <- paste(data$win_get_award, data$award_posted, "KES")
+data$award_posted_getwin[grepl("\\b0\\b", data$award_posted_getwin)] <- "None"
+
+# Add variables ----------------------------------------------------------------
+
+#### N Questions
+data$N_questions <- 6
+data$N_questions[grepl("SHORT", data$file)] <- 3
 
 #### How Identify Vehicle
 data$how_identif <- "number"
@@ -105,6 +111,9 @@ data$N_qs_answered <- data %>%
   dplyr::select(c("matatu_no", "driver_rating", "speed_rating", 
                   "occupancy", "covid_measures", "feedback")) %>%
   apply(1, function(x) sum(!is.na(x)))
+
+# Completed survey
+data$completed_survey <- !is.na(data$complete_date)
 
 # Closest Plate Match ----------------------------------------------------------
 plates <- charc_df$psv_number[charc_df$pilot_number %in% 2]
@@ -162,6 +171,7 @@ var_label(data$where_going) <- "Where are you traveling to? (e.g., stage or loca
 var_label(data$feedback) <- "Would you like to leave a comment about the matatu or ride?"
 var_label(data$phone_hash) <- "Phone number (hashed)"
 var_label(data$award_posted) <- "Award amount (posted on sticker)"
+var_label(data$award_actual) <- "Award amount (actual - advertised in survey)"
 var_label(data$win_get_award) <- "Win or get award?"
 var_label(data$how_identif) <- "How identify matatu on shortcode"
 var_label(data$date) <- "Survey date"
@@ -173,16 +183,12 @@ var_label(data$reg_no_closest_dist) <- "Levenstein distance from reg no to close
 var_label(data$matatu_no_clean) <- "Matatu number - only valid"
 var_label(data$matatu_no_valid) <- "Is matatu number valid?" 
 var_label(data$time_to_complete_mins) <- "Time to complete survey (minutes)" 
+var_label(data$completed_survey) <- "Completed survey" 
 
 # Export -----------------------------------------------------------------------
 saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
                         "echo_data.Rds"))
 write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
                           "echo_data.dta"))
-
-
-data$matatu_no_clean %>% table %>% View()
-data[data$matatu_no_clean %in% "kbm119t",] %>% View()
-
 
 
