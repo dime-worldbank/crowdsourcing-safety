@@ -112,6 +112,8 @@ for(var in names(data) %>% str_subset("_asked")){
 
 for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
 
+data$file <- data$file %>% str_replace_all(".*/", "")
+
 ## Add uid
 data$uid <- 1:nrow(data)
 
@@ -201,6 +203,10 @@ data <- bind_rows(sc_data, qr_data)
 # Pilot Number -----------------------------------------------------------------
 # If plate number invalid, can figure out pilot number in some cases using
 # survey file name and date completed
+
+data$file %>% table() %>% View()
+data$pilot_number %>% is.na %>% table
+
 
 
 
