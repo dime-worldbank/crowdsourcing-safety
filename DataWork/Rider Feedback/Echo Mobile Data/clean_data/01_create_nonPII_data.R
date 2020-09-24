@@ -3,6 +3,11 @@
 read.csv_filename <- function(filepath){
   df <- read.csv(filepath,
                  stringsAsFactors=F)
+  
+  for(var in names(df)){
+    df[[paste0("asked_", var)]] <- "yes"
+  } 
+  
   df$file <- filepath
   return(df)
 }

@@ -2,12 +2,13 @@
 
 read.csv_filename <- function(filepath){
   df <- read_csv(filepath)
-  df$file <- filepath
   
   for(var in names(df)){
     df[[var]] <- df[[var]] %>% as.character()
     df[[paste0("asked_", var)]] <- "yes"
   } 
+  
+  df$file <- filepath
   
   return(df)
 }
