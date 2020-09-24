@@ -110,6 +110,11 @@ for(var in names(data) %>% str_subset("_asked")){
   data[[var]][!(data[[var]] %in% "yes")] <- "no"
 }
 
+for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
+
+## Add uid
+data$uid <- 1:nrow(data)
+
 # Clean Sticker Data -----------------------------------------------------------
 sticker_df <- sticker_df %>%
   mutate(plate      = plate %>% tolower %>% str_squish %>% str_replace_all(" ", ""),
@@ -117,53 +122,93 @@ sticker_df <- sticker_df %>%
   dplyr::rename(matatu_number = psv_number)
 
 # License Plate Number ---------------------------------------------------------
-#### Matatu number, numeric
+#### [1] Matatu number, numeric
 data$matatu_number <- data$matatu_number %>%
   str_replace_all("psv no", "") %>%
   str_replace_all("psv", "") %>%
   str_replace_all("[[:punct:]]", "") %>%
   str_squish() %>%
-  str_replace_all(" ", "")
+  str_replace_all(" ", "") %>%
+  tolower()
     
 psv_no_df <- sticker_df %>%
   dplyr::select(matatu_number, plate) %>%
-  dplyr::rename(plate_1 = plate)
+  dplyr::rename(reg_no_1 = plate)
 
 data <- merge(data, psv_no_df, by = "matatu_number", all.x = T, all.y = F)
 
+#### [2] Closest Plate Match
+# Determine levenstein distance to closest plate match and, if distance is small
+# use that plate
+plates <- sticker_df$plate[!(sticker_df$pilot_number %in% 1)]
+
+leven_df <- lapply(1:nrow(data), function(i){
+  # Returns dataframe of levenstein distance of closest plate number and the plate
+  # number
+  if((i %% 500) %in% 0) print(i)
+  
+  leven_dists <- adist(data$matatu_number[i], plates) %>%
+    as.vector()
+  
+  plate_i <- plates[which.min(leven_dists)]
+  leven_dist_i <- min(leven_dists)
+  
+  if(length(plate_i) %in% 0) plate_i <- NA
+  
+  out_df <- data.frame(reg_no_closest = plate_i,
+                       reg_no_closest_dist = leven_dist_i)
+  
+  return(out_df)
+}) %>%
+  bind_rows()
+
+data <- bind_cols(data, leven_df)
+
+data$reg_no_2 <- NA
+
+use_reg_no <- data$reg_no_closest_dist %in% 0:1 & nchar(data$matatu_number) %in% 7
+data$reg_no_2[use_reg_no] <- data$matatu_number[use_reg_no]
+
+#### Clean Reg Number
+data$reg_no <- data$reg_no_2
+data$reg_no[is.na(data$reg_no)] <- data$reg_no_1[is.na(data$reg_no)]
+
+data$reg_no_1 <- NULL
+data$reg_no_2 <- NULL
+
+# Pilot Number -----------------------------------------------------------------
+
+# ***** EDIT HERE ***** --------------------------------------------------------
+# Label variables
 
 
 
 
-# Select variables and clean names ---------------------------------------------
-## Select useful variables
-data <- data %>%
-  dplyr::select(start_date, invite_date, complete_date,
-                MATATU.NUMBER._R,
-                DRIVER.RATING._L,
-                SPEED.RATING._L,
-                MATATU.OCCUPANCY_L,
-                PASSENGER.HAND.SANITISATION_L,
-                WHEREGOING_L,
-                FEEDBACK_R,
-                phone_hash,
-                file) 
 
-## Clean names
-names(data) <- names(data) %>% 
-  tolower() %>% 
-  str_replace_all("._r|._l", "") %>%
-  str_replace_all("\\.", "_")
 
-data <- data %>%
-  dplyr::rename(occupancy = matatu_occupanc,
-                covid_measures = passenger_hand_sanitisatio,
-                where_going = wheregoin,
-                feedback = feedbac,
-                matatu_no = matatu_number)
 
-## Replace "" with NA
-for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Award Variables --------------------------------------------------------------
 #### Award Amount
