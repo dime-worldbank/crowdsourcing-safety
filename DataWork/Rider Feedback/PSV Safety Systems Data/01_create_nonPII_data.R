@@ -5,7 +5,7 @@ read.csv_filename <- function(filepath){
   
   for(var in names(df)){
     df[[var]] <- df[[var]] %>% as.character()
-    df[[paste0("asked_", var)]] <- "yes"
+    df[[paste0(var, "_asked")]] <- "yes"
   } 
   
   df$file <- filepath
