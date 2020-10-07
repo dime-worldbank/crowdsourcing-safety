@@ -103,6 +103,7 @@ data_total <- data %>%
   dplyr::summarise(N_total = n()) %>%
   ungroup() 
 
+
 data_total <- seq(from = min(data_total$date),
                   to = max(data_total$date),
                   by = 1) %>%

@@ -13,7 +13,7 @@ qr_data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "PSV S
 sticker_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
                                   "Sticker Information", "psv_sticker_information.xlsx"))
 
-# SC Data ----------------------------------------------------------------------
+# Shortcode Data ---------------------------------------------------------------
 sc_data <- sc_data %>%
   dplyr::select(start_date, invite_date, complete_date,
                 MATATU.NUMBER._L,
@@ -52,7 +52,7 @@ names(sc_data) <- names(sc_data) %>%
 sc_data$complete_date <- paste0(sc_data$complete_date, ":00")
 sc_data$complete_date[sc_data$complete_date %in% ":00"] <- ""
 
-# QR Data ----------------------------------------------------------------------
+# QR Code Data -----------------------------------------------------------------
 ## Clean Names
 names(qr_data) <- names(qr_data) %>%
   str_replace_all("How would you rate your matatu driver\\?", "driver_rating") %>%
@@ -82,14 +82,17 @@ qr_data <- qr_data %>%
 qr_data$feedback <- qr_data$feedback %>% tolower() %>% str_squish()
 qr_data <- qr_data[!(qr_data$feedback %in% c("test", "testing")),]
 
-# Append and standardize variables ---------------------------------------------
+# Append and Standardize Variables ---------------------------------------------
+## Append
 data <- bind_rows(qr_data, sc_data)
 
+## Datetime variables
 data <- data %>%
   dplyr::rename(complete_datetime = complete_date) %>%
   mutate(complete_datetime = complete_datetime %>% ymd_hms) %>%
   mutate(complete_date = complete_datetime %>% as.Date)
 
+## Standardize variable responses
 data <- data %>%
   mutate_if(is.character, tolower) %>%
   mutate_if(is.character, str_squish)
@@ -106,12 +109,15 @@ data$occupancy[data$occupancy %in% "there are more people than can fit (people h
 data$occupancy[data$occupancy %in% "there are more people than seats"] <- "more people than seats"
 data$occupancy[data$occupancy %in% "there are the same number of people as seats"] <- "same number of people as seats"
 
+## Cleanup "_asked" varibles
 for(var in names(data) %>% str_subset("_asked")){
   data[[var]][!(data[[var]] %in% "yes")] <- "no"
 }
 
+## Replace "" with NA
 for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
 
+## Cleanup file name
 data$file <- data$file %>% str_replace_all(".*/", "")
 
 ## Add uid
@@ -125,7 +131,14 @@ sticker_df <- sticker_df %>%
                 reg_no = plate)
 
 # License Plate Number ---------------------------------------------------------
-#### [1] Matatu number, numeric
+#### Registration number dataframe
+reg_no_df <- sticker_df %>%
+  dplyr::select(matatu_number) %>%
+  dplyr::rename(matatu_number = matatu_number) %>%
+  mutate(matatu_number_valid = T) %>%
+  unique()
+
+#### Cleanup
 data$matatu_number <- data$matatu_number %>%
   str_replace_all("psv no", "") %>%
   str_replace_all("psv", "") %>%
@@ -134,25 +147,25 @@ data$matatu_number <- data$matatu_number %>%
   str_replace_all(" ", "") %>%
   tolower()
 
-psv_no_df <- sticker_df %>%
-  dplyr::select(matatu_number, reg_no) %>%
-  dplyr::rename(reg_no_1 = reg_no)
+#### Split into data where have valid plate and not
+data <- merge(data, reg_no_df, by = "matatu_number", all.x = T, all.y = F)
 
-data <- merge(data, psv_no_df, by = "matatu_number", all.x = T, all.y = F)
+data_regVALID_T <- data[data$matatu_number_valid %in% T,]
+data_regVALID_F <- data[is.na(data$matatu_number_valid),]
 
-#### [2] Closest Plate Match
-# TODO: First use valid matches, then only do this on remaining ones for shortcode
-#       Process takes a bit, so just to reduce time.
+data_regVALID_T$reg_no <- data_regVALID_T$matatu_number
+
+#### Add Closest Plate Match and Leven Distance
 # Determine levenstein distance to closest plate match and, if distance is small
 # use that plate
-plates <- sticker_df$reg_no[!(sticker_df$pilot_number %in% 1)]
+plates <- reg_no_df$matatu_number[nchar(reg_no_df$matatu_number) %in% 7] %>% unique()
 
-leven_df <- lapply(1:nrow(data), function(i){
+leven_df <- lapply(1:nrow(data_regVALID_F), function(i){
   # Returns dataframe of levenstein distance of closest plate number and the plate
   # number
   if((i %% 500) %in% 0) print(i)
   
-  leven_dists <- adist(data$matatu_number[i], plates) %>%
+  leven_dists <- adist(data_regVALID_F$matatu_number[i], plates) %>%
     as.vector()
   
   plate_i <- plates[which.min(leven_dists)]
@@ -160,26 +173,22 @@ leven_df <- lapply(1:nrow(data), function(i){
   
   if(length(plate_i) %in% 0) plate_i <- NA
   
-  out_df <- data.frame(reg_no_closest = plate_i,
-                       reg_no_closest_dist = leven_dist_i)
+  out_df <- data.frame(matatu_number_closest = plate_i,
+                       matatu_number_closest_dist = leven_dist_i)
   
   return(out_df)
 }) %>%
   bind_rows()
 
-data <- bind_cols(data, leven_df)
+## Add closest matatu number if within levenstein distance of 1
+data_regVALID_F <- bind_cols(data_regVALID_F, leven_df)
+data_regVALID_F$reg_no <- NA
+data_regVALID_F$reg_no[data_regVALID_F$matatu_number_closest_dist %in% 1] <- 
+  data_regVALID_F$matatu_number_closest[data_regVALID_F$matatu_number_closest_dist %in% 1]
 
-data$reg_no_2 <- NA
-
-use_reg_no <- data$reg_no_closest_dist %in% 0:1 & nchar(data$matatu_number) %in% 7
-data$reg_no_2[use_reg_no] <- data$matatu_number[use_reg_no]
-
-#### Clean Reg Number
-data$reg_no <- data$reg_no_2
-data$reg_no[is.na(data$reg_no)] <- data$reg_no_1[is.na(data$reg_no)]
-
-data$reg_no_1 <- NULL
-data$reg_no_2 <- NULL
+## Append data back together
+data <- bind_rows(data_regVALID_T,
+                  data_regVALID_F)
 
 # Merge in Sticker Data --------------------------------------------------------
 sticker_df <- sticker_df %>%
@@ -188,13 +197,17 @@ sticker_df <- sticker_df %>%
                 shortcode_on_sticker = shortcode)
 
 ## Merge for shortcode
-sc_data <- merge(data %>% filter(response_method == "shortcode"), 
-                 sticker_df %>% dplyr::select(-qr_web_address), 
+sc_data <- merge(data %>% 
+                   filter(response_method == "shortcode"), 
+                 sticker_df %>% 
+                   dplyr::select(-qr_web_address), 
                  by = "reg_no", all.x=T, all.y=F)
 
 ## Merge for QR code
-qr_data <- merge(data %>% filter(response_method == "qr code"), 
-                 sticker_df %>% dplyr::select(-reg_no), 
+qr_data <- merge(data %>% 
+                   filter(response_method == "qr code") %>%
+                   select(-reg_no), 
+                 sticker_df, 
                  by = "qr_web_address", all.x=T, all.y=F)
 
 ## Append
@@ -203,6 +216,8 @@ data <- bind_rows(sc_data, qr_data)
 # Pilot Number -----------------------------------------------------------------
 # If plate number invalid, can figure out pilot number in some cases using
 # survey file name and date completed
+
+data$file
 
 data$file %>% table() %>% View()
 data$pilot_number %>% is.na %>% table
