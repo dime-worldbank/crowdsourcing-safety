@@ -1,6 +1,6 @@
 # PSV Rider Feedback: Clean Data
 
-# Load Data --------------------------------------------------------------------
+# 1. LOAD DATA =================================================================
 ## Shortcode Data
 sc_data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "RawData", 
                              "echo_data.Rds"))
@@ -13,7 +13,20 @@ qr_data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "PSV S
 sticker_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
                                   "Sticker Information", "psv_sticker_information.xlsx"))
 
-# Shortcode Data ---------------------------------------------------------------
+# 2. CLEAN INDIVIDUAL DATASETS =================================================
+# Sticker data needs to be cleaned first, as we merge it with qr/shortcode in
+# next step
+
+# ** 2.1 Sticker Data ----------------------------------------------------------
+sticker_df <- sticker_df %>%
+  mutate(plate      = plate %>% tolower %>% str_squish %>% str_replace_all(" ", ""),
+         psv_number = psv_number %>% tolower %>% str_squish %>% str_replace_all(" ", "")) %>%
+  dplyr::rename(matatu_number = psv_number,
+                reg_no = plate)
+
+# ** 2.2 Shortcode Data --------------------------------------------------------
+
+# **** 2.2.1 Main Cleanup ------------------------------------------------------
 sc_data <- sc_data %>%
   dplyr::select(start_date, invite_date, complete_date,
                 MATATU.NUMBER._L,
@@ -52,7 +65,76 @@ names(sc_data) <- names(sc_data) %>%
 sc_data$complete_date <- paste0(sc_data$complete_date, ":00")
 sc_data$complete_date[sc_data$complete_date %in% ":00"] <- ""
 
-# QR Code Data -----------------------------------------------------------------
+# **** 2.2.2 Merge with sticker, account for mispellings -----------------------
+
+## Cleanup
+sc_data$matatu_number <- sc_data$matatu_number %>%
+  str_replace_all("psv no", "") %>%
+  str_replace_all("psv", "") %>%
+  str_replace_all("[[:punct:]]", "") %>%
+  str_squish() %>%
+  str_replace_all(" ", "") %>%
+  tolower()
+
+## Registration number dataframe
+reg_no_df <- sticker_df %>%
+  dplyr::select(matatu_number) %>%
+  filter(!is.na(matatu_number)) %>%
+  mutate(matatu_number_is_valid = T) 
+
+#### Split into data where have valid plate and not
+sc_data <- merge(sc_data, reg_no_df, by = "matatu_number", all.x = T, all.y = F)
+
+data_regVALID_T <- sc_data[sc_data$matatu_number_is_valid %in% T,]
+data_regVALID_F <- sc_data[is.na(sc_data$matatu_number_is_valid),]
+
+data_regVALID_T$matatu_number_valid <- data_regVALID_T$matatu_number
+
+#### Add Closest Plate Match and Leven Distance
+# Determine levenstein distance to closest plate match and, if distance is small
+# use that plate
+plates <- reg_no_df$matatu_number[nchar(reg_no_df$matatu_number) %in% 7] %>% unique()
+
+leven_df <- lapply(1:nrow(data_regVALID_F), function(i){
+  # Returns dataframe of levenstein distance of closest plate number and the plate
+  # number
+  if((i %% 500) %in% 0) print(i)
+  
+  leven_dists <- adist(data_regVALID_F$matatu_number[i], plates) %>%
+    as.vector()
+  
+  plate_i <- plates[which.min(leven_dists)]
+  leven_dist_i <- min(leven_dists)
+  
+  if(length(plate_i) %in% 0) plate_i <- NA
+  
+  out_df <- data.frame(matatu_number_closest = plate_i,
+                       matatu_number_closest_dist = leven_dist_i)
+  
+  return(out_df)
+}) %>%
+  bind_rows()
+
+## Add closest matatu number if within levenstein distance of 1
+data_regVALID_F <- bind_cols(data_regVALID_F, leven_df)
+data_regVALID_F$matatu_number_valid <- NA
+data_regVALID_F$matatu_number_valid[data_regVALID_F$matatu_number_closest_dist %in% 1] <- 
+  data_regVALID_F$matatu_number_closest[data_regVALID_F$matatu_number_closest_dist %in% 1]
+
+## Append data back together
+sc_data <- bind_rows(data_regVALID_T,
+                     data_regVALID_F)
+
+## Merge sticker data
+sc_data <- merge(sc_data, 
+                 sticker_df %>%
+                   filter(!is.na(matatu_number)), 
+                 by.x = "matatu_number_valid",
+                 by.y = "matatu_number",
+                 all.x = T,
+                 all.y = F)
+
+# ** 2.3 QR Code Data ----------------------------------------------------------
 ## Clean Names
 names(qr_data) <- names(qr_data) %>%
   str_replace_all("How would you rate your matatu driver\\?", "driver_rating") %>%
@@ -82,21 +164,63 @@ qr_data <- qr_data %>%
 qr_data$feedback <- qr_data$feedback %>% tolower() %>% str_squish()
 qr_data <- qr_data[!(qr_data$feedback %in% c("test", "testing")),]
 
-# Append and Standardize Variables ---------------------------------------------
-## Append
+## Merge with sticker
+qr_data <- merge(qr_data, 
+                 sticker_df %>%
+                   filter(!is.na(qr_web_address)), 
+                 by = "qr_web_address",
+                 all.x=T,
+                 all.y=F)
+
+# 3. APPEND AND STANDARDIZE VARIABLES ==========================================
+
+# ** 3.1 Append ----------------------------------------------------------------
 data <- bind_rows(qr_data, sc_data)
 
-## Datetime variables
-data <- data %>%
-  dplyr::rename(complete_datetime = complete_date) %>%
-  mutate(complete_datetime = complete_datetime %>% ymd_hms) %>%
-  mutate(complete_date = complete_datetime %>% as.Date)
+# ** 3.2 Cleanup Variables -----------------------------------------------------
 
-## Standardize variable responses
+# **** 3.2.1 General -----------------------------------------------------------
+
+## Character
 data <- data %>%
   mutate_if(is.character, tolower) %>%
   mutate_if(is.character, str_squish)
 
+## Replace "" with NA
+for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
+
+# **** 3.2.2 Variety -----------------------------------------------------------
+## Datetime variables
+data <- data %>%
+  dplyr::rename(complete_datetime = complete_date) %>%
+  mutate(complete_datetime = complete_datetime %>% ymd_hms) %>%
+  mutate(complete_date = complete_datetime %>% as.Date) %>%
+  
+  dplyr::rename(start_datetime = start_date) %>%
+  mutate(start_datetime = start_datetime %>% ymd_hm())
+
+## Completed survey
+data$completed_survey <- !is.na(data$complete_datetime)
+
+## Reg number
+data$reg_no[is.na(data$reg_no)] <- "UNKNOWN"
+
+## Vehicle ID
+data <- data %>%
+  mutate(vehicle_id = reg_no %>% 
+           na_if("UNKNOWN") %>%
+           as.factor() %>%
+           as.numeric()) 
+
+## Cleanup file name
+data$file <- data$file %>% str_replace_all(".*/", "")
+
+## Add uid
+data$uid <- 1:nrow(data)
+
+## **** 3.2.3 Ratings/feedback variables --------------------------------------
+
+data$covid_measures[data$covid_measures %in% "yes - measures seem effective"] <- "yes, effective"
 data$covid_measures[data$covid_measures %in% "yes - but measures are limited"] <- "yes, but seemed limited"
 data$covid_measures[data$covid_measures %in% "yes - but measures are limited - no"] <- "yes, but seemed limited"
 
@@ -114,299 +238,99 @@ for(var in names(data) %>% str_subset("_asked")){
   data[[var]][!(data[[var]] %in% "yes")] <- "no"
 }
 
-## Replace "" with NA
-for(var in names(data)) data[[var]][data[[var]] %in% ""] <- NA
+# **** 3.2.4 Award Amount ------------------------------------------------------
+data <- data %>%
+  dplyr::rename(award_amount_posted = award_amount)
 
-## Cleanup file name
-data$file <- data$file %>% str_replace_all(".*/", "")
+# **** 3.2.5 Win/Get Award -----------------------------------------------------
+# We have this information by knowing the liscence plate. However, in cases where
+# we don't have the plate number, we can use the survey that they answered.
 
-## Add uid
-data$uid <- 1:nrow(data)
+data$award_type[grepl("matatu_survey__win_airtime", data$file)] <- "win"
 
-# Clean Sticker Data -----------------------------------------------------------
-sticker_df <- sticker_df %>%
-  mutate(plate      = plate %>% tolower %>% str_squish %>% str_replace_all(" ", ""),
-         psv_number = psv_number %>% tolower %>% str_squish %>% str_replace_all(" ", "")) %>%
-  dplyr::rename(matatu_number = psv_number,
-                reg_no = plate)
+get_award_files <- c("matatu_survey__get_airtime", 
+                     "matatu_survey__200_kes_incentive",
+                     "matatu_survey__100_kes_incentive") %>%
+  paste(collapse = "|")
+data$award_type[grepl(get_award_files, data$file)] <- "get"
 
-# License Plate Number ---------------------------------------------------------
-#### Registration number dataframe
-reg_no_df <- sticker_df %>%
-  dplyr::select(matatu_number) %>%
-  dplyr::rename(matatu_number = matatu_number) %>%
-  mutate(matatu_number_valid = T) %>%
-  unique()
-
-#### Cleanup
-data$matatu_number <- data$matatu_number %>%
-  str_replace_all("psv no", "") %>%
-  str_replace_all("psv", "") %>%
-  str_replace_all("[[:punct:]]", "") %>%
-  str_squish() %>%
-  str_replace_all(" ", "") %>%
-  tolower()
-
-#### Split into data where have valid plate and not
-data <- merge(data, reg_no_df, by = "matatu_number", all.x = T, all.y = F)
-
-data_regVALID_T <- data[data$matatu_number_valid %in% T,]
-data_regVALID_F <- data[is.na(data$matatu_number_valid),]
-
-data_regVALID_T$reg_no <- data_regVALID_T$matatu_number
-
-#### Add Closest Plate Match and Leven Distance
-# Determine levenstein distance to closest plate match and, if distance is small
-# use that plate
-plates <- reg_no_df$matatu_number[nchar(reg_no_df$matatu_number) %in% 7] %>% unique()
-
-leven_df <- lapply(1:nrow(data_regVALID_F), function(i){
-  # Returns dataframe of levenstein distance of closest plate number and the plate
-  # number
-  if((i %% 500) %in% 0) print(i)
-  
-  leven_dists <- adist(data_regVALID_F$matatu_number[i], plates) %>%
-    as.vector()
-  
-  plate_i <- plates[which.min(leven_dists)]
-  leven_dist_i <- min(leven_dists)
-  
-  if(length(plate_i) %in% 0) plate_i <- NA
-  
-  out_df <- data.frame(matatu_number_closest = plate_i,
-                       matatu_number_closest_dist = leven_dist_i)
-  
-  return(out_df)
-}) %>%
-  bind_rows()
-
-## Add closest matatu number if within levenstein distance of 1
-data_regVALID_F <- bind_cols(data_regVALID_F, leven_df)
-data_regVALID_F$reg_no <- NA
-data_regVALID_F$reg_no[data_regVALID_F$matatu_number_closest_dist %in% 1] <- 
-  data_regVALID_F$matatu_number_closest[data_regVALID_F$matatu_number_closest_dist %in% 1]
-
-## Append data back together
-data <- bind_rows(data_regVALID_T,
-                  data_regVALID_F)
-
-# Merge in Sticker Data --------------------------------------------------------
-sticker_df <- sticker_df %>%
-  dplyr::select(-c(matatu_number, wfp_form_id, notes)) %>%
-  dplyr::rename(qr_code_on_sticker = qr_code,
-                shortcode_on_sticker = shortcode)
-
-## Merge for shortcode
-sc_data <- merge(data %>% 
-                   filter(response_method == "shortcode"), 
-                 sticker_df %>% 
-                   dplyr::select(-qr_web_address), 
-                 by = "reg_no", all.x=T, all.y=F)
-
-## Merge for QR code
-qr_data <- merge(data %>% 
-                   filter(response_method == "qr code") %>%
-                   select(-reg_no), 
-                 sticker_df, 
-                 by = "qr_web_address", all.x=T, all.y=F)
-
-## Append
-data <- bind_rows(sc_data, qr_data)
-
-# Pilot Number -----------------------------------------------------------------
+# **** 3.2.6 Pilot Number ------------------------------------------------------
 # If plate number invalid, can figure out pilot number in some cases using
 # survey file name and date completed
 
-data$file
+# 4. FINALIZE ==================================================================
 
-data$file %>% table() %>% View()
-data$pilot_number %>% is.na %>% table
+# ** 4.1 Subset to Relevant Variables ------------------------------------------
+
+data <- data %>%
+  dplyr::select(-c(invite_date, qr_web_address, file, notes, matatu_number_is_valid, wfp_form_id))
+
+# ** 4.2 Order variables -------------------------------------------------------
+data <- data %>%
+  dplyr::select(uid, reg_no,
+                start_datetime, complete_date, complete_datetime, 
+                everything())
+
+# ** 4.3 Label variables -------------------------------------------------------
+var_label(data$start_datetime) <- "Shortcode Survey Start Date/Time"
+#var_label(data$invite_date) <- "Survey Invite Date/Time"
+var_label(data$complete_datetime) <- "Survey Completion Date/Time"
+var_label(data$complete_date) <- "Survey Completion Date"
+var_label(data$matatu_number) <- "Matatu number, as entered"
+var_label(data$matatu_number_valid) <- "Matatu number, valid"
+var_label(data$driver_rating) <- "How would you rate your Matatu driver?"
+var_label(data$speed_rating) <- "How would you describe your Matatu driver's speed?"
+var_label(data$occupancy) <- "On the Matatu, are there..."
+var_label(data$covid_measures) <- "Were measures taken to prevent spread of COVID-19? e.g. Limiting passengers or providing sanitiser / wipes?"
+var_label(data$where_going) <- "Where are you traveling to? (e.g., stage or location where you'll get off the matatu)"
+var_label(data$feedback) <- "Would you like to leave a comment about the matatu or ride?"
+var_label(data$phone_hash) <- "Phone number (hashed)"
+var_label(data$amenity_importance) <- "How important are amenities (e.g., wifi) when choosing a matatu to rider?"
+var_label(data$award_amount_posted) <- "Award amount (KES - posted on sticker)"
+#var_label(data$award_actual) <- "Award amount (actual - advertised in survey)"
+var_label(data$award_type) <- "Win or get award?"
+var_label(data$award_offer_end) <- "Award offer ending date"
+var_label(data$response_method) <- "Used shortcode or QR code"
+var_label(data$reg_no) <- "Registration Number"
+var_label(data$qr_code) <- "Whether vehicle had a qr code"
+var_label(data$shortcode) <- "Whether vehicle had a shortcode"
+var_label(data$stickers_installed) <- "Date stickers installed"
+var_label(data$pilot_number) <- "Pilot round number"
+var_label(data$matatu_number_closest) <- "Matatu number, closest"
+var_label(data$matatu_number_closest_dist) <- "Matatu number, closest [levenstein distance]"
+var_label(data$uid) <- "Response Unique ID"
+
+var_label(data$feedback_asked) <- "Was 'feedback' question asked in survey?"
+var_label(data$driver_rating_asked) <- "Was 'driver_rating' question asked in survey?"
+var_label(data$covid_measures_asked) <- "Was 'covid_measures' question asked in survey?"
+var_label(data$where_going_asked) <- "Was 'where_going' question asked in survey?"
+var_label(data$speed_rating_asked) <- "Was 'speed_rating' question asked in survey?"
+var_label(data$amenity_importance_asked) <- "Was 'amenity_importance' question asked in survey?"
+var_label(data$occupancy_asked) <- "Was 'occupancy' question asked in survey?"
+var_label(data$matatu_number_asked) <- "Was 'matatu_number' question asked in survey?"
+var_label(data$flier) <- "Flier type given to driver"
+
+#var_label(data$how_identif) <- "How identify matatu on shortcode"
+#var_label(data$date) <- "Survey date"
+#var_label(data$hour) <- "Survey hour"
+#var_label(data$reg_no_raw) <- "Reg no, as entered"
+#var_label(data$reg_no_clean) <- "Reg no, cleaned"
+#var_label(data$reg_no_closest) <- "Reg no, closest to correct on"
+#var_label(data$reg_no_closest_dist) <- "Levenstein distance from reg no to closest reg no"
+#var_label(data$time_to_complete_mins) <- "Time to complete survey (minutes)" 
+var_label(data$completed_survey) <- "Answered all questions in survey" 
+var_label(data$vehicle_id) <- "Vehicle ID" 
+
+# Export -----------------------------------------------------------------------
+saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 
+                        "rider_feedback.Rds"))
+write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 
+                          "rider_feedback.dta"))
 
 
 
 
 
-# ***** EDIT HERE ***** --------------------------------------------------------
-# Label variables
 
-if(F){
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  # Award Variables --------------------------------------------------------------
-  #### Award Amount
-  data$award_posted <- ""
-  data$award_posted[grepl("100_KES", data$file)] <- "100"
-  data$award_posted[grepl("200_KES", data$file)] <- "200"
-  data$award_posted[grepl("Get_Airtime", data$file)] <- "50"
-  data$award_posted[grepl("Win_Airtime", data$file)] <- "50"
-  data$award_posted[grepl("SHORT", data$file) & grepl("Get_Airtime", data$file)] <- "50" # Unspecified?
-  
-  #### Award Actual
-  data$award_actual <- data$award_posted
-  data$award_actual[data$award_actual %in% c("100", "200") & data$start_date >= "2020-06-28"] <- "20"
-  data$award_actual[data$start_date >= "2020-07-20" & data$award_actual %in% "20"] <- "0"
-  data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% "50"] <- "0"
-  data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% "Unspecified"] <- "0"
-  data$award_actual[grepl("SHORT", data$file) & grepl("Get_Airtime", data$file)] <- "10" # Unspecified?
-  data$award_actual[data$start_date >= "2020-08-31" & data$award_actual %in% "10"] <- "0"
-  
-  #### Get or Win Award
-  data$win_get_award[grepl("Win_Airtime", data$file)] <- "Win"
-  data$win_get_award[is.na(data$win_get_award)] <- "Get"
-  
-  #### Award Actual - Get Win
-  data$award_actual_getwin <- paste(data$win_get_award, data$award_actual, "KES")
-  data$award_actual_getwin[grepl("\\b0\\b", data$award_actual_getwin)] <- "None"
-  data$award_actual_getwin <- data$award_actual_getwin %>%
-    factor(levels = c("None",  "Get 10 KES", "Win 50 KES", "Get 20 KES", "Get 50 KES",
-                      "Get 100 KES", "Get 200 KES"))
-  
-  #### Award Posted - Get Win
-  data$award_posted_getwin <- paste(data$win_get_award, data$award_posted, "KES")
-  data$award_posted_getwin[grepl("\\b0\\b", data$award_posted_getwin)] <- "None"
-  
-  # Add variables ----------------------------------------------------------------
-  
-  #### N Questions
-  data$N_questions <- 6
-  data$N_questions[grepl("SHORT", data$file)] <- 3
-  
-  #### How Identify Vehicle
-  data$how_identif <- "number"
-  data$how_identif[grepl("Get_Airtime|Win_Airtime", data$file)] <- "reg no"
-  
-  # Create variables -------------------------------------------------------------
-  data <- data %>%
-    mutate(start_date = start_date %>% ymd_hm,
-           complete_date = complete_date %>% ymd_hm) %>%
-    mutate(date = start_date %>% as.Date(),
-           hour = start_date %>% hour(),
-           time_to_complete_mins = difftime(start_date, complete_date, units = "mins")) %>%
-    mutate(week = start_date %>% week) %>%
-    mutate(week_date = ymd( "2020-01-01") + lubridate::weeks(week - 1))
-  
-  data$reg_no_raw <- NA
-  data$reg_no_raw[data$how_identif %in% "reg no"] <-
-    data$matatu_no[data$how_identif %in% "reg no"]
-  
-  data$reg_no_clean <- data$reg_no_raw %>%
-    tolower() %>%
-    str_replace_all("[[:punct:]]", "") %>%
-    str_squish() %>%
-    str_replace_all(" ", "")
-  
-  data <- data %>%
-    mutate(feedback_nwords = feedback %>% str_count("\\S+"))
-  
-  # Number of questions answered, out of questions always asked
-  data$N_qs_answered <- data %>%
-    dplyr::select(c("matatu_no", "driver_rating", "speed_rating", 
-                    "occupancy", "covid_measures", "feedback")) %>%
-    apply(1, function(x) sum(!is.na(x)))
-  
-  # Completed survey
-  data$completed_survey <- !is.na(data$complete_date)
-  
-  # Closest Plate Match ----------------------------------------------------------
-  plates <- charc_df$psv_number[charc_df$pilot_number %in% 2]
-  
-  leven_df <- lapply(1:nrow(data), function(i){
-    
-    # levenstein distance to closest plate number and plate number
-    
-    if((i %% 500) %in% 0) print(i)
-    
-    leven_dists <- adist(data$reg_no_clean[i], charc_df$psv_number[charc_df$pilot_number %in% 2]) %>%
-      as.vector()
-    
-    plate_i <- plates[which.min(leven_dists)]
-    leven_dist_i <- min(leven_dists)
-    
-    if(length(plate_i) %in% 0) plate_i <- NA
-    
-    out_df <- data.frame(reg_no_closest = plate_i,
-                         reg_no_closest_dist = leven_dist_i)
-    
-    return(out_df)
-  }) %>%
-    bind_rows()
-  
-  data <- bind_cols(data, leven_df)
-  
-  # Clean matatu number ----------------------------------------------------------
-  data$matatu_no_clean <- data$matatu_no %>% 
-    tolower() %>%
-    str_squish() %>%
-    str_replace_all(" ", "")
-  
-  data$matatu_no_clean[data$reg_no_closest_dist %in% 1] <-
-    data$reg_no_closest[data$reg_no_closest_dist %in% 1]
-  
-  data$matatu_no_clean[!(data$matatu_no_clean %in% charc_df$psv_number)] <- NA
-  
-  data$matatu_no_valid <- !(data$matatu_no_clean %in% NA)
-  
-  # Remove unneeded variables ----------------------------------------------------
-  data <- data %>%
-    dplyr::select(-c(file))
-  
-  # Label variables --------------------------------------------------------------
-  var_label(data$start_date) <- "Survey Start Date/Time"
-  var_label(data$invite_date) <- "Survey Invite Date/Time"
-  var_label(data$complete_date) <- "Survey Completion Date/Time"
-  var_label(data$matatu_no) <- "Matatu number, as entered"
-  var_label(data$driver_rating) <- "How would you rate your Matatu driver?"
-  var_label(data$speed_rating) <- "How would you describe your Matatu driver's speed?"
-  var_label(data$occupancy) <- "On the Matatu, are there"
-  var_label(data$covid_measures) <- "Were measures taken to prevent spread of COVID-19? e.g. Limiting passengers or providing sanitiser / wipes?"
-  var_label(data$where_going) <- "Where are you traveling to? (e.g., stage or location where you'll get off the matatu)"
-  var_label(data$feedback) <- "Would you like to leave a comment about the matatu or ride?"
-  var_label(data$phone_hash) <- "Phone number (hashed)"
-  var_label(data$award_posted) <- "Award amount (posted on sticker)"
-  var_label(data$award_actual) <- "Award amount (actual - advertised in survey)"
-  var_label(data$win_get_award) <- "Win or get award?"
-  var_label(data$how_identif) <- "How identify matatu on shortcode"
-  var_label(data$date) <- "Survey date"
-  var_label(data$hour) <- "Survey hour"
-  var_label(data$reg_no_raw) <- "Reg no, as entered"
-  var_label(data$reg_no_clean) <- "Reg no, cleaned"
-  var_label(data$reg_no_closest) <- "Reg no, closest to correct on"
-  var_label(data$reg_no_closest_dist) <- "Levenstein distance from reg no to closest reg no"
-  var_label(data$matatu_no_clean) <- "Matatu number - only valid"
-  var_label(data$matatu_no_valid) <- "Is matatu number valid?" 
-  var_label(data$time_to_complete_mins) <- "Time to complete survey (minutes)" 
-  var_label(data$completed_survey) <- "Completed survey" 
-  
-  # Export -----------------------------------------------------------------------
-  saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
-                          "echo_data.Rds"))
-  write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "FinalData", 
-                            "echo_data.dta"))
-}
+
 
