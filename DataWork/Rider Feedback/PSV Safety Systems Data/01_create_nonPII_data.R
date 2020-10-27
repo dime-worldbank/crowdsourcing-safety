@@ -24,7 +24,7 @@ data <- file.path(onedrive_file_path, "Data", "Rider Feedback", "PSV Safety Syst
 # Prep Variables ---------------------------------------------------------------
 
 #### Hash Phone Number
-data$phone_hash <- data$`Phone Number` %>% as.factor() %>% as.numeric()
+data$phone_hash <- data$`Phone Number` %>% as.character() %>% md5()
 data$phone <- NULL
 
 #### Remove other PII Vars

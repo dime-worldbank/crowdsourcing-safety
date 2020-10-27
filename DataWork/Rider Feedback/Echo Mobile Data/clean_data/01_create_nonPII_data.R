@@ -21,7 +21,7 @@ data <- file.path(onedrive_file_path, "Data", "Rider Feedback", "Echo Mobile Dat
 # Prep Variables ---------------------------------------------------------------
 
 #### Hash Phone Number
-data$phone_hash <- data$phone %>% as.factor() %>% as.numeric()
+data$phone_hash <- data$phone %>% as.character() %>% md5()
 data$phone <- NULL
 
 # Export -----------------------------------------------------------------------
