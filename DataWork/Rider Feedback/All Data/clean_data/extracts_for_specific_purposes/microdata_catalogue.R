@@ -123,16 +123,17 @@ data <- data %>%
                              shortcode = 2),
                            "How answered survey"),
          
-         phone_hash
+         user_id = phone_hash %>% as.factor() %>% as.numeric(),
          
          award_offer_end = award_offer_end # %>% ymd() # keep as character so keeps "none"
   )
 
 var_label(data$award_offer_end) <- "Award offer ending date"
+var_label(data$user_id) <- "Unique user ID"
 
 # Subset variables -------------------------------------------------------------
 data <- data %>%
-  dplyr::select(uid, vehicle_id, date, response_method,
+  dplyr::select(uid, user_id, vehicle_id, date, response_method,
                 driver_rating, speed_rating, occupancy, covid_measures, feedback, feedback_asked,
                 award_amount_posted, award_type, award_offer_end)
 
