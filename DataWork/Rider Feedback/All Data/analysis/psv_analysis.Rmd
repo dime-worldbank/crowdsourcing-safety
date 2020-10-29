@@ -14,7 +14,10 @@ output:
     number_sections: true
 ---
 
-This document summarizes results from piloting the Matatu Rider Feedback project. So far, there have been 2 pilots:
+This document summarizes results from piloting the Matatu Rider Feedback project. So far, there have been 4 pilots:
+
+* __Pilot 0__
+* Stickers with just QR codes installed on 5 Lothian buses
 
 * __Pilot 1__ 
 * 15 Vehicles involved. 
@@ -33,6 +36,10 @@ This document summarizes results from piloting the Matatu Rider Feedback project
 * On August 12, we restarted the survey -- only asking 3 questions and lowered the award to 10 KES.
 * The stickers were installedon July 28 and the stickers indicate that the award offer expires on August 31.
 
+* __Pilot 3__ 
+* 20 vehicles involved
+* 10 vehicles had both QR and shortcode, 10 only had QR
+* Those giving feedback could win 100 KES. No expirtation date.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -50,8 +57,8 @@ PILOT_1_DATE <- "2020-06-26"
 PILOT_2_DATE <- "2020-07-28"
 
 # Load Data --------------------------------------------------------------------
-data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback",
-                          "Echo Mobile Data", "FinalData", "echo_data.Rds"))
+data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", 
+                          "All Data", "FinalData", "rider_feedback.Rds"))
 
 # Prep Data --------------------------------------------------------------------
 data <- data %>%
@@ -61,258 +68,94 @@ data <- data %>%
 
 # Number of Responses
 
-## Daily - By Award Type
-```{r, fig.height=4}
+## Daily - By Posted Award Type
+```{r, fig.height=16}
 
 data_award <- data %>%
   filter(!is.na(complete_date)) %>%
-  group_by(date, award_actual_getwin) %>%
+  group_by(date, award_type, month) %>%
   dplyr::summarise(N = n()) 
 
 data_total <- data %>%
   filter(!is.na(complete_date)) %>%
-  group_by(date) %>%
+  group_by(date, month) %>%
   dplyr::summarise(N_total = n()) %>%
   ungroup() 
 
 ggplot() +
   geom_col(data = data_award, 
            aes(x=date, y=N,
-               fill = award_actual_getwin,
-               group = award_actual_getwin)) +
+               fill = award_type,
+               group = award_type)) +
   geom_text(data = data_total,
             aes(x=date, y=N_total,
-                label = N_total), nudge_y = 50, color = "black", size=2) +
-  geom_vline(xintercept = as.Date(PILOT_2_DATE),
-             color = "red") +
-  labs(fill = "Award") +
-  theme_ipsum()
+                label = N_total), 
+            color = "black", 
+            fontface = "bold",
+            size=3) +
+  #geom_vline(xintercept = as.Date(PILOT_2_DATE),
+  #           color = "red") +
+  labs(fill = "Award",
+       x = "") +
+  theme_minimal() +
+  facet_wrap(~month,
+             ncol = 1,
+             scales ="free") +
+  theme(strip.text = element_text(face = "bold", size=16, color = "black", hjust = 0.5))
 ```
 
-## Daily/By Week - By Actual Award Type
-```{r, fig.height=21}
-
-data_award <- data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(date, week_date, award_actual_getwin) %>%
-  dplyr::summarise(N = n()) 
-
-data_total <- data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(date, week_date) %>%
-  dplyr::summarise(N_total = n()) %>%
-  ungroup() 
-
-
-data_total <- seq(from = min(data_total$date),
-                  to = max(data_total$date),
-                  by = 1) %>%
-  as.data.frame() %>%
-  dplyr::rename(date = ".") %>%
-  left_join(data_total, by = "date") %>%
-  mutate(N_total = replace_na(N_total, 0)) %>%
-  mutate(week_date = ymd( "2020-01-01") + lubridate::weeks(week(date) - 1))
-
-
-ggplot() +
-  geom_col(data = data_award, 
-           aes(x=date, y=N,
-               fill = award_actual_getwin,
-               group = award_actual_getwin)) +
-  geom_text(data = data_total,
-            aes(x=date, y=N_total,
-                label = N_total), nudge_y = 2, color = "black", size=4) +
-  labs(fill = "Award") +
-  theme_ipsum() +
-  facet_wrap(~week_date, scales = "free", ncol=1)
-```
-
-## Daily/By Week - By Posted Award Type
-```{r, fig.height=21}
-
-data_award <- data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(date, week_date, award_posted_getwin) %>%
-  dplyr::summarise(N = n()) 
-
-data_total <- data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(date, week_date) %>%
-  dplyr::summarise(N_total = n()) %>%
-  ungroup() 
-
-data_total <- seq(from = min(data_total$date),
-                  to = max(data_total$date),
-                  by = 1) %>%
-  as.data.frame() %>%
-  dplyr::rename(date = ".") %>%
-  left_join(data_total, by = "date") %>%
-  mutate(N_total = replace_na(N_total, 0)) %>%
-  mutate(week_date = ymd( "2020-01-01") + lubridate::weeks(week(date) - 1))
-
-
-ggplot() +
-  geom_col(data = data_award, 
-           aes(x=date, y=N,
-               fill = award_posted_getwin,
-               group = award_posted_getwin)) +
-  geom_text(data = data_total,
-            aes(x=date, y=N_total,
-                label = N_total), nudge_y = 2, color = "black", size=4) +
-  labs(fill = "Award") +
-  theme_ipsum() +
-  facet_wrap(~week_date, scales = "free", ncol=1)
-```
-
-
-
-## Overall - Award Type
-
-TODO: Standardize by days award active.
-
+## By Matatu
 ```{r}
-
-data %>% 
-  group_by(award_actual_getwin) %>%
-  summarise(N = n()) %>%
-  ggplot(aes(x = award_actual_getwin, y = N)) + 
-  geom_col(alpha = 0.9, fill = "aquamarine") +
-  geom_text(aes(label = N)) +
-  labs(x = "Award Type") +
-  coord_flip() +
-  theme_ipsum()
-
-```
-
-
-
-## Daily - By Vehicle
-```{r}
-
-data_veh <- data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(date, matatu_no_clean) %>%
-  dplyr::summarise(N = n()) 
-
-data_total <- data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(date) %>%
-  dplyr::summarise(N_total = n()) %>%
-  ungroup() 
-
-ggplot() +
-  geom_col(data = data_veh, 
-           aes(x=date, y=N,
-               fill = matatu_no_clean,
-               group = matatu_no_clean)) +
-  geom_text(data = data_total,
-            aes(x=date, y=N_total,
-                label = N_total), nudge_y = 50, color = "black", size=2) +
-  geom_vline(xintercept = as.Date(PILOT_2_DATE),
-             color = "red") +
-  labs(fill = "Award") +
-  theme_ipsum()
-
-```
-
-## Vehicle - Overall
-```{r}
-
 data %>%
   filter(!is.na(complete_date)) %>%
-  filter(!is.na(matatu_no)) %>%
-  group_by(matatu_no_clean) %>%
-  dplyr::summarise(N = n()) %>%
-  ggplot(aes(x = reorder(matatu_no_clean, N), y = N)) +
-  geom_col(fill = "deepskyblue", alpha=0.8) +
-  geom_text(aes(label = N), nudge_y = 50) +
-  labs(x = "Matatu", y = "N") +
-  coord_flip() +
-  theme_ipsum()
-
+  group_by(reg_no, pilot_number) %>%
+  dplyr::summarise(N = n(),
+                   date = max(date),
+                   "Prop Use Shortcode" = mean(response_method %in% "shortcode") %>% 
+                     round(2)) %>%
+  mutate(pilot_number = pilot_number %>% as.character()) %>%
+  dplyr::rename("Reg Number" = reg_no,
+                "Pilot Number" = pilot_number,
+                "Latest Entry" = date) %>%
+  datatable(filter = 'top')
 ```
 
-## Hourly - By Vehicle
-```{r, fig.height=20}
-data %>%
-  filter(!is.na(complete_date)) %>%
-  mutate(datetime = complete_date %>% round_date(unit = "hour")) %>%
-  filter(!is.na(datetime)) %>%
-  group_by(datetime, week_date, matatu_no_clean) %>%
-  dplyr::summarise(N = n()) %>%
-  ungroup() %>%
-  mutate(week_date = paste("Week of", week_date)) %>%
-  ggplot() +
-  geom_col(aes(x = datetime, y = N,
-               group = matatu_no_clean,
-               fill = matatu_no_clean)) +
-  labs(title = "Completed Responses per Hour",
-       fill = "Award") +
-  facet_wrap(~week_date, ncol = 1, scale = "free") +
-  theme_minimal()
-```
-
-
-## Response by Hour Histogram
-```{r, fig.height=20}
-
-data %>%
-  filter(!is.na(complete_date)) %>%
-  group_by(hour, week_date, matatu_no_clean) %>%
-  dplyr::summarise(N = n()) %>%
-  ungroup() %>%
-  mutate(week_date = paste("Week of", week_date)) %>%
-  ggplot() +
-  geom_col(aes(x = hour, y = N,
-               fill = matatu_no_clean,
-               group = matatu_no_clean)) +
-  labs(title = "Completed Responses per Hour") +
-  facet_wrap(~week_date, ncol = 1, scale = "free_x") +
-  theme_minimal()
-```
-
-
-## When enter reg no, how incorrect?
+## By Pilot Number
 ```{r}
-
 data %>%
-  filter(how_identif %in% "reg no",
-         !is.na(reg_no_raw)) %>%
-  group_by(reg_no_closest_dist) %>%
+  filter(!is.na(complete_date)) %>%
+  mutate(pilot_number = replace_na(pilot_number, "Unknown - No Reg. No.")) %>%
+  group_by(pilot_number) %>%
   dplyr::summarise(N = n()) %>%
-  mutate(percent = (N/sum(N)*100) %>% round(1) %>% paste("%")) %>%
-  ggplot(aes(x = reg_no_closest_dist, y = N)) +
-  geom_col(fill = "dodgerblue", color = "black") +
-  geom_text(aes(label = percent), nudge_y = 100) +
-  labs(x = "Character difference to valid plate number",
-       title = "Number of character differences to valid plate number") +
-  theme_ipsum()
-
-
+  dplyr::rename("Pilot Number" = pilot_number) %>%
+  kable() %>%
+  kable_styling(full_width = F)
 ```
 
-# Questions by Vehicle
-```{r, fig.height=20}
+# Feedback 
 
+## Questions by Vehicle
+```{r, fig.height=30}
 data_long <- data %>%
-  dplyr::select(matatu_no_clean, 
+  dplyr::select(reg_no, 
                 driver_rating, speed_rating, occupancy, covid_measures) %>%
-  pivot_longer(-matatu_no_clean) %>%
+  pivot_longer(-reg_no) %>%
   
-  filter(value != "") %>%
+  filter(value != "",
+         !is.na(value)) %>%
   
   # Number of responses per question, per vehicle
-  group_by(matatu_no_clean, name) %>%
+  group_by(reg_no, name) %>%
   mutate(N_veh = n()) %>%
   ungroup() %>%
   
   # Aggregate
-  group_by(name, value, matatu_no_clean, N_veh) %>%
+  group_by(name, value, reg_no, N_veh) %>%
   summarise(N = n()) %>%
   ungroup()  %>%
   
   # Clean variables
-  mutate(matatu_no_clean = paste0(matatu_no_clean, " - ", N_veh)) %>%
+  mutate(reg_no = paste0(reg_no, " - ", N_veh)) %>%
   mutate(N = N/N_veh)
 
 data_long$name[data_long$name %in% "driver_rating"] <- "How would you rate your Matatu driver?"
@@ -320,32 +163,32 @@ data_long$name[data_long$name %in% "covid_measures"] <- "Were measures taken to 
 data_long$name[data_long$name %in% "occupancy"] <- "On the Matatu, are there"
 data_long$name[data_long$name %in% "speed_rating"] <- "How would you describe your Matatu driver's speed?"
 
-data_long$value <- data_long$value %>% str_squish()
+data_long$value <- data_long$value %>% str_squish() %>% tolower()
 
-data_long$value <- factor(data_long$value, levels = c("No",
-                                                      "Yes, but seemed limited",
-                                                      "Yes, effective",
+data_long$value <- factor(data_long$value, levels = c("no",
+                                                      "yes, but seemed limited",
+                                                      "yes, effective",
                                                       
-                                                      "Very Unsafe",
-                                                      "Unsafe",
-                                                      "Safe",
-                                                      "Very Safe",
+                                                      "very unsafe",
+                                                      "unsafe",
+                                                      "safe",
+                                                      "very safe",
                                                       
-                                                      "Less people than seats",
-                                                      "Same number of people as seats",
-                                                      "More people than seats",
-                                                      "More people than can fit",
+                                                      "less people than seats",
+                                                      "same number of people as seats",
+                                                      "more people than seats",
+                                                      "more people than can fit",
                                                       
-                                                      "Too slow",
-                                                      "Okay",
-                                                      "Fast",
-                                                      "Dangerously Fast"))
+                                                      "too slow",
+                                                      "okay",
+                                                      "fast",
+                                                      "dangerously fast"))
 
 out_plot <- lapply(data_long$name %>% unique, function(i){
   
   data_long %>%
     filter(name %in% i) %>%
-    ggplot(aes(x = reorder(matatu_no_clean, N_veh), # 
+    ggplot(aes(x = reorder(reg_no, N_veh), # 
                y = N, group=value, fill=value)) +
     geom_col(color="black") +
     labs(x="", y="",
@@ -359,12 +202,9 @@ out_plot <- lapply(data_long$name %>% unique, function(i){
 do.call(grid.arrange, c(out_plot, ncol=1))
 ```
 
-# Feedback
 
-## Number of Words - Histogram
-```{r}
-# TO DO: Put into buckets and show % -- use geom_col
-
+## Feedback - Length of Text Response
+```{r, fig.height=4}
 data$feedback_nwords_bin <- NA
 data$feedback_nwords_bin[data$feedback_nwords %in% 1] <- "1"
 data$feedback_nwords_bin[data$feedback_nwords %in% 2] <- "2"
@@ -392,131 +232,56 @@ data %>%
   theme_ipsum()
 ```
 
-## Responses - All
-
+## Feedback - Text Response
 ```{r}
 data %>%
   filter(feedback_nwords > 0) %>%
   arrange(desc(feedback_nwords)) %>%
-  dplyr::select(feedback, matatu_no_clean) %>%
-  dplyr::rename("Matatu" = matatu_no_clean,
+  dplyr::select(feedback, reg_no) %>%
+  dplyr::rename("Matatu" = reg_no,
                 Feedback = feedback) %>%
   paged_table()
 ```
 
-## Responses - Driver Unsafe or Very Unsafe
-
+# Survey Completion Rate
 ```{r}
 data %>%
-  filter(feedback_nwords > 0,
-         driver_rating %in% c("Unsafe", "Very Unsafe")) %>%
-  arrange(desc(feedback_nwords)) %>%
-  dplyr::select(feedback, matatu_no_clean) %>%
-  dplyr::rename("Matatu" = matatu_no_clean,
-                Feedback = feedback) %>%
-  paged_table()
+  mutate(pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
+  group_by(pilot_number) %>%
+  summarise("Completed Survey: Yes" = sum(completed_survey),
+            "Completed Survey: No" = sum(completed_survey %in% F),
+            "Completed Survey Proportion" = mean(completed_survey) %>% round(2)) %>%
+  ungroup() %>%
+  dplyr::rename("Pilot Number" = pilot_number) %>%
+  kable() %>%
+  kable_styling(full_width = F)
 ```
 
-
-```{r}
-# n_grams <- data %>%
-#   filter(feedback_nwords > 0) %>%
-#   pull(feedback) %>%
-#   str_squish() %>%
-#   tolower() %>%
-#   
-#   tokens(remove_punct = T) %>%
-#   tokens_ngrams(n = 3:5) %>%
-#   
-#   as.character() %>% 
-#   str_replace_all("_", " ") %>%
-#   
-#   table %>%
-#   as.data.frame() %>%
-#   dplyr::rename(phrase = ".") %>%
-#   filter(!is.na(phrase)) %>%
-#   arrange(-Freq)
-  
-```
-
-
-# Number of Questions Answered
-
-## Overall - 6 Qs Survey
-
+# Reponse Type - By Pilot Number
 ```{r}
 data %>%
-  filter(N_questions %in% 6) %>%
-  group_by(N_qs_answered) %>%
-  dplyr::summarise(N = n()) %>%
+  mutate(pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
+  group_by(pilot_number) %>%
+  summarise("Shortcode" = sum(response_method %in% "shortcode"),
+            "QR Code" = sum(response_method %in% "qr code"),
+            "Prop. Shortcode" = mean(response_method %in% "shortcode") %>% round(2)) %>%
   ungroup() %>%
-  dplyr::mutate(prop = (round(N / sum(N),2)*100) %>% paste0("%")) %>%
-  ggplot(aes(x = N_qs_answered, y = N)) +
-  geom_col(fill = "deepskyblue4", color = "black") +
-  geom_text(aes(label = prop), nudge_y = 150) +
-  labs(x = "Number of Questions Answered") +
-  theme_ipsum()
-
+  dplyr::rename("Pilot Number" = pilot_number) %>%
+  kable() %>%
+  kable_styling(full_width = F)
 ```
 
-## By Vehicle - 6 Qs Survey
-
-```{r}
-
-data %>%
-  
-  filter(N_questions %in% 6) %>%
-  
-  mutate(N_qs_answered = N_qs_answered %>% as.factor() %>% fct_rev) %>%
-  
-  # Number of responses per question, per vehicle
-  group_by(matatu_no_clean) %>%
-  mutate(N_veh = n()) %>%
-  ungroup() %>%
-  
-  group_by(N_qs_answered, matatu_no_clean, N_veh) %>%
-  dplyr::summarise(N = n()) %>%
-  ungroup() %>%
-  
-  mutate(prop = N / N_veh) %>%
-  
-  mutate(matatu_no_clean = paste0(matatu_no_clean, " - ", N_veh)) %>%
-  
-  ggplot(aes(x = reorder(matatu_no_clean, N_veh), y = prop, 
-             group = N_qs_answered,
-             fill = N_qs_answered)) +
-  geom_col(color = "black") +
-  labs(x = "Vehicle & Number of Responses", y = "Proportion",
-       fill = "Number of\nQuestions Answered") +
-  coord_flip() +
-  theme_ipsum()
-```
-
-## Overall - 3 Qs Survey
-
-After realizing we are low on funds after the 50 KES, we lowered the award to 10 KES and the number of questions to 3. This is clearly indicated at the start of the survey. The first message received in the shortcode is:
-
-_"Welcome to this 3 question survey. \*\*We've lowered the award to 10 KES\*\*_
-           
-_What is the matatu reg. number? (Written on sticker)."_
-
+# Reponse Type - By Shortcode On Sticker
+Some stickers only had the QR code, and not a shortcode
 ```{r}
 data %>%
-  filter(N_questions %in% 3) %>%
-  group_by(N_qs_answered) %>%
-  dplyr::summarise(N = n()) %>%
+  filter(!is.na(shortcode)) %>%
+  group_by(shortcode) %>%
+  summarise("N Responses using QR Code" = sum(response_method %in% "qr code")) %>%
   ungroup() %>%
-  dplyr::mutate(prop = (round(N / sum(N),2)*100) %>% paste0("%")) %>%
-  ggplot(aes(x = N_qs_answered, y = N)) +
-  geom_col(fill = "deepskyblue4", color = "black") +
-  geom_text(aes(label = prop), nudge_y = 1) +
-  labs(x = "Number of Questions Answered") +
-  theme_ipsum()
-
+  dplyr::rename("Shortcode On Sticker" = shortcode) %>%
+  kable() %>%
+  kable_styling(full_width = F)
 ```
-
-
-
-
 
 

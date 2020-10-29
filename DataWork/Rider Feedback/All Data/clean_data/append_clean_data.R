@@ -125,6 +125,10 @@ data_regVALID_F$matatu_number_valid[data_regVALID_F$matatu_number_closest_dist %
 sc_data <- bind_rows(data_regVALID_T,
                      data_regVALID_F)
 
+## Manually add reg no
+# The "generic sticker" was only put on one matatu
+sc_data$matatu_number_valid[grepl("GNRIC_MATATU", sc_data$file)] <- "kba970c"
+
 ## Merge sticker data
 sc_data <- merge(sc_data, 
                  sticker_df %>%
@@ -199,6 +203,13 @@ data <- data %>%
   dplyr::rename(start_datetime = start_date) %>%
   mutate(start_datetime = start_datetime %>% ymd_hm())
 
+## Datetime and date
+data$datetime <- data$complete_datetime
+data$datetime[is.na(data$datetime)] <- data$start_datetime[is.na(data$datetime)]
+
+data$date <- data$datetime %>% date()
+data$month <- data$date %>% substring(1,7)
+
 ## Completed survey
 data$completed_survey <- !is.na(data$complete_datetime)
 
@@ -214,6 +225,10 @@ data <- data %>%
 
 ## Cleanup file name
 data$file <- data$file %>% str_replace_all(".*/", "")
+
+## Feedback - number of words
+data$feedback_nwords <- data$feedback %>% n_words()
+data$feedback_nwords[is.na(data$feedback)] <- NA
 
 ## Add uid
 data$uid <- 1:nrow(data)
@@ -273,7 +288,9 @@ data <- data %>%
 
 # ** 4.3 Label variables -------------------------------------------------------
 var_label(data$start_datetime) <- "Shortcode Survey Start Date/Time"
-#var_label(data$invite_date) <- "Survey Invite Date/Time"
+var_label(data$datetime) <- "Survey Date/Time"
+var_label(data$date) <- "Survey Date"
+var_label(data$month) <- "Survey Month"
 var_label(data$complete_datetime) <- "Survey Completion Date/Time"
 var_label(data$complete_date) <- "Survey Completion Date"
 var_label(data$matatu_number) <- "Matatu number, as entered"
@@ -326,9 +343,6 @@ saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data",
                         "rider_feedback.Rds"))
 write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 
                           "rider_feedback.dta"))
-
-
-
 
 
 
