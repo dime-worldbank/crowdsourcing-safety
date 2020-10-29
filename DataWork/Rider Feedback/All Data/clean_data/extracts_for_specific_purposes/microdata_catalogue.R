@@ -123,6 +123,8 @@ data <- data %>%
                              shortcode = 2),
                            "How answered survey"),
          
+         phone_hash
+         
          award_offer_end = award_offer_end # %>% ymd() # keep as character so keeps "none"
   )
 

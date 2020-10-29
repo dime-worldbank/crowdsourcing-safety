@@ -22,8 +22,12 @@ library(haven)
 library(stringr)
 library(rmarkdown)
 library(wesanderson)
+<<<<<<< HEAD
 library(knitr)
 library(data.table)
 library(DT)
 library(syn)
 library(kableExtra)
+=======
+library(openssl)
+>>>>>>> ab1973848109333509c37045545ec50730713e5b
