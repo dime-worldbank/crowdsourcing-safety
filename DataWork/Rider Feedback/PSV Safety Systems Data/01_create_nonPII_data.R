@@ -13,13 +13,14 @@ read.csv_filename <- function(filepath){
   return(df)
 }
 
-# Read Data --------------------------------------------------------------------
+# Load QR Data -----------------------------------------------------------------
 DATA_PATH <- file.path(onedrive_file_path, "Data", "Rider Feedback", "PSV Safety Systems Data", "RawData - PII")
 
 data <- file.path(onedrive_file_path, "Data", "Rider Feedback", "PSV Safety Systems Data", "RawData - PII") %>%
   list.files(pattern = "*.csv", full.names = T) %>%
   lapply(read.csv_filename) %>%
   bind_rows()
+
 
 # Prep Variables ---------------------------------------------------------------
 
