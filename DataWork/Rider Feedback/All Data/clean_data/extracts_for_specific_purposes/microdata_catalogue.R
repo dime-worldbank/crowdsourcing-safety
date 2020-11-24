@@ -25,6 +25,7 @@ data$where_going[is.na(data$where_going) & data$where_going_asked %in% "yes"] <-
 data$where_going[is.na(data$where_going) & data$where_going_asked %in% "no"] <- "NOT ASKED"
 
 data$award_offer_end[is.na(data$award_offer_end) & is.na(data$award_amount_posted)] <- "UNKNOWN"
+data$pilot_number[is.na(data$pilot_number)] <- "UNKNOWN"
 
 #### Label
 data <- data %>%
@@ -129,13 +130,13 @@ data <- data %>%
   )
 
 var_label(data$award_offer_end) <- "Award offer ending date"
-var_label(data$user_id) <- "Unique user ID"
+var_label(data$user_id) <- "Unique user ID based on phone number"
 
 # Subset variables -------------------------------------------------------------
 data <- data %>%
   dplyr::select(uid, user_id, vehicle_id, date, response_method,
                 driver_rating, speed_rating, occupancy, covid_measures, feedback, feedback_asked,
-                award_amount_posted, award_type, award_offer_end)
+                award_amount_posted, award_type, award_offer_end, pilot_number)
 
 # Export -----------------------------------------------------------------------
 write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 

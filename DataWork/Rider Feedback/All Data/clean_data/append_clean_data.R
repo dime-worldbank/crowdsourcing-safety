@@ -160,7 +160,7 @@ qr_data <- qr_data %>%
                 occupancy, occupancy_asked,
                 amenity_importance, amenity_importance_asked,
                 feedback, feedback_asked,
-                qr_web_address,
+                qr_web_address, phone_hash,
                 file) %>%
   mutate(response_method = "qr code")
 
@@ -229,6 +229,10 @@ data$file <- data$file %>% str_replace_all(".*/", "")
 ## Feedback - number of words
 data$feedback_nwords <- data$feedback %>% n_words()
 data$feedback_nwords[is.na(data$feedback)] <- NA
+
+## Pilot number
+# Add one so starts at 1, not 0
+data$pilot_number <- data$pilot_number + 1
 
 ## Add uid
 data$uid <- 1:nrow(data)

@@ -16,30 +16,69 @@ output:
 
 This document summarizes results from piloting the Matatu Rider Feedback project. So far, there have been 4 pilots:
 
-* __Pilot 0__
-* Stickers with just QR codes installed on 5 Lothian buses
+__Pilot 1__
 
-* __Pilot 1__ 
-* 15 Vehicles involved. 
-* 8 vehicles had stickers advertising that riders receive 200 KES after completing the survey 
-* 7 vehicles advertised receiving 100 KES after completing the survey.
-* We received a large number of responses after only a couple days of running the pilot. Consequently, we lowered the award for types to 20 KES. The lower award was advertised in the survey. 
-* In the shortcode, to identify the vehicle, users entered a 2 digit number that was put on the stickers. 
-* The pilot started on June 28, and the stickers indicated that the award expired on July 20.
+* __Number of Vehicles:__ 5
+* __Start Date:__ March 27, 2020
+* __Awards:__ None
+* __QR/Shortcode On Sticker:__ Only QR
+* __Other Details:__ Installed on long range Lothian buses
 
-* __Pilot 2__ 
-* 15 vehicles involved. 
-* 9 vehicles had stickers advertising that riders received 50 KES after completing the survey (6 had both the shortcode and QR code, while 3 only had the QR code)  
-* 6 vehicles advertised winning 50 KES in airtime. 
-* Instead of a two digit number, the licence plate was put on the sticker and riders entered the plate number in the shortcode survey.
-* As with the previous pilot, we received a large number of responses in the first couple days. We paused the shortcode survey where a rider automatically recieved the 50 KES award due to large costs. 
-* On August 12, we restarted the survey -- only asking 3 questions and lowered the award to 10 KES.
-* The stickers were installedon July 28 and the stickers indicate that the award offer expires on August 31.
+__Pilot 2__
 
-* __Pilot 3__ 
-* 20 vehicles involved
-* 10 vehicles had both QR and shortcode, 10 only had QR
-* Those giving feedback could win 100 KES. No expirtation date.
+* __Number of Vehicles:__ 15
+* __Start Date:__ June 25, 2020
+* __Awards:__ (1) 8 vehicles advertised that each user would get 200 KES after completing the survey; (2) 7 vehicles advertised that each user would get 100 KES after completing the survey. After an initial large response rate, the award was lowered to 50 KES. The stickers still advertised 100 and 200 KES; however, the survey notified the user that the award had been lowered.
+* __QR/Shortcode On Sticker:__ Both
+* __Other Details:__ 
+
+__Pilot 3__
+
+* __Number of Vehicles:__ 15
+* __Start Date:__ July 29, 2020
+* __Awards:__ (1) 9 vehicles advertised that riders would receive 50 KES after completing the survey; (2) 6 vehicles advertising that users could win 50 KES after completing the survey
+* __QR/Shortcode On Sticker:__ (1) In 12 matatus, the stickers had both the shortcode and QR code; (2) in 3 matatus, the stickers just had the QR code.
+* __Other Details:__
+
+
+
+__Pilot 4__
+
+* __Number of Vehicles:__ 21
+* __Start Date:__ September 5, 2020
+* __Awards:__ For all vehicles, stickers advertised that users could win 100 KES after completing the survey.
+* __QR/Shortcode On Sticker:__ In 11 matatus, the stickers had both the shortcode and QR code; in 10 matatus the stickers just had the QR code.
+* __Other Details:__ In the design of the sticker the QR code was made larger to make it easier to scan
+
+```{r, include=F}
+#* __Pilot 1__
+#* Stickers with just QR codes installed on 5 Lothian buses
+
+#* __Pilot 1__ 
+#* 15 Vehicles involved. 
+#* 8 vehicles had stickers advertising that riders receive 200 KES after completing the survey 
+#* 7 vehicles advertised receiving 100 KES after completing the survey.
+#* We received a large number of responses after only a couple days of running the pilot. Consequently, we lowered the award for types to 20 KES. The lower award was advertised in the survey. 
+#* In the shortcode, to identify the vehicle, users entered a 2 digit number that was put on the stickers. 
+#* The pilot started on June 28, and the stickers indicated that the award expired on July 20.
+
+#* __Pilot 2__ 
+#* 15 vehicles involved. 
+#* 9 vehicles had stickers advertising that riders received 50 KES after completing the survey (6 had both the shortcode and QR code, while 3 only had the QR code)  
+#* 6 vehicles advertised winning 50 KES in airtime. 
+#* Instead of a two digit number, the licence plate was put on the sticker and riders entered the plate number in the shortcode survey.
+#* As with the previous pilot, we received a large number of responses in the first couple days. We paused the shortcode survey where a rider automatically recieved the 50 KES award due to large costs. 
+#* On August 12, we restarted the survey -- only asking 3 questions and lowered the award to 10 KES.
+#* The stickers were installedon July 28 and the stickers indicate that the award offer expires on August 31.
+
+#* __Pilot 3__ 
+#* 20 vehicles involved
+#* 10 vehicles had both QR and shortcode, 10 only had QR
+#* Those giving feedback could win 100 KES. No expirtation date.
+```
+
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -53,16 +92,22 @@ if(Sys.info()[["user"]] == "robmarty") github <- "~/Documents/Github/PSV-Rider-F
 source(file.path(github, "_psv_feedback_master.R"))
 
 # Parameters -------------------------------------------------------------------
-PILOT_1_DATE <- "2020-06-26"
-PILOT_2_DATE <- "2020-07-28"
+PILOT_1_DATE <- "2020-03-27"
+PILOT_2_DATE <- "2020-06-25"
+PILOT_3_DATE <- "2020-07-29"
+PILOT_4_DATE <- "2020-09-05" 
 
 # Load Data --------------------------------------------------------------------
 data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", 
                           "All Data", "FinalData", "rider_feedback.Rds"))
 
+pilot_df <- read.csv(file.path(dropbox_file_path, "Data", 
+                               "Pilot Information", "pilot_info.csv"),
+                     stringsAsFactors = F)
+
 # Prep Data --------------------------------------------------------------------
-data <- data %>%
-  filter(date >= "2020-06-26")
+#data <- data %>%
+#  filter(date >= "2020-06-26")
 
 ```
 
@@ -121,13 +166,53 @@ data %>%
 ```
 
 ## By Pilot Number
-```{r}
+```{r warning=FALSE}
+
+# pilot_df_adj <- pilot_df %>%
+#   mutate(pilot_number = pilot_number %>% as.character(),
+#          start_date = start_date %>% ymd()) %>%
+#   mutate(today_date = Sys.Date()) %>%
+#   mutate(n_days = difftime(today_date, start_date, units = "days") %>% as.numeric()) %>%
+#   dplyr::select(pilot_number, n_days, n_vehicles)
+
+pilot_df_adj <- pilot_df %>%
+  mutate(pilot_number = pilot_number %>% as.character())
+
+data$subset_type <- paste(data$pilot_number, "-", data$award_type)
+
+df_first30days <- lapply(unique(data$subset_type), function(subset_type){
+  data_i <- data[data$subset_type %in% subset_type,]
+  data_i <- data_i[!is.na(data_i$complete_date),]
+  
+  day_start <- data_i$date %>% min()
+  day_end <- day_start + 30
+  
+  data_i <- data_i[data_i$date <= day_end,]
+  
+  return(data.frame(pilot_number = data_i$pilot_number[1],
+                    award_type = data_i$award_type[1],
+                    N_first_30_days = nrow(data_i)))
+}) %>%
+  bind_rows() %>%
+  mutate(pilot_number = pilot_number %>% as.character()) %>%
+  filter(!is.na(pilot_number))
+
 data %>%
   filter(!is.na(complete_date)) %>%
   mutate(pilot_number = replace_na(pilot_number, "Unknown - No Reg. No.")) %>%
-  group_by(pilot_number) %>%
+  group_by(pilot_number, award_type) %>%
   dplyr::summarise(N = n()) %>%
-  dplyr::rename("Pilot Number" = pilot_number) %>%
+  left_join(pilot_df_adj, by = c("pilot_number", "award_type")) %>%
+  left_join(df_first30days, by = c("pilot_number", "award_type")) %>%
+  mutate("Average Number of Responses Per Vehicle Per Day in First 30 Days of Pilot" = N_first_30_days/n_vehicles/30) %>%
+  dplyr::rename("Pilot Number" = pilot_number,
+                "N (first 30 days)" = N_first_30_days,
+                "Award Type" = award_type) %>%
+  dplyr::select("Pilot Number", 
+                "Award Type",
+                "N", 
+                "N (first 30 days)",
+                "Average Number of Responses Per Vehicle Per Day in First 30 Days of Pilot") %>%
   kable() %>%
   kable_styling(full_width = F)
 ```
@@ -243,9 +328,10 @@ data %>%
   paged_table()
 ```
 
-# Survey Completion Rate
+# Survey Completion Rate: Shortcode
 ```{r}
 data %>%
+  filter(response_method %in% "shortcode") %>%
   mutate(pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
   group_by(pilot_number) %>%
   summarise("Completed Survey: Yes" = sum(completed_survey),
@@ -260,6 +346,7 @@ data %>%
 # Reponse Type - By Pilot Number
 ```{r}
 data %>%
+  filter(!is.na(complete_date)) %>%
   mutate(pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
   group_by(pilot_number) %>%
   summarise("Shortcode" = sum(response_method %in% "shortcode"),
@@ -271,17 +358,52 @@ data %>%
   kable_styling(full_width = F)
 ```
 
-# Reponse Type - By Shortcode On Sticker
-Some stickers only had the QR code, and not a shortcode
+# Shortcode vs QR Code
+## By Pilot
 ```{r}
+
 data %>%
-  filter(!is.na(shortcode)) %>%
-  group_by(shortcode) %>%
-  summarise("N Responses using QR Code" = sum(response_method %in% "qr code")) %>%
+  filter(!is.na(complete_date)) %>%
+  group_by(pilot_number, shortcode) %>%
+  dplyr::summarise(qr_N = sum(response_method %in% "qr code"),
+                   sr_N = sum(response_method %in% "shortcode")) %>%
   ungroup() %>%
-  dplyr::rename("Shortcode On Sticker" = shortcode) %>%
+  mutate(pilot_number = replace_na(pilot_number, "Unknown")) %>%
+  mutate(shortcode    = replace_na(shortcode, "Unknown")) %>%
+  dplyr::rename("Pilot" = pilot_number,
+                "Shortcode on Sticker?" = shortcode,
+                "QR Responses" = qr_N,
+                "Shortcode Responses" = sr_N) %>%
   kable() %>%
   kable_styling(full_width = F)
+
 ```
+
+## By Vehicle
+Only showing vehicles where at least one QR code response
+```{r}
+
+data_temp <- data %>%
+  filter(!is.na(complete_date)) %>%
+  group_by(reg_no, pilot_number, shortcode) %>%
+  dplyr::summarise(qr_N = sum(response_method %in% "qr code"),
+                   sr_N = sum(response_method %in% "shortcode")) %>%
+  ungroup() %>%
+  mutate(reg_no = replace_na(reg_no, "Unknown")) %>%
+  mutate(shortcode    = replace_na(shortcode, "Unknown")) %>%
+  filter(qr_N > 0) %>%
+  dplyr::rename("Matatu" = reg_no,
+                "Pilot" = pilot_number,
+                "QR Responses" = qr_N,
+                "Shortcode Responses" = sr_N) 
+
+## Check why positive values here
+data_temp$`Shortcode Responses`[data_temp$shortcode %in% "no"] <- 0
+
+data_temp %>%
+  datatable(filter = 'top')
+
+```
+
 
 
