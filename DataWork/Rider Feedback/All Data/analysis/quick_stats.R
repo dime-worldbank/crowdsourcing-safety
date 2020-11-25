@@ -2,12 +2,18 @@
 
 # Load Data --------------------------------------------------------------------
 feedback_df <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 
-                          "rider_feedback.Rds"))
+                                 "rider_feedback.Rds"))
 
 matatu_df <- read_excel(file.path(dropbox_file_path, "Data", "Matatu Data", "Characteristics", "RawData", 
-                                 "vehicle_basic_info.xlsx"))
+                                  "vehicle_basic_info.xlsx"))
 
 # Stats ------------------------------------------------------------------------
+
+feedback_df$completed_survey %>% table()
+table(!is.na(feedback_df$speed_rating) | 
+        !is.na(feedback_df$driver_rating) |
+        !is.na(feedback_df$covid_measures) )
+
 
 nrow(feedback_df)
 feedback_df$reg_no  %>% unique() %>% length()

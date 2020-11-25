@@ -8,7 +8,9 @@ if(Sys.info()[["user"]] == "WB521633") dropbox_file_path <- "C:/Users/wb521633/D
 if(Sys.info()[["user"]] == "WB521633") onedrive_file_path <- "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
 
 #### From Main
-echo_figures <- file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "Outputs", "figures")
+sensors_pilot_dir <- file.path(dropbox_file_path, "Data", "Sensors", "pilot")
+
+#echo_figures <- file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "Outputs", "figures")
 
 # Packages ---------------------------------------------------------------------
 library(tidyverse)
@@ -28,3 +30,4 @@ library(DT)
 library(syn)
 library(kableExtra)
 library(openssl)
+library(ggmap)
