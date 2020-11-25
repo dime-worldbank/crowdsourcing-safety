@@ -41,7 +41,9 @@ sc_data <- file.path(onedrive_file_path, "Data", "Rider Feedback", "Echo Mobile 
 
 # Export -----------------------------------------------------------------------
 data <- bind_rows(qr_data,
-                  sc_data)
+                  sc_data) %>%
+  mutate(completed = ifelse(completed %in% T, "Yes", "No"),
+         phone = phone %>% as.character())
 
 write.csv(data, file.path(onedrive_file_path, "Data", "Rider Feedback",
                           "All Data - PII", "rider_feedback.csv"), 
