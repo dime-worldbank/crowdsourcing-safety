@@ -1,0 +1,258 @@
+---
+title: "Sensor data description"
+author: "DIME"
+date: "13/12/2020"
+output: 
+ html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
+    toc_fold: TRUE
+    highlight: tango
+    keep_md: yes
+    theme: cosmo
+    number_sections: true
+---
+
+# Summary
+
+* This document describes the sensor data for the matatu the sensor is placed in. We have been testing two sensors since September. Over the last 4 weeks, we have been trying to test different platforms to download the data from in order to get a dataset at the vehicle-time level which updates every 10 seconds. \
+* Since we have been moving platforms, here we show the summary of 10 days of data in the last week of October and 2nd week for November.
+
+```{r dataprep, echo=FALSE, include=FALSE}
+
+#install.packages("shiny")
+#install.packages("shinydashboard")
+#install.packages("doBy")
+#install.packages("kableExtra")
+
+# Load all packages
+library(dplyr)
+library(leaflet)
+library(lubridate)
+library(purrr)
+library(shiny)
+library(shinydashboard)
+library(raster)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(gridExtra)
+library(hrbrthemes)
+library(readxl)
+library(labelled)
+library(haven)
+library(stringr)
+library(rmarkdown)
+library(wesanderson)
+library(ggplot2)
+library(dplyr)
+library(doBy)
+library(geojsonsf)
+library(sf)
+library(knitr)
+library(kableExtra)
+library(ggmap)
+library(RColorBrewer)
+
+
+# File path
+if(Sys.info()[["user"]] == "meyhar") dropbox_file_path <- "~/Dropbox/PSV Rider Feedback"
+
+#Sensor data
+sensor_data <- file.path(dropbox_file_path, "Data", "Sensors", "pilot", "RawData")
+output_sensor <- file.path(dropbox_file_path, "Data", "Sensors", "pilot", "Outputs")
+
+# Load sensor data
+
+sensor <- read_excel(file.path(sensor_data,"Matt_KBA_970C_Lions-_Trip_and_Eco-driving_detalization_19.11.2020_23-45-06.xlsx"), sheet = 5 )
+
+sensor <- sensor %>%
+  separate(col =Coordinates,
+           into = c("lat", "lon"),
+           sep = ",") %>%
+  mutate(lat = lat %>% as.numeric(),
+         lon = lon %>% as.numeric()) %>%
+  mutate(Time = Time %>% dmy_hms()) %>%
+  mutate(date = Time %>% as.Date())
+
+sensor$hour <- lubridate::hour(sensor$Time)
+
+```
+
+# Number of days of data
+* Data for days:\
+* -- Oct 22- Oct 27 and,\
+  -- Nov 11,12,13,19.\
+* The sensor is on Alfred's car and a Matatu. This document has the information on the matatu.
+* Gaps in data collection exists since we were trying 2-3 different platforms to store data on.
+* Overall, the main variables of interest for us are the: \
+    -lat/lon, \
+    -speed,  \
+    -harsh braking (dummy and magnitude) \
+* Lat/lon, speed seem to be alright and making sense overall. 
+* We need to bring up the following:
+  -- Dates for which there are 0 values for speed and other variables, \
+  -- Meaning if harsh braking/harsh acceleration is 0 \
+
+``````{r, fig.height=8}
+# Speed over time
+sensor_data_days <- ggplot(sensor, aes(x=Time, y=Speed)) +
+  geom_line(color="#69b3a2",  linetype=2) +
+theme_ipsum() 
+```
+# Variable summary
+
+## Speed
+* We suspect the 0 in speed can be a combination of :\
+  -- Less matatu movement due to covid, \
+  -- They were having some technical issue in the device in the last week of October, first week of November due to which the device was not collecting any data. \
+  -- We will make sure to check the reasons for this with Sam.
+  
+```{r}
+sensor$speed_dum <- ifelse(sensor$Speed == 0, 1, 0)
+kable(table(sensor$date, sensor$speed_dum), col.names = c("Non-zero speed", "Zero speed"), caption = "Speed = 0 km/h by date") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+## Harsh Acceleration
+* Values represent magnitudes of harsh acceleration. 
+* Values are being shown only when speed is non-zero
+
+```{r}
+
+speed_valid <- subset(sensor, sensor$Speed != 0)
+kable(table(speed_valid$date, speed_valid$`Harsh Acceleration*`), caption = "Harsh Acceleration values by Date") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+## Harsh Braking
+* Values represent magnitude of harsh braking
+* For instance 0.31 is harsher than 0.16
+* Values are being shown only when speed is non-zero
+
+```{r, layout="l-body-outset"}
+library(knitr)
+library(kableExtra)
+
+kable(table(speed_valid$date, speed_valid$`Harsh Braking*`), caption = "Harsh Braking values by Date") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+##  Harsh Cornering
+* Missing for all
+* Values are being shown only when speed is non-zero
+
+```{r, layout="l-body-outset"}
+library(knitr)
+library(kableExtra)
+
+kable(table(speed_valid$date, speed_valid$`Harsh Cornering*`), caption = "Harsh Cornering values by Date") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+## Ignition
+*Dummy whether ignition was on or off
+```{r, layout="l-body-outset"}
+library(knitr)
+library(kableExtra)
+
+kable(table(speed_valid$date, speed_valid$`Ignition*`), caption = "Ignition (On/Off) by Date") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+## Braking - Event dummy 
+* Dummy whether braking occurred or not
+* Not sure of this variable, does it turn on when any brake is applied or when vehicle comes to a halt?
+* Need to check whether is braking dummy or harsh braking dummy
+* Values are being shown for all data and for the subset of values when speed is non-zero.
+
+```{r, layout="l-body-outset"}
+library(knitr)
+library(kableExtra)
+
+kable(table(speed_valid$date, speed_valid$`Event: braking*`), caption = "Braking event by Date (Speed (Non-zero)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+kable(table(sensor$date, sensor$`Event: braking*`), caption = "Braking event by Date (Speed includes zero)") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+## Acceleration - Event dummy 
+* Dummy whether harsh acceleration happened
+* Values are being shown only when speed is non-zero
+
+```{r}
+library(knitr)
+library(kableExtra)
+
+kable(table(speed_valid$date, speed_valid$`Event: acceleration*`), caption = "Speeding event by Date") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+# Speed over time for 19th November 2020
+``````{r, fig.height=8}
+subset <- subset(sensor, sensor$date == "2020-11-19")
+sensor_data_19 <- ggplot(subset, aes(x=Time, y=Speed)) +
+  geom_line(color="#69b3a2",  linetype=2) +
+theme_ipsum() 
+print(sensor_data_19)
+```
+
+# Speed tracing between 15:00 - 17:00 19th November 2020
+``````{r, fig.height=8}
+time_subset <- subset(subset, subset = hour %in% c(15,16))
+sensor_data_15 <- ggplot(time_subset, aes(x=Time, y=Speed)) +
+  geom_line(color="#69b3a2",  linetype=1) +
+  ggtitle("Speed tracing 19th November 15:00-17:00") +
+theme_ipsum() 
+print(sensor_data_15)
+```
+
+# Map of route on 4 days
+
+``````{r  echo=FALSE, include=FALSE}
+expand <- 1.5/111.12
+basemap <- get_stamenmap(bbox = c(left   = min(sensor$lon, na.rm=T) - expand, 
+                                  bottom = min(sensor$lat, na.rm=T) - expand, 
+                                  right  = max(sensor$lon, na.rm=T) + expand, 
+                                  top    = max(sensor$lat, na.rm=T) + expand),
+                         zoom = 12)
+
+`````
+
+``````{r, fig.height=8}
+ggmap(basemap) +
+  geom_point(data = sensor %>%
+               filter(date %in% as.Date(c("2020-10-24",
+                                          "2020-10-25",
+                                          "2020-10-26",
+                                          "2020-10-27"))) %>%
+               arrange(Speed),
+             aes(x = lon, y=lat),
+             size = 1.2,
+             color = "black") +
+  geom_point(data = sensor %>%
+               filter(date %in% as.Date(c("2020-10-24",
+                                        "2020-10-25",
+                                        "2020-10-26",
+                                        "2020-10-27"))) %>%
+               arrange(Speed),
+             aes(x = lon, y=lat, color = Speed),
+             size = 1) +
+
+  labs(title = "Routes and Speeds Over Example Four Day Period\nfor Matatu KBA 970C\n",
+       color = "Speed\n(km/hr)") +
+  scale_color_gradientn(colours = rev(brewer.pal(n = 7, name = "Spectral"))) + 
+  theme_void() +
+  theme(plot.title = element_text(hjust = 0.5,
+                                  face = "bold",
+                                  size = 10),
+        legend.position = "bottom") +
+  facet_wrap(~date)
+```
