@@ -6,8 +6,8 @@
 # (3) Report IDs (for sensor tracing, echo driving, etc reports)
 
 # Wialon Token/Params ----------------------------------------------------------
-wailon_token <- read.table(file.path(sensors_dir, "wialon_token", "wialon_token.txt"), stringsAsFactors = F)$V1
-SID <- get_sid(wailon_token)
+wialon_token <- read.table(file.path(sensors_dir, "wialon_token", "wialon_token.txt"), stringsAsFactors = F)$V1
+SID <- get_sid(wialon_token)
 
 # User IDs ---------------------------------------------------------------------
 users_df <- get_ids(SID, "avl_unit", 1)
