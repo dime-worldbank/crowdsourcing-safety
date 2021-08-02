@@ -14,8 +14,8 @@
 # If should skip data already scraped (checking vehicle and day). 
 # If TRUE, re-scrapes data
 # If FALSE, skips data already scraped
-OVERWRITE_DATA_SENSORTRACING <- T
-OVERWRITE_DATA_ECHODRIVING   <- T
+OVERWRITE_DATA_SENSORTRACING <- F
+OVERWRITE_DATA_ECHODRIVING   <- F
 
 # Load Token/IDS ---------------------------------------------------------------
 # Load token associated with account and IDs (numeric IDs for vehicles, reports

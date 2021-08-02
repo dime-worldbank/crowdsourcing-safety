@@ -76,6 +76,8 @@ get_report <- function(user_id,
   # RESOURCES
   # https://sdk.wialon.com/wiki/en/sidebar/remoteapi/codesamples/reports
   
+  Sys.sleep(10) # For API limits; Set large until figure out limits.
+  
   # API Calls ------------------------------------------------------------------
   # Make calls to the API to get the raw data
   SID <- get_sid(wialon_token)
@@ -128,7 +130,6 @@ get_report <- function(user_id,
   
   # Echo Driving Report
   if(report_id %in% 1){
-    Sys.sleep(10) # For API limits
     col_names <- c("no", 
                    "grouping",
                    "violation",
