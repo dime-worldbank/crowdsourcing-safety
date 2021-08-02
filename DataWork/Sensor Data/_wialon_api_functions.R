@@ -205,7 +205,7 @@ get_report <- function(user_id,
   if(length(results_list) > 0){
     df_out <- map_df(1:length(results_list), function(i){
       if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
-
+      
       df_i <- results_list[i] %>% as.data.frame()
       names(df_i) <- col_names
       
@@ -249,7 +249,7 @@ get_report <- function(user_id,
     # Add reg no and vehicle id
     reg_no <- users_df$nm[users_df$id %in% user_id] %>% tolower()
     
-    df_out %>%
+    df_out <- df_out %>%
       dplyr::mutate(reg_no_id = user_id,
                     reg_no = reg_no) %>%
       distinct()

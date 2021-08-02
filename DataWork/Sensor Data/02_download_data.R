@@ -30,6 +30,7 @@ resource_id    <- resource_df$id
 # Don't scrape today; wait until the day is complete so get full data.
 
 scrape_until_date <- Sys.time() %>% with_tz(tzone = "UTC") %>% as.Date()
+scrape_until_date <- scrape_until_date - 1
 
 dates <- seq(from = ymd("2021-07-29"),
              to = scrape_until_date,
@@ -83,5 +84,4 @@ for(date_i in dates){
     
   }
 }
-
 
