@@ -128,6 +128,7 @@ get_report <- function(user_id,
   
   # Echo Driving Report
   if(report_id %in% 1){
+    Sys.sleep(10) # For API limits
     col_names <- c("no", 
                    "grouping",
                    "violation",
@@ -194,6 +195,16 @@ get_report <- function(user_id,
                    "latitude2",
                    "longitude2")
     
+    # Sometimes there's only
+    col_names8 <- c("no",
+                    "group",
+                    "speed",
+                    "blank",
+                    "location",
+                    "latitude",
+                    "longitude",
+                    "time_str")
+    
   }
   
   #### Grab list of data
@@ -205,9 +216,18 @@ get_report <- function(user_id,
   if(length(results_list) > 0){
     df_out <- map_df(1:length(results_list), function(i){
       if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
-      
+      #print(i)
       df_i <- results_list[i] %>% as.data.frame()
-      names(df_i) <- col_names
+
+      # In some cases, a dataframe will have less variables than typical; here, we use
+      # a different dataframe
+      if(report_id %in% 2 & ncol(df_i) %in% 8){
+        names(df_i) <- col_names8
+        df_i$diff_num_vars_rawdata <- T # flag to check data later
+      } else{
+        names(df_i) <- col_names
+        df_i$diff_num_vars_rawdata <- F
+      }
       
       ## Cleanup
       # Do some basic clean-up. Main clean-up involes removing unnessary data in
@@ -238,7 +258,8 @@ get_report <- function(user_id,
                         #sensor, ##
                         #sensor_value, ##
                         #formatted_value, ##
-                        time_str) 
+                        time_str,
+                        diff_num_vars_rawdata) 
         
       }
       
@@ -260,9 +281,11 @@ get_report <- function(user_id,
   
   # Clear Report ---------------------------------------------------------------
   # After accessing a report, need to clear it
+  Sys.sleep(0.1)
   req_clear <- paste0("https://hst-api.wialon.com/wialon/ajax.html?svc=report/cleanup_result&params={}&sid=",SID)
   res_clear = GET(req_clear)
   raw_json <- rawToChar(res_clear$content)
+  Sys.sleep(0.1)
   
   return(df_out)
 }

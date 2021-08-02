@@ -1,14 +1,40 @@
-# Download Data from Wialon System
+# Append Data Downloaded from Wialon System
 
-# Downloads data from two report types:
-# (1) Echo Driving Report [Dataset of harsh driving events]
-# (2) Sensor Tracing [Dataset for each time sensor records any value; speed/location]
-# Creates a file for each day & vehicle
+# Data originally downloaded into multiple files (across dates and units). Append
+# everything into one dataset
 
-# API LIMITS
-# Main one seems to be: "No more than 200 executions within 5 minutes by a user from one IP address"
-# We make 3 API calls in each 
-# https://sdk.wialon.com/wiki/en/sidebar/remoteapi/apiref/limits/limits#:~:text=No%20more%20than%2010%2D%20API,be%20processed%20during%2010%20seconds
+clean_dates <- function(x){
+  # Wialon dates are originally in a [day][month][year]_[hour][minute][second]
+  # format and originally in UTC. Convert to standard date/time format and 
+  # convert to EAT.
+  x %>% dmy_hms(tz = "UTC") %>% with_tz(tzone = "Africa/Nairobi")
+}
+
+# Echo Driving -----------------------------------------------------------------
+#### Load Data
+echodriving <- file_dir <- file.path(sensors_dir, "RawData", "echo_driving_individual_data") %>%
+  list.files(pattern = "*.gz.parquet",
+             full.names = T) %>%
+  map_df(function(path) read_parquet(path))
+
+#### Clean Data
+echodriving_clean <- echodriving %>%
+  dplyr::mutate(begin_datetime_str = begin_datetime_str %>% clean_dates(),
+                end_datetime_str = end_datetime_str %>% clean_dates()) %>%
+  dplyr::mutate_at(vars(value, max_speed, distance), ~.x %>% 
+                     str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+                     str_squish() %>%
+                     as.numeric)
+
+echodriving_clean$reg_no[1:10] %>% sub_string(-1,-8)
+
+
+                value = value %>% str_replace_all(" g", "") %>% str_squish() %>% as.numeric,
+                max_speed = max_speed %>% str_replace_all(" km/h", "") %>% str_squish() %>% as.numeric,
+                distance = distance %>% str_replace_all(" km", "") %>% str_squish() %>% as.numeric)
+
+
+echodriving$distance
 
 # Parameters -------------------------------------------------------------------
 # If should skip data already scraped (checking vehicle and day). 
@@ -44,8 +70,7 @@ dates <- seq(from = ymd("2021-07-01"),
   as.character()
 
 # Download Echo Driving Report -------------------------------------------------
-Sys.sleep(10)
-for(date_i in rev(dates)){
+for(date_i in dates){
   print(date_i)
   
   file_name <- paste0("echodriving_", date_i, ".gz.parquet")
@@ -68,10 +93,10 @@ for(date_i in rev(dates)){
 }
 
 # Download Sensor Tracing Data -------------------------------------------------
-for(date_i in rev(dates)){
+for(date_i in dates){
   print(date_i)
   for(user_id_i in unique(users_df$id)){
-
+    
     file_name <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
     dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i))
     file_dir <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i, file_name)
