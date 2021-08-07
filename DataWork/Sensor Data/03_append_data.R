@@ -41,7 +41,30 @@ sensortracing <- file_dir <- file.path(sensors_dir, "RawData", "sensor_tracing_i
   list.files(pattern = "*.gz.parquet",
              full.names = T,
              recursive = T) %>%
-  map_df(function(path) read_parquet(path))
+  map_df(function(path){
+    
+    ## Load Data
+    df <- read_parquet(path) 
+    
+    ## Fix variables (make consistent types for appending)
+    if(!is.null(df$speed[1])){
+      df <- df %>%
+        dplyr::mutate(speed = speed %>% as.character %>% as.numeric)
+    }
+    
+    if(!is.null(df$latitude[1])){
+      df <- df %>%
+        dplyr::mutate(latitude = latitude %>% as.character %>% as.numeric)
+    }
+    
+    if(!is.null(df$longitude[1])){
+      df <- df %>%
+        dplyr::mutate(longitude = longitude %>% as.character %>% as.numeric)
+    }
+    
+    return(df)
+    
+  })
 
 #### Clean Data
 sensortracing_clean <- sensortracing %>%
@@ -54,6 +77,6 @@ sensortracing_clean <- sensortracing %>%
   dplyr::select(-diff_num_vars_rawdata)
 
 #### Save Data
-write_parquet(echodriving_clean, file.path(sensors_dir, "FinalData", "sensortracing.gz.parquet"), 
+write_parquet(sensortracing_clean, file.path(sensors_dir, "FinalData", "sensortracing.gz.parquet"), 
               compression = "gzip", compression_level = 5)
 

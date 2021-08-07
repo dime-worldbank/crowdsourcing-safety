@@ -196,12 +196,19 @@ get_report <- function(user_id,
                    "latitude2",
                    "longitude2")
     
-    # Sometimes there's only
+    # Sometimes there's only 8 or 6 columns
     col_names8 <- c("no",
                     "group",
                     "speed",
                     "blank",
                     "location",
+                    "latitude",
+                    "longitude",
+                    "time_str")
+    
+    col_names6 <- c("no",
+                    "group",
+                    "speed",
                     "latitude",
                     "longitude",
                     "time_str")
@@ -218,13 +225,17 @@ get_report <- function(user_id,
     df_out <- map_df(1:length(results_list), function(i){
       if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
       #print(i)
-      df_i <- results_list[i] %>% as.data.frame()
+      df_i <- results_list[i] %>% unlist %>% t %>% as.data.frame()
 
       # In some cases, a dataframe will have less variables than typical; here, we use
       # a different dataframe
       if(report_id %in% 2 & ncol(df_i) %in% 8){
         names(df_i) <- col_names8
         df_i$diff_num_vars_rawdata <- T # flag to check data later
+      } else if (report_id %in% 2 & ncol(df_i) %in% 6){
+        names(df_i) <- col_names6
+        df_i$diff_num_vars_rawdata <- T # flag to check data later
+        df_i$location <- NA
       } else{
         names(df_i) <- col_names
         df_i$diff_num_vars_rawdata <- F
@@ -260,7 +271,17 @@ get_report <- function(user_id,
                         #sensor_value, ##
                         #formatted_value, ##
                         time_str,
-                        diff_num_vars_rawdata) 
+                        diff_num_vars_rawdata) %>%
+          dplyr::mutate(speed = speed %>% 
+                          as.character() %>% 
+                          str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+                          str_squish() %>%
+                          as.numeric,
+                        time_str = time_str %>% dmy_hms(tz = "UTC"),
+                        latitude = latitude %>% as.character %>% as.numeric,
+                        longitude = longitude %>% as.character %>% as.numeric,
+                        location = location %>% as.character(),
+                        time_str = time_str %>% as.character()) 
         
       }
       

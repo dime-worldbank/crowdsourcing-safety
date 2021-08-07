@@ -44,7 +44,6 @@ dates <- seq(from = ymd("2021-07-01"),
   as.character()
 
 # Download Echo Driving Report -------------------------------------------------
-Sys.sleep(10)
 for(date_i in rev(dates)){
   print(date_i)
   
