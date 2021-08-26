@@ -15,7 +15,18 @@ clean_dates <- function(x){
 echodriving <- file.path(sensors_dir, "RawData", "echo_driving_individual_data") %>%
   list.files(pattern = "*.gz.parquet",
              full.names = T) %>%
-  map_df(function(path) read_parquet(path))
+  map_df(function(path){
+    df <- read_parquet(path)
+    
+    if(nrow(df) > 0){
+      df <- df %>%
+        dplyr::mutate_at(vars(latitude_begin, longitude_begin,
+                              latitude_end, longitude_end), . %>% as.character %>% as.numeric)
+    }
+    
+    return(df)
+  })
+
 
 #### Clean Data
 echodriving_clean <- echodriving %>%
@@ -68,7 +79,6 @@ sensortracing <- file_dir <- file.path(sensors_dir, "RawData", "sensor_tracing_i
 
 #### Clean Data
 sensortracing_clean <- sensortracing %>%
-  dplyr::mutate(time_str = time_str %>% clean_dates()) %>%
   dplyr::mutate_at(vars(speed), ~.x %>% 
                      str_replace_all("[[:alpha:]]|[[/]]", "") %>%
                      str_squish() %>%
