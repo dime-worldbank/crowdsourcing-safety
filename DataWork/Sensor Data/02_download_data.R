@@ -67,9 +67,10 @@ for(date_i in rev(dates)){
 }
 
 # Download Sensor Tracing Data -------------------------------------------------
+
 for(date_i in rev(dates)){
   print(date_i)
-  for(user_id_i in unique(users_df$id)){
+  for(user_id_i in rev(unique(users_df$id))){
 
     file_name <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
     dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i))
@@ -84,6 +85,9 @@ for(date_i in rev(dates)){
                            datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric(),
                            wialon_token,
                            users_df)
+      
+      print(nrow(df_out))
+      print(names(df_out))
       
       write_parquet(df_out, file_dir, compression = "gzip", compression_level = 5)
     }

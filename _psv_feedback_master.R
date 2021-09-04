@@ -37,6 +37,7 @@ library(lubridate)
 library(httr)
 library(jsonlite)
 library(arrow)
+library(furrr)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "_wialon_api_functions.R"))
