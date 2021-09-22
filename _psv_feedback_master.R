@@ -12,7 +12,9 @@ if(Sys.info()[["user"]] == "robmarty") github_dir <- "~/Documents/Github/PSV-Rid
 if(Sys.info()[["user"]] == "meyhar")   github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
 
 #### From Root
-sensors_dir <- file.path(dropbox_dir, "Data", "Sensor Data")
+data_dir                  <- file.path(dropbox_dir, "Data")
+sensors_dir               <- file.path(data_dir, "Sensor Data")
+sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Survey")
 
 # Packages ---------------------------------------------------------------------
 library(tidyverse)

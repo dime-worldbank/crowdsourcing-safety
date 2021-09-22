@@ -68,9 +68,9 @@ for(date_i in rev(dates)){
 
 # Download Sensor Tracing Data -------------------------------------------------
 
-for(date_i in rev(dates)){
+for(date_i in dates){
   print(date_i)
-  for(user_id_i in rev(unique(users_df$id))){
+  for(user_id_i in unique(users_df$id)){
 
     file_name <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
     dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i))
