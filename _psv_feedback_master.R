@@ -9,6 +9,7 @@ if(Sys.info()[["user"]] == "meyhar")   dropbox_dir <- "~/Dropbox/World Bank/IEs/
 if(Sys.info()[["user"]] == "WB521633") onedrive_dir <- "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
 
 if(Sys.info()[["user"]] == "robmarty") github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
+if(Sys.info()[["user"]] == "WB521633") github_dir <- "C:/Users/wb521633/Documents/Github/PSV-Rider-Feedback/"
 if(Sys.info()[["user"]] == "meyhar")   github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
 
 #### From Root
