@@ -39,8 +39,8 @@ echodriving_clean <- echodriving %>%
   dplyr::rename(max_speed_kmhr = max_speed,
                 distance_km = distance,
                 value_g = value,
-                begin_datetime = begin_datetime_str,
-                end_datetime = end_datetime_str)
+                begin_datetime_eat = begin_datetime_str,
+                end_datetime_eat = end_datetime_str)
 
 #### Save Data
 write_parquet(echodriving_clean, file.path(sensors_dir, "FinalData", "echodriving.gz.parquet"), 
@@ -84,7 +84,11 @@ sensortracing_clean <- sensortracing %>%
                      str_squish() %>%
                      as.numeric) %>%
   dplyr::rename(speed_kmhr = speed) %>%
-  dplyr::select(-diff_num_vars_rawdata)
+  dplyr::select(-diff_num_vars_rawdata) %>%
+  dplyr::mutate(datetime_eat = time_str %>% 
+                  ymd_hms() %>%
+                  with_tz(tzone = "Africa/Nairobi")) %>%
+  dplyr::rename(time_str_raw_utc = time_str)
 
 #### Save Data
 write_parquet(sensortracing_clean, file.path(sensors_dir, "FinalData", "sensortracing.gz.parquet"), 

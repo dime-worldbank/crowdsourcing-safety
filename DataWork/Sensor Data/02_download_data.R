@@ -66,6 +66,14 @@ for(date_i in rev(dates)){
   
 }
 
+# user_id = unique(users_df$id)[1]
+# report_id = report_df$id[report_df$n %in% "Eco Driving Report"] 
+# resource_id = resource_id
+# datetime_begin = paste(date_i, "00:00:00") %>% ymd_hms(tz = "UTC") %>% as.numeric() 
+# datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric()
+# wialon_token
+# users_df
+
 # Download Sensor Tracing Data -------------------------------------------------
 
 for(date_i in dates){

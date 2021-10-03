@@ -218,8 +218,6 @@ get_report <- function(user_id,
   #### Grab list of data
   results_list <- df$r[[1]]$c
   
-  print(paste0("--", user_id, "; N Obs: ", length(results_list)))
-  
   ####  List to dataframe
   if(show_progress) print(paste0("--", user_id, "; N Obs: ", length(results_list)))
   
@@ -228,11 +226,12 @@ get_report <- function(user_id,
     # https://furrr.futureverse.org/
     plan(multisession, workers = 4)
     
-    df_out <- future_map_dfr(1:length(results_list), function(i){
+    # future_map_dfr
+    df_out <- map_dfr(1:length(results_list), function(i){
       if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
       #print(i)
       df_i <- results_list[i] %>% unlist %>% t %>% as.data.frame()
-
+      
       # In some cases, a dataframe will have less variables than typical; here, we use
       # a different dataframe
       if(report_id %in% 2 & ncol(df_i) %in% 8){
