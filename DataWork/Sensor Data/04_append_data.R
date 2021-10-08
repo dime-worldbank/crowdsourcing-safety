@@ -73,6 +73,11 @@ sensortracing <- file_dir <- file.path(sensors_dir, "RawData", "sensor_tracing_i
         dplyr::mutate(longitude = longitude %>% as.character %>% as.numeric)
     }
     
+    if(!is.null(df$reg_no_id[1])){
+      df <- df %>%
+        dplyr::mutate(reg_no_id = reg_no_id %>% as.character)
+    }
+    
     return(df)
     
   })
