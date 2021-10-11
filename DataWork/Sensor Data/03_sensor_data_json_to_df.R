@@ -14,8 +14,6 @@ IN_FILES <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_te
              recursive = T,
              full.names = T) 
 
-file_i <- IN_FILES[10]
-
 tmp <- lapply(IN_FILES, function(file_i){
   print(file_i)
   

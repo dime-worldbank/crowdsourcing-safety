@@ -503,7 +503,10 @@ report_json_to_df <- function(results_list,
   
   if(length(results_list) > 0){
     
-    if( ((length(unlist(results_list)) %% 13) %in% 0) & report_id == 2){
+    # (1) If report_id==2 (sensor tracing) AND divisible by 13 OR
+    # (2) Report_id==1 (echo mobile)
+    if( (((length(unlist(results_list)) %% 13) %in% 0) & report_id == 2) | (report_id == 1)  ){
+      print("Quick extract!")
       
       ## Extract data
       df_out <- as.data.frame(t(matrix(unlist(results_list), nrow=length(unlist(results_list[1])))))
@@ -513,27 +516,45 @@ report_json_to_df <- function(results_list,
       df_out$diff_num_vars_rawdata <- F
       
       ## Select variables
-      df_out <- df_out %>%
-        dplyr::select(speed,
-                      latitude,
-                      longitude,
-                      location,
-                      #sensor, ##
-                      #sensor_value, ##
-                      #formatted_value, ##
-                      time_str,
-                      diff_num_vars_rawdata) %>%
-        dplyr::mutate(speed = speed %>% 
-                        as.character() %>% 
-                        str_replace_all("[[:alpha:]]|[[/]]", "") %>%
-                        str_squish() %>%
-                        as.numeric,
-                      time_str = time_str %>% dmy_hms(tz = "UTC"),
-                      latitude = latitude %>% as.character %>% as.numeric,
-                      longitude = longitude %>% as.character %>% as.numeric,
-                      location = location %>% as.character(),
-                      time_str = time_str %>% as.character()) 
+      if(report_id == 1){
+        df_out <- df_out %>%
+          dplyr::select(violation, 
+                        begin_datetime_str,
+                        latitude_begin,
+                        longitude_begin,
+                        end_datetime_str,
+                        latitude_end,
+                        longitude_end,
+                        value,
+                        max_speed,
+                        time_interval,
+                        distance) 
+      }
       
+      if(report_id == 2){
+        df_out <- df_out %>%
+          dplyr::select(speed,
+                        latitude,
+                        longitude,
+                        location,
+                        #sensor, ##
+                        #sensor_value, ##
+                        #formatted_value, ##
+                        time_str,
+                        diff_num_vars_rawdata) %>%
+          dplyr::mutate(speed = speed %>% 
+                          as.character() %>% 
+                          str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+                          str_squish() %>%
+                          as.numeric,
+                        time_str = time_str %>% dmy_hms(tz = "UTC"),
+                        latitude = latitude %>% as.character %>% as.numeric,
+                        longitude = longitude %>% as.character %>% as.numeric,
+                        location = location %>% as.character(),
+                        time_str = time_str %>% as.character()) 
+      }
+      
+      # If report_id==2 and not divisible by 13
     } else{
       
       df_out <- map_dfr(1:length(results_list), function(i){
@@ -608,7 +629,8 @@ report_json_to_df <- function(results_list,
     reg_no <- users_df$nm[users_df$id %in% user_id] %>% tolower()
     
     df_out <- df_out %>%
-      dplyr::mutate(reg_no_id = user_id) %>%
+      dplyr::mutate(reg_no_id = user_id,
+                    reg_no = reg_no) %>%
       distinct()
     
   } else{
