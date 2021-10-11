@@ -502,84 +502,113 @@ report_json_to_df <- function(results_list,
   if(show_progress) print(paste0("--", user_id, "; N Obs: ", length(results_list)))
   
   if(length(results_list) > 0){
-    # Parallelizing for furrr
-    # https://furrr.futureverse.org/
-    plan(multisession, workers = 4)
     
-    # future_map_dfr
-    df_out <- map_dfr(1:length(results_list), function(i){
-      if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
-      #print(i)
-      df_i <- results_list[i] %>% unlist %>% t %>% as.data.frame()
+    if( ((length(unlist(results_list)) %% 13) %in% 0) & report_id == 2){
       
-      # In some cases, a dataframe will have less variables than typical; here, we use
-      # a different dataframe
-      if(report_id %in% 2 & ncol(df_i) %in% 8){
-        names(df_i) <- col_names8
-        df_i$diff_num_vars_rawdata <- T # flag to check data later
-      } else if (report_id %in% 2 & ncol(df_i) %in% 6){
-        names(df_i) <- col_names6
-        df_i$diff_num_vars_rawdata <- T # flag to check data later
-        df_i$location <- NA
-      } else{
-        names(df_i) <- col_names
-        df_i$diff_num_vars_rawdata <- F
-      }
+      ## Extract data
+      df_out <- as.data.frame(t(matrix(unlist(results_list), nrow=length(unlist(results_list[1])))))
       
-      ## Cleanup
-      # Do some basic clean-up. Main clean-up involes removing unnessary data in
-      # order to minimize the size of the data.
-      # Echo Driving Report
-      if(report_id %in% 1){
-        df_i <- df_i %>%
-          dplyr::select(violation, 
-                        begin_datetime_str,
-                        latitude_begin,
-                        longitude_begin,
-                        end_datetime_str,
-                        latitude_end,
-                        longitude_end,
-                        value,
-                        max_speed,
-                        time_interval,
-                        distance) 
-      }
+      ## Add variables
+      names(df_out) <- col_names
+      df_out$diff_num_vars_rawdata <- F
       
-      # Sensor Tracing
-      if(report_id %in% 2){
-        df_i <- df_i %>%
-          dplyr::select(speed,
-                        latitude,
-                        longitude,
-                        location,
-                        #sensor, ##
-                        #sensor_value, ##
-                        #formatted_value, ##
-                        time_str,
-                        diff_num_vars_rawdata) %>%
-          dplyr::mutate(speed = speed %>% 
-                          as.character() %>% 
-                          str_replace_all("[[:alpha:]]|[[/]]", "") %>%
-                          str_squish() %>%
-                          as.numeric,
-                        time_str = time_str %>% dmy_hms(tz = "UTC"),
-                        latitude = latitude %>% as.character %>% as.numeric,
-                        longitude = longitude %>% as.character %>% as.numeric,
-                        location = location %>% as.character(),
-                        time_str = time_str %>% as.character()) 
+      ## Select variables
+      df_out <- df_out %>%
+        dplyr::select(speed,
+                      latitude,
+                      longitude,
+                      location,
+                      #sensor, ##
+                      #sensor_value, ##
+                      #formatted_value, ##
+                      time_str,
+                      diff_num_vars_rawdata) %>%
+        dplyr::mutate(speed = speed %>% 
+                        as.character() %>% 
+                        str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+                        str_squish() %>%
+                        as.numeric,
+                      time_str = time_str %>% dmy_hms(tz = "UTC"),
+                      latitude = latitude %>% as.character %>% as.numeric,
+                      longitude = longitude %>% as.character %>% as.numeric,
+                      location = location %>% as.character(),
+                      time_str = time_str %>% as.character()) 
+      
+    } else{
+      
+      df_out <- map_dfr(1:length(results_list), function(i){
+        if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
+        #print(i)
+        df_i <- results_list[i] %>% unlist %>% t %>% as.data.frame()
         
-      }
-      
-      return(df_i)
-    })
+        # In some cases, a dataframe will have less variables than typical; here, we use
+        # a different dataframe
+        if(report_id %in% 2 & ncol(df_i) %in% 8){
+          names(df_i) <- col_names8
+          df_i$diff_num_vars_rawdata <- T # flag to check data later
+        } else if (report_id %in% 2 & ncol(df_i) %in% 6){
+          names(df_i) <- col_names6
+          df_i$diff_num_vars_rawdata <- T # flag to check data later
+          df_i$location <- NA
+        } else{
+          names(df_i) <- col_names
+          df_i$diff_num_vars_rawdata <- F
+        }
+        
+        ## Cleanup
+        # Do some basic clean-up. Main clean-up involes removing unnessary data in
+        # order to minimize the size of the data.
+        # Echo Driving Report
+        if(report_id %in% 1){
+          df_i <- df_i %>%
+            dplyr::select(violation, 
+                          begin_datetime_str,
+                          latitude_begin,
+                          longitude_begin,
+                          end_datetime_str,
+                          latitude_end,
+                          longitude_end,
+                          value,
+                          max_speed,
+                          time_interval,
+                          distance) 
+        }
+        
+        # Sensor Tracing
+        if(report_id %in% 2){
+          df_i <- df_i %>%
+            dplyr::select(speed,
+                          latitude,
+                          longitude,
+                          location,
+                          #sensor, ##
+                          #sensor_value, ##
+                          #formatted_value, ##
+                          time_str,
+                          diff_num_vars_rawdata) %>%
+            dplyr::mutate(speed = speed %>% 
+                            as.character() %>% 
+                            str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+                            str_squish() %>%
+                            as.numeric,
+                          time_str = time_str %>% dmy_hms(tz = "UTC"),
+                          latitude = latitude %>% as.character %>% as.numeric,
+                          longitude = longitude %>% as.character %>% as.numeric,
+                          location = location %>% as.character(),
+                          time_str = time_str %>% as.character()) 
+          
+        }
+        
+        return(df_i)
+      })
+    }
     
     # Cleanup --------------------------------------------------------------------
     # Add reg no and vehicle id
     reg_no <- users_df$nm[users_df$id %in% user_id] %>% tolower()
     
     df_out <- df_out %>%
-      dplyr::mutate(reg_no_id = user_id,
-                    reg_no = reg_no) %>%
+      dplyr::mutate(reg_no_id = user_id) %>%
       distinct()
     
   } else{
