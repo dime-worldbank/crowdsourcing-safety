@@ -87,8 +87,7 @@ for(date_i in rev(dates)){
 for(date_i in rev(dates)){
   print(date_i)
   for(user_id_i in unique(users_df$id)){
-    print(user_id_i)
-    
+
     # Parquet is final data while rds is temp data, later to be turned into parquet
     file_name_parquet <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
     file_name_rds     <- paste0("sensortracing_", user_id_i, "_", date_i, ".Rds")
@@ -100,6 +99,7 @@ for(date_i in rev(dates)){
     file_dir_rds <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_temp_raw_jsons", date_i, file_name_rds)
     
     if(!(file.exists(file_dir_parquet) | file.exists(file_dir_rds)) | OVERWRITE_DATA_SENSORTRACING){
+      print(user_id_i)
       
       df_out <- get_report_raw_json(user_id = user_id_i, 
                                     report_id = report_df$id[report_df$n %in% "Units Sensors Tracing - all"], 
