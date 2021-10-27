@@ -50,11 +50,11 @@ library(sfheaders)
 source(file.path(github_dir, "DataWork", "Sensor Data", "_wialon_api_functions.R"))
 
 # Settings ---------------------------------------------------------------------
+RUN_CODE <- F
+
 OVERWRITE_EXTRACTED_DATA <- F
 
 # Code -------------------------------------------------------------------------
-RUN_CODE <- F
-
 if(RUN_CODE){
   # Process Sensor Data --------------------------------------------------------
   sensor_code_dir <- file.path(github_dir, "DataWork", "Sensor Data")

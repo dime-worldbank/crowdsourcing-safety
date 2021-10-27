@@ -3,8 +3,6 @@
 # Aggregate individual sensor tracing files; save aggregate file for each
 # sensor and date
 
-OVERWRITE_EXTRACTED_DATA <- F
-
 # Raw Files --------------------------------------------------------------------
 raw_sensor_files <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data") %>%
   list.files(pattern = "*.parquet",
