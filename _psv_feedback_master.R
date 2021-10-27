@@ -42,6 +42,46 @@ library(httr)
 library(jsonlite)
 library(arrow)
 library(furrr)
+library(geosphere)
+library(sf)
+library(sfheaders)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "_wialon_api_functions.R"))
+
+# Settings ---------------------------------------------------------------------
+OVERWRITE_EXTRACTED_DATA <- F
+
+# Code -------------------------------------------------------------------------
+RUN_CODE <- F
+
+if(RUN_CODE){
+  # Process Sensor Data --------------------------------------------------------
+  sensor_code_dir <- file.path(github_dir, "DataWork", "Sensor Data")
+  
+  # Download Sensor Data
+  source(file.path(sensor_code_dir, "02_download_data.R"))
+  
+  # Process Sensor Tracing Data
+  source(file.path(sensor_code_dir, "03_sensor_data_json_to_df.R"))
+  source(file.path(sensor_code_dir, "03b_sensor_to_hourly_individual_files.R"))
+  source(file.path(sensor_code_dir, "03c_append_sensor_hr_data.R"))
+  
+  # Process Echo driving Data
+  source(file.path(sensor_code_dir, "04a_append_echodriving_raw.R"))
+  source(file.path(sensor_code_dir, "04a_echodriving_to_hourly_individual_files.R"))
+  source(file.path(sensor_code_dir, "04b_append_echodriving_hr_data.R"))
+  
+  # Create Day and Day/Hour data with sensor tracing + echo driving merged in
+  source(file.path(sensor_code_dir, "05_merge_dayhr_data.R"))
+  source(file.path(sensor_code_dir, "06_aggregate_to_daily.R"))
+  
+}
+
+
+
+
+
+
+
+
