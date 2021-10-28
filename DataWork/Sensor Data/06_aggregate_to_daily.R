@@ -55,19 +55,27 @@ daily_polyline_sf <- lapply(unique(sensor_lines_sf$group_id), function(group_id_
   
   ## Grab polyline for vehicle on date
   sensor_lines_sf_i <- sensor_lines_sf[sensor_lines_sf$group_id %in% group_id_i,]
-  
+
+  ## Summarize
+  # TAKES A LONG TIME AND CREATES MULTILINE, NOT LINE
+  # polyline_sf <- sensor_lines_sf_i %>%
+  #   group_by(group_id) %>%
+  #   summarize(geometry = st_union(geometry))
+
   ## Grab coordinates as dataframe
-  coords_df <- sensor_lines_sf_i$geometry %>% 
+  ## BELOW ASSUMES CORRECT ORDERING; HAD ISSUES OF WEIRD STRAIGHT LINES
+  ## BEING CREATED
+  coords_df <- sensor_lines_sf_i$geometry %>%
     st_coordinates() %>%
     as.data.frame()
   coords_df$group_id <- group_id_i
-  
+
   ## Make polyline
-  polyline_sf <- sf_linestring(coords_df, 
-                               x = "X", 
+  polyline_sf <- sf_linestring(coords_df,
+                               x = "X",
                                y = "Y",
                                linestring_id = "group_id")
-  st_crs(polyline_sf) <- 4326 
+  st_crs(polyline_sf) <- 4326
   
   ## Add total distance between min/max lat & lon
   bbox_df <- st_bbox(polyline_sf) %>%
@@ -89,8 +97,8 @@ daily_polyline_sf <- lapply(unique(sensor_lines_sf$group_id), function(group_id_
 daily_polyline_sf$distance_daily_km <- as.numeric(st_length(daily_polyline_sf))/1000 
 
 #### Merge Back to Main Dataframes
-sensor_agg_sf <- sensor_agg_df %>%
-  left_join(daily_polyline_sf, by = "group_id")
+sensor_agg_sf <- daily_polyline_sf %>%
+  right_join(sensor_agg_df, by = "group_id")
 
 sensor_agg_df <- sensor_agg_sf
 sensor_agg_df$geometry <- NULL
@@ -104,5 +112,5 @@ saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 ## Data with Polyline
 saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
 
-
-
+#sensor_agg_sf[3,] %>% plot()
+#sensor_agg_sf$group_id[3]

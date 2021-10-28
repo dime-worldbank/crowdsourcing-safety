@@ -65,11 +65,11 @@ sensor_sf <- sensor_sf %>%
 
 ## Add Hour and Date
 sensor_df <- sensor_df %>%
-  dplyr::mutate(date = datetime_eat %>% as.Date(),
+  dplyr::mutate(date = datetime_eat %>% as.Date(tz = "Africa/Nairobi"),
                 hour = datetime_eat %>% hour())
 
 sensor_sf <- sensor_sf %>%
-  dplyr::mutate(date = datetime_eat %>% as.Date(),
+  dplyr::mutate(date = datetime_eat %>% as.Date(tz = "Africa/Nairobi"),
                 hour = datetime_eat %>% hour())
 
 # Export -----------------------------------------------------------------------
