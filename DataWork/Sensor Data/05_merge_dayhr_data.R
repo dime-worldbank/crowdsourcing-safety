@@ -7,6 +7,10 @@ ed_df <- readRDS(file.path(sensors_dir, "FinalData", "echodriving_dayhr.Rds"))
 st_df <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
 st_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_datapolyline.Rds"))
 
+# Individual dataset fixes -----------------------------------------------------
+# Ensure variable types are the same
+ed_df$reg_no_id <- ed_df$reg_no_id %>% as.character()
+
 # Echo/Sensor Data -------------------------------------------------------------
 sensor_df <- st_df %>%
   full_join(ed_df, by = c("reg_no_id", "reg_no", "datetime_eat"))
@@ -71,9 +75,9 @@ sensor_sf <- sensor_sf %>%
 # Export -----------------------------------------------------------------------
 write_parquet(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.gz.parquet"), 
               compression = "gzip", compression_level = 5)
-saveRDS(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.gz.Rds"))
+saveRDS(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
 
-saveRDS(sensor_sf, file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.gz.Rds"))
+saveRDS(sensor_sf, file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.Rds"))
 
 
 

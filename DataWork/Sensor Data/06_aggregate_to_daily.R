@@ -1,8 +1,8 @@
 # Merge Sensor Data with Survey Data
 
 # Load Data --------------------------------------------------------------------
-sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.gz.Rds"))
-sensor_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.gz.Rds"))
+sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
+sensor_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.Rds"))
 
 # Aggregate --------------------------------------------------------------------
 sensor_nonsum_df <- sensor_df %>%
@@ -29,6 +29,11 @@ sensor_sum_df <- sensor_df %>%
 sensor_agg_df <- merge(sensor_nonsum_df, sensor_sum_df, 
                        by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date"))
 
+# Export Data Only -------------------------------------------------------------
+write_parquet(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.gz.parquet"), 
+              compression = "gzip", compression_level = 5)
+saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
+
 # Aggregate Polylines ----------------------------------------------------------
 sensor_polylineagg_sf <- sensor_sf %>%
   group_by(reg_no, reg_no_id, regno_clean, sacco, route, date) %>%
@@ -38,12 +43,7 @@ sensor_agg_sf <- right_join(sensor_polylineagg_sf,
                            sensor_agg_df, 
                            by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date"))
 
-# Export -----------------------------------------------------------------------
-write_parquet(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.gz.parquet"), 
-              compression = "gzip", compression_level = 5)
-saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.gz.Rds"))
-
-saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.gz.Rds"))
+saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
 
 
 

@@ -63,7 +63,7 @@ if(RUN_CODE){
   source(file.path(sensor_code_dir, "02_download_data.R"))
   
   # Process Sensor Tracing Data
-  source(file.path(sensor_code_dir, "03_sensor_data_json_to_df.R"))
+  source(file.path(sensor_code_dir, "03a_sensor_data_json_to_df.R"))
   source(file.path(sensor_code_dir, "03b_sensor_to_hourly_individual_files.R"))
   source(file.path(sensor_code_dir, "03c_append_sensor_hr_data.R"))
   
