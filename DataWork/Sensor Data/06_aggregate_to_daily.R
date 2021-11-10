@@ -103,6 +103,10 @@ sensor_agg_sf <- daily_polyline_sf %>%
 sensor_agg_df <- sensor_agg_sf
 sensor_agg_df$geometry <- NULL
 
+#### Cleanup
+sensor_agg_df$group_id <- NULL
+sensor_agg_sf$group_id <- NULL
+
 # Export -----------------------------------------------------------------------
 ## Data Only
 write_parquet(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.gz.parquet"), 
@@ -112,5 +116,4 @@ saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 ## Data with Polyline
 saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
 
-#sensor_agg_sf[3,] %>% plot()
-#sensor_agg_sf$group_id[3]
+
