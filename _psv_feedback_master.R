@@ -2,15 +2,16 @@
 
 # Filepaths --------------------------------------------------------------------
 #### Root
-if(Sys.info()[["user"]] == "robmarty") dropbox_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
-if(Sys.info()[["user"]] == "WB521633") dropbox_dir <- "C:/Users/wb521633/Dropbox/World Bank/IEs/PSV Rider Feedback"
-if(Sys.info()[["user"]] == "meyhar")   dropbox_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
+if(Sys.info()[["user"]] == "robmarty"){
+  dropbox_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
+  github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
+}
 
-if(Sys.info()[["user"]] == "WB521633") onedrive_dir <- "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
-
-if(Sys.info()[["user"]] == "robmarty") github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
-if(Sys.info()[["user"]] == "WB521633") github_dir <- "C:/Users/wb521633/Documents/Github/PSV-Rider-Feedback/"
-if(Sys.info()[["user"]] == "meyhar")   github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
+if(Sys.info()[["user"]] == "WB521633"){
+  dropbox_dir <- "C:/Users/wb521633/Dropbox/World Bank/IEs/PSV Rider Feedback"
+  github_dir <- "C:/Users/wb521633/Documents/Github/PSV-Rider-Feedback/"
+  onedrive_dir <- "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
+}
 
 #### From Root
 data_dir                  <- file.path(dropbox_dir, "Data")
