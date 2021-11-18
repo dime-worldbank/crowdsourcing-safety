@@ -506,7 +506,7 @@ report_json_to_df <- function(results_list,
     # (1) If report_id==2 (sensor tracing) AND divisible by 13 OR
     # (2) Report_id==1 (echo mobile)
     # TODO: Only works if 13 columns; can also add a quick extract for 6 and 8 column instances
-    if( (((length(unlist(results_list)) %% 13) %in% 0) & (report_id == 2) & (length(results_list[[1]]) %in% 13) ) | (report_id == 1)  ){
+    if( (((length(unlist(results_list)) %% 13) %in% 0) & (report_id == 2) & (length(unlist(results_list[[1]])) %in% 13) ) | (report_id == 1)  ){
       print("Quick extract!")
       
       ## Extract data

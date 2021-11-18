@@ -60,6 +60,9 @@ if(RUN_CODE){
   # Process Sensor Data --------------------------------------------------------
   sensor_code_dir <- file.path(github_dir, "DataWork", "Sensor Data")
   
+  # Check Wailon Token Still Valid
+  source(file.path(sensor_code_dir, "00_check_wialon_token.R"))
+  
   # Download Sensor Data
   source(file.path(sensor_code_dir, "02_download_data.R"))
   
