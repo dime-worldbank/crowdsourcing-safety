@@ -41,7 +41,7 @@ in_survey_not_wialon_df <- in_survey_not_wialon_df %>%
   dplyr::rename(reg_no = ".") %>%
   dplyr::mutate(id = 1:n()) %>%
   dplyr::select(id, reg_no) %>%
-  dplyr::mutate(last_updated = Sys.Date())
+  dplyr::mutate(last_updated = Sys.time())
 
 # In Wialon data, but not survey
 in_wialon_not_survey_df <- wialon_df$regno[!(wialon_df$regno %in% survey_df$regno)]
@@ -59,7 +59,7 @@ in_wialon_not_survey_df <- in_wialon_not_survey_df %>%
   dplyr::rename(reg_no = ".") %>%
   dplyr::mutate(id = 1:n()) %>%
   dplyr::select(id, reg_no) %>%
-  dplyr::mutate(last_updated = Sys.Date())
+  dplyr::mutate(last_updated = Sys.time())
 
 #### Export
 write.csv(in_survey_not_wialon_df, 
