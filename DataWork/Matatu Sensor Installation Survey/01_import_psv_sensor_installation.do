@@ -2,10 +2,10 @@
 *
 * 	Imports and aggregates "psv_sensor_installation" (ID: psv_sensor_installation) data.
 *
-*	Inputs:  "~/Dropbox/World Bank/IEs/PSV Rider Feedback/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_WIDE.csv/psv_sensor_installation_WIDE.csv"
-*	Outputs: "psv_sensor_installation.dta"
+*	Inputs:  "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback/Data/Matatu Sensor Installation Survey/RawData//psv_sensor_installation_WIDE.csv"
+*	Outputs: "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback/Data/Matatu Sensor Installation Survey/FinalData//psv_sensor_installation.dta"
 *
-*	Output by SurveyCTO June 17, 2021 12:33 PM.
+*	Output by SurveyCTO December 17, 2021 6:56 PM.
 
 * initialize Stata
 clear all
@@ -21,14 +21,9 @@ set mem 100m
 local overwrite_old_data 0
 
 * initialize form-specific parameters
-* INPUTS
-local csvfile "$dropbox_dir/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_WIDE.csv"
-local corrfile "$dropbox_dir/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_WIDE.csv"
-
-* OUTPUTS
-local dtafile "$dropbox_dir/Data/Matatu Sensor Installation Survey/FinalData/psv_sensor_installation.dta"
-local csvfile_out "$dropbox_dir/Data/Matatu Sensor Installation Survey/FinalData/psv_sensor_installation.csv"
-
+local csvfile "$onedrive_dir/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_WIDE.csv"
+local dtafile "$onedrive_dir/Data/Matatu Sensor Installation Survey/FinalData/psv_sensor_installation.dta"
+local corrfile "$onedrive_dir/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_corrections.csv"
 local note_fields1 ""
 local text_fields1 "deviceid subscriberid simid devicephonenum matatu_regno gps_serial_no matatu_sacco sacco_name_other matatu_other_route driver_name driver_phone_no owner_name owner_phone_no driver_tenure"
 local text_fields2 "driver_route_tenure n_drivers_per_veh_q matatu_seats matatu_amenities matatu_other instanceid"
@@ -237,8 +232,6 @@ if _N>0 {
 	
 	* save data to Stata format
 	save "`dtafile'", replace
-	export delimited using "`csvfile_out'", replace
-
 
 	* show codebook and notes
 	codebook
@@ -254,7 +247,7 @@ disp
 * Rather than using SurveyCTO's review and correction workflow, the code below can apply a list of corrections
 * listed in a local .csv file. Feel free to use, ignore, or delete this code.
 *
-*   Corrections file path and filename:  ~/Dropbox/World Bank/IEs/PSV Rider Feedback/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_WIDE.csv/psv_sensor_installation_corrections.csv
+*   Corrections file path and filename:  C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback/Data/Matatu Sensor Installation Survey/RawData//psv_sensor_installation_corrections.csv
 *
 *   Corrections file columns (in order): key, fieldname, value, notes
 
@@ -347,7 +340,6 @@ if _rc==0 {
 
 		* re-save data
 		save "`dtafile'", replace
-		export delimited using "`csvfile_out'", replace
 	}
 	else {
 		* restore primary data		
