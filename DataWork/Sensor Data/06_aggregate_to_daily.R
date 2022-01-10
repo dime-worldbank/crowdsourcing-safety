@@ -2,7 +2,6 @@
 
 # Load Data --------------------------------------------------------------------
 sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
-sensor_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.Rds"))
 
 # Aggregate --------------------------------------------------------------------
 sensor_nonsum_df <- sensor_df %>%

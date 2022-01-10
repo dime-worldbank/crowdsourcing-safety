@@ -11,6 +11,9 @@ survey_df <- survey_df %>%
 sacco_df <- read_csv(file.path(sacco_route_dir, "RawData", "sacco_route_information.csv"))
 sacco_df <- sacco_df
 
+# Corrections ------------------------------------------------------------------
+survey_df$matatu_sacco[survey_df$matatu_regno %in% "KCV 924M"] <- "Simba_Coach_Limited"
+
 # Reg No and Sacco -------------------------------------------------------------
 survey_df <- survey_df %>%
   dplyr::mutate(matatu_regno_clean = matatu_regno %>%
@@ -39,8 +42,8 @@ survey_df <- survey_df %>%
   left_join(sacco_df, by = "sacco")
 
 # Subset Variables -------------------------------------------------------------
-survey_df <- survey_df %>%
-  dplyr::select(regno_clean, sacco, route) 
+#survey_df <- survey_df %>%
+#  dplyr::select(regno_clean, sacco, route) 
 
 # Export -----------------------------------------------------------------------
 saveRDS(survey_df, file.path(sensor_install_survey_dir, "FinalData", "psv_sensor_installation_clean.Rds"))

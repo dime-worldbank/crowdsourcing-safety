@@ -79,6 +79,7 @@ library(geosphere)
 library(sf)
 library(sfheaders)
 library(googlesheets4)
+library(leaflet)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "_wialon_api_functions.R"))
