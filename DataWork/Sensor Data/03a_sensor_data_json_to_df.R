@@ -12,8 +12,7 @@ report_id = report_df$id[report_df$n %in% "Units Sensors Tracing - all"]
 IN_FILES <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_temp_raw_jsons") %>%
   list.files(pattern = "*.Rds",
              recursive = T,
-             full.names = T) %>%
-  rev()
+             full.names = T) 
 
 tmp <- lapply(IN_FILES, function(file_i){
   print(file_i)

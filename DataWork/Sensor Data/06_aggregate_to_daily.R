@@ -21,7 +21,8 @@ sensor_nonsum_df <- sensor_df %>%
                    distance_km = sum(distance_km))
 
 sensor_sum_df <- sensor_df %>%
-  group_by(reg_no, reg_no_id, regno_clean, sacco, route, date) %>%
+  dplyr::select(-n_drivers_per_veh_q) %>% # starts with N // is character
+  dplyr::group_by(reg_no, reg_no_id, regno_clean, sacco, route, date) %>%
   dplyr::summarise_at(vars(matches("\\bN_")),
                       sum)
 

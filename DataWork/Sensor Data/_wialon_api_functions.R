@@ -629,6 +629,11 @@ report_json_to_df <- function(results_list,
     # Add reg no and vehicle id
     reg_no <- users_df$nm[users_df$id %in% user_id] %>% tolower()
     
+    if(length(reg_no) %in% 0){
+      reg_no <- "UNKNOWN"
+      print("Unknown Reg No")
+    } 
+    
     df_out <- df_out %>%
       dplyr::mutate(reg_no_id = user_id,
                     reg_no = reg_no) %>%
