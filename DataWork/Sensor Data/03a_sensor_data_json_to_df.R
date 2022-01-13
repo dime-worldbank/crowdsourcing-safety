@@ -14,6 +14,10 @@ IN_FILES <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_te
              recursive = T,
              full.names = T) 
 
+if(!(Sys.info()[["user"]] %in% "WB521633")){
+  IN_FILES <- rev(IN_FILES)
+}
+
 tmp <- lapply(IN_FILES, function(file_i){
   print(file_i)
   
