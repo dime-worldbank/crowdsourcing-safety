@@ -506,6 +506,15 @@ report_json_to_df <- function(results_list,
     # (1) If report_id==2 (sensor tracing) AND divisible by 13 OR
     # (2) Report_id==1 (echo mobile)
     # TODO: Only works if 13 columns; can also add a quick extract for 6 and 8 column instances
+    
+    # Whether should implement slow extract.
+    # -- First, checks if should do quick extract
+    # -- Second, if does quick extract, do a quality check; if seems to be issues,
+    #    still do slow extract, where data from slow extract will be used instead
+    #    of quick extract method
+    DATA_PROCESSED <- F
+    
+    # Quick method of extracting data ------------------------------------------
     if( (((length(unlist(results_list)) %% 13) %in% 0) & (report_id == 2) & (length(unlist(results_list[[1]])) %in% 13) ) | (report_id == 1)  ){
       print("Quick extract!")
       
@@ -555,8 +564,29 @@ report_json_to_df <- function(results_list,
                         time_str = time_str %>% as.character()) 
       }
       
+      ### Quality Checks
+      # Checks quality of data. If there seem to be issues, then process using
+      # slower method
+      DATA_ISSUE_1 <- sum(is.na(df_out$longitude)) > 0
+      DATA_ISSUE_2 <- sum(is.na(df_out$latitude)) > 0
+      DATA_ISSUE_3 <- sum(df_out$longitude > 360, na.rm = T) > 0
+      DATA_ISSUE_4 <- sum(df_out$latitude, na.rm = T) > 0
+      
+      if(DATA_ISSUE_1 | 
+         DATA_ISSUE_2 | 
+         DATA_ISSUE_3 | 
+         DATA_ISSUE_4){
+        print("Data processing issue, so using slow method instead")
+        DATA_PROCESSED <- F
+      } else{
+        DATA_PROCESSED <- T
+      }
+      
       # If report_id==2 and not divisible by 13
-    } else{
+    } 
+    
+    # Slow method of extracting data -------------------------------------------
+    if(DATA_PROCESSED %in% F){
       
       df_out <- map_dfr(1:length(results_list), function(i){
         if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
@@ -625,7 +655,7 @@ report_json_to_df <- function(results_list,
       })
     }
     
-    # Cleanup --------------------------------------------------------------------
+    # Cleanup ------------------------------------------------------------------
     # Add reg no and vehicle id
     reg_no <- users_df$nm[users_df$id %in% user_id] %>% tolower()
     

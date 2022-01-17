@@ -9,6 +9,35 @@ raw_sensor_files <- file.path(sensors_dir, "RawData", "sensor_tracing_individual
              recursive = T,
              full.names = T)
 
+# df <- map_df(raw_sensor_files, function(raw_sensor_files_i){
+#   
+#   df_tmp <- read_parquet(raw_sensor_files_i)
+#   
+#   DATA_ISSUE_1 <- sum(is.na(df_tmp$longitude)) > 0
+#   DATA_ISSUE_2 <- sum(is.na(df_tmp$latitude)) > 0
+#   DATA_ISSUE_3 <- sum(df_tmp$longitude > 360, na.rm = T) > 0
+#   DATA_ISSUE_4 <- sum(df_tmp$latitude, na.rm = T) > 0
+#   
+#   if(DATA_ISSUE_1 | 
+#      DATA_ISSUE_2 | 
+#      DATA_ISSUE_3 | 
+#      DATA_ISSUE_4){
+#     DELETE <- T
+#   } else{
+#     DELETE <- F
+#   }
+#   
+#   return(data.frame(file = raw_sensor_files_i,
+#              DELETE = DELETE))
+# })
+# 
+# df_d <- df[df$DELETE %in% T,]
+# 
+# for(file_i in df_d$file){
+#   file.remove(file_i)
+# }
+
+
 # If overwrite, delete ---------------------------------------------------------
 if(OVERWRITE_EXTRACTED_DATA){
   tmp <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individual_files",
@@ -24,7 +53,7 @@ if(OVERWRITE_EXTRACTED_DATA){
     lapply(file.remove)
 }
 
-raw_sensor_filepath_i = raw_sensor_files[7000]
+#raw_sensor_filepath_i = raw_sensor_files[7000]
 for(raw_sensor_filepath_i in raw_sensor_files){
   
   ## Path for output
@@ -60,7 +89,8 @@ for(raw_sensor_filepath_i in raw_sensor_files){
       
       #### Aggregate
       sensor_sum_df <- sensor_df %>%
-        dplyr::filter(!is.na(datetime_eat)) %>%
+        dplyr::filter(!is.na(datetime_eat),
+                      !is.na(speed)) %>%
         group_by(reg_no, reg_no_id, datetime_eat, hour) %>%
         dplyr::summarise(speed_min = min(speed),
                          speed_p05 = quantile(speed, probs = 0.05) %>% as.numeric(),
@@ -79,12 +109,12 @@ for(raw_sensor_filepath_i in raw_sensor_files){
                          N_speed_over_120 = sum(speed > 120),
                          N_speed_over_130 = sum(speed > 130),
                          N_speed_over_150 = sum(speed > 150),
-                         distance_minmax_latlon_km = distHaversine(p1 = c(min(longitude),
-                                                                          min(latitude)),
-                                                                   p2 = c(max(longitude),
-                                                                          max(latitude)))/1000,
-                         latitude = median(latitude),
-                         longitude = median(longitude),
+                         distance_minmax_latlon_km = distHaversine(p1 = c(min(longitude, na.rm=T),
+                                                                          min(latitude, na.rm=T)),
+                                                                   p2 = c(max(longitude, na.rm=T),
+                                                                          max(latitude, na.rm=T)))/1000,
+                         latitude = median(latitude, na.rm=T),
+                         longitude = median(longitude, na.rm=T),
                          N_obs_speed = n()) %>%
         ungroup()
       

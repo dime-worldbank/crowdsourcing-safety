@@ -1,5 +1,8 @@
 # Convert sensor tracing data from json to dataframe
 
+# TODO: ISSUE WITH: "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback/Data/Sensor Data/RawData/sensor_tracing_individual_data/2021-12-29/sensortracing_24493303_2021-12-29.gz.parquet"
+# -- Didn't download correctly. Wrong variables assigned.
+
 # Load Token/IDS ---------------------------------------------------------------
 # Load token associated with account and IDs (numeric IDs for vehicles, reports
 # and resource)

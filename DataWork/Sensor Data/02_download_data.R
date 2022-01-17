@@ -43,6 +43,8 @@ dates <- seq(from = ymd("2021-07-01"),
 ) %>%
   as.character()
 
+#dates <- "2021-12-29"
+
 # Download Echo Driving Report -------------------------------------------------
 for(date_i in rev(dates)){
   print(date_i)

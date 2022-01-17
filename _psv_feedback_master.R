@@ -5,7 +5,7 @@
 RUN_CODE <- T # If F, doesn't run any code, no matter the below settings
 
 PROCESS_SENSOR_DATA        <- F # Download and clean sensor data (takes a while)
-PROCESS_SENSOR_SURVEY_DATA <- T # Clean survey data. RUN STATA MASTER FIRST TO DOWNLOAD DATA.
+PROCESS_SENSOR_SURVEY_DATA <- F # Clean survey data. RUN STATA MASTER FIRST TO DOWNLOAD DATA.
 
 #### Other
 # Relevant for sensor data. If F, checks if data has already been downloaded. If
