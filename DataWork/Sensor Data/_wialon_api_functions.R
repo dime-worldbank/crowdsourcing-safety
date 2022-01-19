@@ -567,15 +567,19 @@ report_json_to_df <- function(results_list,
       ### Quality Checks
       # Checks quality of data. If there seem to be issues, then process using
       # slower method
-      DATA_ISSUE_1 <- sum(is.na(df_out$longitude)) > 0
+      DATA_ISSUE_1 <- sum(is.na(df_out$longitude)) > 0 # Not always an issue, but could indicate issue
       DATA_ISSUE_2 <- sum(is.na(df_out$latitude)) > 0
-      DATA_ISSUE_3 <- sum(df_out$longitude > 360, na.rm = T) > 0
-      DATA_ISSUE_4 <- sum(df_out$latitude, na.rm = T) > 0
+      DATA_ISSUE_3 <- sum(df_out$longitude > 180, na.rm = T) > 0
+      DATA_ISSUE_4 <- sum(df_out$longitude < -180, na.rm = T) > 0
+      DATA_ISSUE_5 <- sum(df_out$latitude > 90, na.rm = T) > 0
+      DATA_ISSUE_6 <- sum(df_out$latitude < -90, na.rm = T) > 0
       
       if(DATA_ISSUE_1 | 
          DATA_ISSUE_2 | 
          DATA_ISSUE_3 | 
-         DATA_ISSUE_4){
+         DATA_ISSUE_4 | 
+         DATA_ISSUE_5 | 
+         DATA_ISSUE_6){
         print("Data processing issue, so using slow method instead")
         DATA_PROCESSED <- F
       } else{
@@ -585,11 +589,56 @@ report_json_to_df <- function(results_list,
       # If report_id==2 and not divisible by 13
     } 
     
+    
+    # a <- map_df(1:length(results_list), function(i){
+    #   if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
+    #   
+    #   df_i <- results_list[i] %>% unlist %>% t %>% as.data.frame()
+    #   
+    #   if(report_id %in% 2 & ncol(df_i) %in% 8){
+    #     names(df_i) <- col_names8
+    #     df_i$diff_num_vars_rawdata <- T # flag to check data later
+    #   } else if (report_id %in% 2 & ncol(df_i) %in% 6){
+    #     names(df_i) <- col_names6
+    #     df_i$diff_num_vars_rawdata <- T # flag to check data later
+    #     df_i$location <- NA
+    #   } else{
+    #     names(df_i) <- col_names
+    #     df_i$diff_num_vars_rawdata <- F
+    #   }
+    #   
+    #   df_i <- df_i %>%
+    #     dplyr::select(speed,
+    #                   latitude,
+    #                   longitude,
+    #                   location,
+    #                   #sensor, ##
+    #                   #sensor_value, ##
+    #                   #formatted_value, ##
+    #                   time_str,
+    #                   diff_num_vars_rawdata)
+    #   #   dplyr::mutate(speed = speed %>% 
+    #   #                   as.character() %>% 
+    #   #                   str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+    #   #                   str_squish() %>%
+    #   #                   as.numeric,
+    #   #                 time_str = time_str %>% dmy_hms(tz = "UTC"),
+    #   #                 latitude = latitude %>% as.character %>% as.numeric,
+    #   #                 longitude = longitude %>% as.character %>% as.numeric,
+    #   #                 location = location %>% as.character(),
+    #   #                 time_str = time_str %>% as.character()) 
+    #   
+    #   #names(df_i) <- paste0("V", 1:length(df_i))
+    #   
+    #   df_i
+    # }) 
+    
     # Slow method of extracting data -------------------------------------------
     if(DATA_PROCESSED %in% F){
       
+      #### Extract data
       df_out <- map_dfr(1:length(results_list), function(i){
-        if(show_progress & ((i %% 1000) %in% 0)) print(paste0(i, "/", length(results_list)))
+        if(show_progress & ((i %% 10000) %in% 0)) print(paste0(i, "/", length(results_list)))
         #print(i)
         df_i <- results_list[i] %>% unlist %>% t %>% as.data.frame()
         
@@ -611,48 +660,88 @@ report_json_to_df <- function(results_list,
         # Do some basic clean-up. Main clean-up involes removing unnessary data in
         # order to minimize the size of the data.
         # Echo Driving Report
-        if(report_id %in% 1){
-          df_i <- df_i %>%
-            dplyr::select(violation, 
-                          begin_datetime_str,
-                          latitude_begin,
-                          longitude_begin,
-                          end_datetime_str,
-                          latitude_end,
-                          longitude_end,
-                          value,
-                          max_speed,
-                          time_interval,
-                          distance) 
-        }
-        
-        # Sensor Tracing
-        if(report_id %in% 2){
-          df_i <- df_i %>%
-            dplyr::select(speed,
-                          latitude,
-                          longitude,
-                          location,
-                          #sensor, ##
-                          #sensor_value, ##
-                          #formatted_value, ##
-                          time_str,
-                          diff_num_vars_rawdata) %>%
-            dplyr::mutate(speed = speed %>% 
-                            as.character() %>% 
-                            str_replace_all("[[:alpha:]]|[[/]]", "") %>%
-                            str_squish() %>%
-                            as.numeric,
-                          time_str = time_str %>% dmy_hms(tz = "UTC"),
-                          latitude = latitude %>% as.character %>% as.numeric,
-                          longitude = longitude %>% as.character %>% as.numeric,
-                          location = location %>% as.character(),
-                          time_str = time_str %>% as.character()) 
-          
-        }
+        # if(report_id %in% 1){
+        #   df_i <- df_i %>%
+        #     dplyr::select(violation, 
+        #                   begin_datetime_str,
+        #                   latitude_begin,
+        #                   longitude_begin,
+        #                   end_datetime_str,
+        #                   latitude_end,
+        #                   longitude_end,
+        #                   value,
+        #                   max_speed,
+        #                   time_interval,
+        #                   distance) 
+        # }
+        # 
+        # # Sensor Tracing
+        # if(report_id %in% 2){
+        #   df_i <- df_i %>%
+        #     dplyr::select(speed,
+        #                   latitude,
+        #                   longitude,
+        #                   location,
+        #                   #sensor, ##
+        #                   #sensor_value, ##
+        #                   #formatted_value, ##
+        #                   time_str,
+        #                   diff_num_vars_rawdata) %>%
+        #     dplyr::mutate(speed = speed %>% 
+        #                     as.character() %>% 
+        #                     str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+        #                     str_squish() %>%
+        #                     as.numeric,
+        #                   time_str = time_str %>% dmy_hms(tz = "UTC"),
+        #                   latitude = latitude %>% as.character %>% as.numeric,
+        #                   longitude = longitude %>% as.character %>% as.numeric,
+        #                   location = location %>% as.character(),
+        #                   time_str = time_str %>% as.character()) 
+        #   
+        # }
         
         return(df_i)
       })
+      
+      # Select and format variables ----------------------------------------------
+      ## Select variables
+      if(report_id == 1){
+        df_out <- df_out %>%
+          dplyr::select(violation, 
+                        begin_datetime_str,
+                        latitude_begin,
+                        longitude_begin,
+                        end_datetime_str,
+                        latitude_end,
+                        longitude_end,
+                        value,
+                        max_speed,
+                        time_interval,
+                        distance) 
+      }
+      
+      if(report_id == 2){
+        df_out <- df_out %>%
+          dplyr::select(speed,
+                        latitude,
+                        longitude,
+                        location,
+                        #sensor, ##
+                        #sensor_value, ##
+                        #formatted_value, ##
+                        time_str,
+                        diff_num_vars_rawdata) %>%
+          dplyr::mutate(speed = speed %>% 
+                          as.character() %>% 
+                          str_replace_all("[[:alpha:]]|[[/]]", "") %>%
+                          str_squish() %>%
+                          as.numeric,
+                        time_str = time_str %>% dmy_hms(tz = "UTC"),
+                        latitude = latitude %>% as.character %>% as.numeric,
+                        longitude = longitude %>% as.character %>% as.numeric,
+                        location = location %>% as.character(),
+                        time_str = time_str %>% as.character()) 
+      }
     }
     
     # Cleanup ------------------------------------------------------------------

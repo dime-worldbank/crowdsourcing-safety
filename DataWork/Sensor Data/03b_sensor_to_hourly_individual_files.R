@@ -16,7 +16,7 @@ raw_sensor_files <- file.path(sensors_dir, "RawData", "sensor_tracing_individual
 #   DATA_ISSUE_1 <- sum(is.na(df_tmp$longitude)) > 0
 #   DATA_ISSUE_2 <- sum(is.na(df_tmp$latitude)) > 0
 #   DATA_ISSUE_3 <- sum(df_tmp$longitude > 360, na.rm = T) > 0
-#   DATA_ISSUE_4 <- sum(df_tmp$latitude, na.rm = T) > 0
+#   DATA_ISSUE_3 <- sum(df_tmp$latitude > 180, na.rm = T) > 0
 #   
 #   if(DATA_ISSUE_1 | 
 #      DATA_ISSUE_2 | 
