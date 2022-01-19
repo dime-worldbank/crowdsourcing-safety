@@ -35,6 +35,7 @@ sensor_df <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individua
   list.files(pattern = "*.Rds",
              full.names = T) %>%
   map_df(read_clean_sensor) 
+
 saveRDS(sensor_df, file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
 write_parquet(sensor_df, file.path(sensors_dir, "FinalData", 
                                    "sensortracing_dayhr_dataonly.gz.parquet"), 

@@ -5,6 +5,8 @@ sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
 
 # Aggregate --------------------------------------------------------------------
 sensor_nonsum_df <- sensor_df %>%
+  dplyr::filter(!is.na(N_obs_speed),
+                N_obs_speed > 0) %>%
   group_by(reg_no, reg_no_id, regno_clean, sacco, route, date) %>%
   dplyr::summarise(speed_min = min(speed_min),
                    speed_p05 = weighted.mean(x = speed_p05, w = N_obs_speed),
@@ -115,8 +117,5 @@ saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
 ## Data with Polyline
 saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
-
-
-
 
 
