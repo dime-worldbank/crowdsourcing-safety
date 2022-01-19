@@ -3,11 +3,25 @@
 # Aggregate individual sensor tracing files; save aggregate file for each
 # sensor and date
 
+distHaversine_checkna <- function(p1, p2){
+  
+  if(Inf %in% p1){
+    out <- NA
+  } else{
+    out <- distHaversine(p1, p2)
+  }
+  
+  return(out)
+}
+
 # Raw Files --------------------------------------------------------------------
 raw_sensor_files <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data") %>%
   list.files(pattern = "*.parquet",
              recursive = T,
              full.names = T)
+
+# sensortracing_24260915_2021-12-30.Rds
+
 
 # df <- map_df(raw_sensor_files, function(raw_sensor_files_i){
 #   
@@ -53,6 +67,8 @@ if(OVERWRITE_EXTRACTED_DATA){
     lapply(file.remove)
 }
 
+#raw_sensor_filepath_i = "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback/Data/Sensor Data/RawData/sensor_tracing_individual_data/2021-07-01/sensortracing_24260915_2021-12-30.gz.parquet"
+
 #raw_sensor_filepath_i = raw_sensor_files[7000]
 for(raw_sensor_filepath_i in raw_sensor_files){
   
@@ -73,6 +89,11 @@ for(raw_sensor_filepath_i in raw_sensor_files){
     
     ## Load and aggregate
     sensor_df <- read_parquet(raw_sensor_filepath_i)
+    
+    ## Need some positive lat/lon
+    #if(sum(!is.na(sensor_df$latitude)) %in% 0){
+    #  sensor_df <- data.frame(NULL)
+    #}
     
     if(nrow(sensor_df) %in% 0){
       polyline_sf <- data.frame(NULL)
@@ -109,10 +130,10 @@ for(raw_sensor_filepath_i in raw_sensor_files){
                          N_speed_over_120 = sum(speed > 120),
                          N_speed_over_130 = sum(speed > 130),
                          N_speed_over_150 = sum(speed > 150),
-                         distance_minmax_latlon_km = distHaversine(p1 = c(min(longitude, na.rm=T),
-                                                                          min(latitude, na.rm=T)),
-                                                                   p2 = c(max(longitude, na.rm=T),
-                                                                          max(latitude, na.rm=T)))/1000,
+                         distance_minmax_latlon_km = distHaversine_checkna(p1 = c(min(longitude, na.rm=T),
+                                                                                  min(latitude, na.rm=T)),
+                                                                           p2 = c(max(longitude, na.rm=T),
+                                                                                  max(latitude, na.rm=T)))/1000,
                          latitude = median(latitude, na.rm=T),
                          longitude = median(longitude, na.rm=T),
                          N_obs_speed = n()) %>%
