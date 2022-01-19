@@ -568,7 +568,7 @@ report_json_to_df <- function(results_list,
       # Checks quality of data. If there seem to be issues, then process using
       # slower method
       DATA_ISSUE_1 <- sum(is.na(df_out$longitude)) > 0 # Not always an issue, but could indicate issue
-      DATA_ISSUE_2 <- sum(is.na(df_out$latitude)) > 0
+      DATA_ISSUE_2 <- sum(is.na(df_out$latitude)) > 0 # Not always an issue, but could indicate issue
       DATA_ISSUE_3 <- sum(df_out$longitude > 180, na.rm = T) > 0
       DATA_ISSUE_4 <- sum(df_out$longitude < -180, na.rm = T) > 0
       DATA_ISSUE_5 <- sum(df_out$latitude > 90, na.rm = T) > 0
