@@ -27,7 +27,7 @@ if(F){
 #### Root
 # Rob (Personal Comptuer)
 if(Sys.info()[["user"]] == "robmarty"){
-  dropbox_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
+  onedrive_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
   github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
 }
 
@@ -83,6 +83,7 @@ library(leaflet)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "_wialon_api_functions.R"))
+source(file.path(github_dir, "Functions", "load_sensortracing_raw.R"))
 
 # Code -------------------------------------------------------------------------
 if(RUN_CODE){
