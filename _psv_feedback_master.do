@@ -16,8 +16,8 @@ di "The user, in this case, is: " c(username)
 		global github_dir "C:/Users/wb521633/Documents/Github/PSV-Rider-Feedback"
 	}
 	else if ( "`c(username)'" == "WB575963" ) { // Ruiwen 
-		global onedrive_dir "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
-		global github_dir "C:/Users/wb521633/Documents/Github/PSV-Rider-Feedback"
+		global onedrive_dir "C:/Users/wb575963/WBG/Robert Andrew Marty - PSV Rider Feedback"
+		global github_dir "C:/Users/wb575963/Documents/Github/PSV-Rider-Feedback/"
 	}
 	
 * Code -------------------------------------------------------------------------
