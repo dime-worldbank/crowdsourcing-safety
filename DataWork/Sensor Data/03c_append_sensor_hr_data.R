@@ -41,6 +41,7 @@ sensor_files_dataonly <- file.path(sensors_dir, "FinalData", "sensortracing_hour
 
 pb <- progress_bar$new(total = length(sensor_files_dataonly))
 
+print("Append data with data only (no polyline)")
 sensor_df <- sensor_files_dataonly %>%
   map_df(~read_clean_sensor(.)) 
 
@@ -57,6 +58,7 @@ sensor_files_data_polyline <- file.path(sensors_dir, "FinalData", "sensortracing
 
 pb <- progress_bar$new(total = length(sensor_files_data_polyline))
 
+print("Append data with polyline")
 sensor_sf <- sensor_files_data_polyline %>%
   map(function(file_i){
     pb$tick() 
