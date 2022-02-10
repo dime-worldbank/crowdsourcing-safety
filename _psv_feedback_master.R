@@ -42,7 +42,7 @@ if(Sys.info()[["user"]] == "WB521633"){
 if(Sys.info()[["user"]] == "wb575963"){
   #dropbox_dir <- "C:/Users/wb575963/Dropbox/PSV Rider Feedback"
   github_dir <- "C:/Users/wb575963/Documents/Github/PSV-Rider-Feedback/"
-  onedrive_dir <- "C:/Users/wb575963/OneDrive - WBG/PSV Rider Feedback"
+  onedrive_dir <- "C:/Users/wb575963/WBG/Robert Andrew Marty - PSV Rider Feedback"
 }
 
 #### From Root
