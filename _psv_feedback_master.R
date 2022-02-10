@@ -80,6 +80,7 @@ library(sf)
 library(sfheaders)
 library(googlesheets4)
 library(leaflet)
+library(progress)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "_wialon_api_functions.R"))
@@ -99,6 +100,13 @@ if(RUN_CODE){
     source(file.path(sensor_code_dir, "02_download_data.R"))
     
     # Process Sensor Tracing Data
+    # A. Sensor data downloaded as json. Convert json to dataframe/export as
+    #    parquet file.
+    # B. Aggregate sensor data to hourly level and save file for each vehicle
+    #    and day (so file at hourly level for each vehilce and day). Saves file
+    #    with data including polyline of route and a separate smaller file
+    #    that just includes the data (with no polyline)
+    # C. Append sensor hourly data, creating file with all data appended.
     source(file.path(sensor_code_dir, "03a_sensor_data_json_to_df.R"))
     source(file.path(sensor_code_dir, "03b_sensor_to_hourly_individual_files.R"))
     source(file.path(sensor_code_dir, "03c_append_sensor_hr_data.R"))

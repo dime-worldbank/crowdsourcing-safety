@@ -1,6 +1,10 @@
 # Append Hourly Sensor Data
 
-read_clean_sensor <- function(path){
+# Functions --------------------------------------------------------------------
+read_clean_sensor <- function(path, show_progress = T){
+  if(show_progress){
+    pb$tick() 
+  }
   
   ## Load Data
   df <- readRDS(path) 
@@ -30,11 +34,16 @@ read_clean_sensor <- function(path){
 }
 
 # Data only --------------------------------------------------------------------
-sensor_df <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individual_files",
-                       "data_only") %>%
+sensor_files_dataonly <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individual_files",
+                                   "data_only") %>%
   list.files(pattern = "*.Rds",
-             full.names = T) %>%
-  map_df(read_clean_sensor) 
+             full.names = T)
+
+pb <- progress_bar$new(total = length(sensor_files_dataonly))
+
+print("Append data with data only (no polyline)")
+sensor_df <- sensor_files_dataonly %>%
+  map_df(~read_clean_sensor(.)) 
 
 saveRDS(sensor_df, file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
 write_parquet(sensor_df, file.path(sensors_dir, "FinalData", 
@@ -42,15 +51,21 @@ write_parquet(sensor_df, file.path(sensors_dir, "FinalData",
               compression = "gzip", compression_level = 5)
 
 # Data and polyline ------------------------------------------------------------
-sensor_sf <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individual_files",
-                       "data_and_polyline") %>%
+sensor_files_data_polyline <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individual_files",
+                                        "data_and_polyline") %>%
   list.files(pattern = "*.Rds",
-             full.names = T) %>%
-  lapply(function(file_i){
-    
+             full.names = T)
+
+pb <- progress_bar$new(total = length(sensor_files_data_polyline))
+
+print("Append data with polyline")
+sensor_sf <- sensor_files_data_polyline %>%
+  map(function(file_i){
+    pb$tick() 
+
     # Issue appending sf file with data.frame(NULL); here check if zero rows and
     # convert to NULL
-    data <- read_clean_sensor(file_i)
+    data <- read_clean_sensor(file_i, show_progress = F)
     if(nrow(data) %in% 0){
       out <- NULL
     } else{

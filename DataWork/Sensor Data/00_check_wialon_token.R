@@ -2,7 +2,7 @@
 
 # Check
 wialon_token <- read.table(file.path(sensors_dir, "wialon_token", "wialon_token.txt"), 
-                           stringsAsFactors = F)$V1
+                           stringsAsFactors = F)$V1 %>% as.character()
 SID <- get_sid(wialon_token)
 
 if(is.null(SID)){
