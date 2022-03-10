@@ -1,10 +1,16 @@
 # Load raw data from sensor tracing data for specific time interval and/or vehicle
 
-vehicles <- c("kck139y", "kcq012w")
-dates <- c("2021-12-06", "2021-12-07", "2021-12-08", "2021-07-04")
+#vehicles <- c("kck139y", "kcq012w")
+#dates <- c("2021-12-06", "2021-12-07", "2021-12-08", "2021-07-04")
 
 load_st_raw <- function(dates, 
                         vehicles){
+  
+  ## Clean vehicles 
+  vehicles <- vehicles %>%
+    tolower() %>%
+    str_squish() %>%
+    str_replace_all(" ", "") 
   
   ## Grab all files
   print("Grabing files...")
@@ -41,7 +47,9 @@ load_st_raw <- function(dates,
   
   print(paste0("Appending ", length(files), " files..."))
   
-  df <- map_df(files, function(file_i){
+  file_i = files[15]
+  df <- lapply(files, function(file_i){
+    print(file_i)
     df_i <- read_parquet(file_i) 
     if(nrow(df_i) %in% 0){
       out <- NULL 
@@ -51,7 +59,8 @@ load_st_raw <- function(dates,
     }
   
     return(out)
-  })
+  }) %>%
+    bind_rows()
   
   return(df)
 }
