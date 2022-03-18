@@ -1,8 +1,39 @@
 # Quick Stats
 
+# Daily Data -------------------------------------------------------------------
+sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
+
+veh_i <- sensor_df %>%
+  dplyr::filter(regno_clean %in% "KBJ 650W") %>%
+  filter(N_violation > 0)
+
+veh_i <- veh_i
+veh_i
+veh_i$N_violation %>% summary()
+
+veh_i %>%
+  ggplot() +
+  geom_point(aes(x = datetime_eat,
+                 y = speed_p85))
+
+dates <- seq(from = ymd("2021-11-01"),
+             to = ymd("2021-11-15"),
+             by = 1)
+
+vr <- load_st_raw(dates = dates,
+                  vehicles = "kbj650w")
+
+
+
+
+
+
+
+
+
 # Echo Driving -----------------------------------------------------------------
 echo_df <- read_parquet(file.path(sensors_dir, "FinalData", "echodriving_clean.gz.parquet"))
-sensor_df <- read_parquet(file.path(sensors_dir, "FinalData", "sensortracing_clean.gz.parquet"))
+sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
 
 sensor_df1 <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", "2021-09-17") %>%
   list.files(full.names = T, pattern = "*.parquet") %>%

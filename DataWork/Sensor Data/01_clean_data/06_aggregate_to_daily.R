@@ -20,7 +20,7 @@ sensor_nonsum_df <- sensor_df %>%
                    speed_p95 = weighted.mean(x = speed_p95, w = N_obs_speed),
                    speed_max = max(speed_max),
                    distance_minmax_latlon_km = sum(distance_minmax_latlon_km),
-                   distance_km = sum(distance_km))
+                   distance_hourly_sum_km = sum(distance_km))
 
 sensor_sum_df <- sensor_df %>%
   dplyr::select(-n_drivers_per_veh_q) %>% # starts with N // is character
@@ -96,7 +96,7 @@ daily_polyline_sf <- lapply(unique(sensor_lines_sf$group_id), function(group_id_
   bind_rows()
 
 #### Add Distance Variables
-daily_polyline_sf$distance_daily_km <- as.numeric(st_length(daily_polyline_sf))/1000 
+daily_polyline_sf$distance_km <- as.numeric(st_length(daily_polyline_sf))/1000 
 
 #### Merge Back to Main Dataframes
 sensor_agg_sf <- daily_polyline_sf %>%

@@ -2,7 +2,7 @@
 
 # Settings ---------------------------------------------------------------------
 #### CODE TO RUN
-RUN_CODE <- T # If F, doesn't run any code, no matter the below settings
+RUN_CODE <- F # If F, doesn't run any code, no matter the below settings
 
 PROCESS_SENSOR_DATA        <- F # Download and clean sensor data (takes a while)
 PROCESS_SENSOR_SURVEY_DATA <- F # Clean survey data. RUN STATA MASTER FIRST TO DOWNLOAD DATA.
@@ -91,7 +91,7 @@ if(RUN_CODE){
   
   # Process Sensor Data --------------------------------------------------------
   if(PROCESS_SENSOR_DATA){
-    sensor_code_dir <- file.path(github_dir, "DataWork", "Sensor Data")
+    sensor_code_dir <- file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data")
     
     # Check Wailon Token Still Valid
     source(file.path(sensor_code_dir, "00_check_wialon_token.R"))

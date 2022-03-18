@@ -11,8 +11,6 @@ echo_df <- echo_df %>%
   dplyr::filter(regno_clean %in% "kcn863s")
 
 dayhr_df <- dayhr_df %>%
-  dplyr::filter(regno_clean %in% "kcn863s")
+  dplyr::filter(regno_clean %in% "KCN 863S")
 
-dayhr_df$N_violation %>% hist()
-dayhr_df$N_violation_acceleration 
-
+dayhr_df$N_violation %>% table()
