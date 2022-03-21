@@ -47,7 +47,7 @@ if(Sys.info()[["user"]] == "wb575963"){
 }
 
 #### From Root
-data_dir                  <- file.path(onedrive_dir, "Data")
+data_dir                  <- file.path(dropbox_dir, "Data")
 sensors_dir               <- file.path(data_dir, "Sensor Data")
 sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Survey")
 sacco_route_dir           <- file.path(data_dir, "Sacco Route Data")

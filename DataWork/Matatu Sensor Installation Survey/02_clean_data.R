@@ -4,9 +4,6 @@
 #### Survey Data
 survey_df <- read_dta(file.path(sensor_install_survey_dir, "FinalData", "psv_sensor_installation.dta"))
 
-survey_df <- survey_df %>%
-  distinct(matatu_regno, .keep_all = T) 
-
 #### SACCO Info
 sacco_df <- read_csv(file.path(sacco_route_dir, "RawData", "sacco_route_information.csv"))
 sacco_df <- sacco_df
@@ -35,7 +32,8 @@ survey_df <- survey_df %>%
                   TRUE ~ matatu_sacco
                 )) %>%
   dplyr::rename(sacco = matatu_sacco,
-                regno_clean = matatu_regno_clean)
+                regno_clean = matatu_regno_clean) %>%
+  distinct(regno_clean, .keep_all = T) 
 
 # Route ------------------------------------------------------------------------
 survey_df <- survey_df %>%
