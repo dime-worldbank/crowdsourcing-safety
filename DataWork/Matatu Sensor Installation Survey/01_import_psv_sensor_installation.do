@@ -21,9 +21,11 @@ set mem 100m
 local overwrite_old_data 0
 
 * initialize form-specific parameters
-local csvfile "$onedrive_dir/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_WIDE.csv"
-local dtafile "$onedrive_dir/Data/Matatu Sensor Installation Survey/FinalData/psv_sensor_installation.dta"
-local corrfile "$onedrive_dir/Data/Matatu Sensor Installation Survey/RawData/psv_sensor_installation_corrections.csv"
+local csvfile "$onedrive_dir/Data/Matatu Sensor Installation Survey/RawData - PII/psv_sensor_installation_WIDE.csv"
+local dtafile "$onedrive_dir/Data/Matatu Sensor Installation Survey/FinalData - PII/psv_sensor_installation.dta"
+local dtafile_nonpii "$dropbox_dir/Data/Matatu Sensor Installation Survey/FinalData/psv_sensor_installation.dta"
+
+local corrfile "$onedrive_dir/Data/Matatu Sensor Installation Survey/RawData - PII/psv_sensor_installation_corrections.csv"
 local note_fields1 ""
 local text_fields1 "deviceid subscriberid simid devicephonenum matatu_regno gps_serial_no matatu_sacco sacco_name_other matatu_other_route driver_name driver_phone_no owner_name owner_phone_no driver_tenure"
 local text_fields2 "driver_route_tenure n_drivers_per_veh_q matatu_seats matatu_amenities matatu_other instanceid"
@@ -232,6 +234,10 @@ if _N>0 {
 	
 	* save data to Stata format
 	save "`dtafile'", replace
+	
+	* drop PII variables and save	
+	drop driver_name driver_phone_no owner_name owner_phone_no
+	save "`dtafile_nonpii'", replace
 
 	* show codebook and notes
 	codebook

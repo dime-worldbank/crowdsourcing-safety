@@ -13,6 +13,7 @@ di "The user, in this case, is: " c(username)
 	}	
 	else if ( "`c(username)'" == "WB521633" ) { // Rob
 		global onedrive_dir "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
+		global dropbox_dir "C:/Users/wb521633/Dropbox/World Bank/IEs/PSV Rider Feedback"
 		global github_dir "C:/Users/wb521633/Documents/Github/PSV-Rider-Feedback"
 	}
 	else if ( "`c(username)'" == "WB575963" ) { // Ruiwen 
