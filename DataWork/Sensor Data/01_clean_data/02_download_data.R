@@ -23,7 +23,7 @@ OVERWRITE_DATA_ECHODRIVING   <- F
 wialon_token <- read.table(file.path(sensors_dir, "wialon_token", "wialon_token.txt"), stringsAsFactors = F)$V1
 
 # Regenerate IDs - Needed in case additional vehicles added
-source(file.path(github_dir, "DataWork", "Sensor Data", "01_get_wialon_ids.R")) 
+source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "01_get_wialon_ids.R")) 
 
 users_df    <- read.csv(file.path(sensors_dir, "RawData", "wialon_ids", "user_ids.csv"))
 resource_df <- read.csv(file.path(sensors_dir, "RawData", "wialon_ids", "resource_ids.csv"))
