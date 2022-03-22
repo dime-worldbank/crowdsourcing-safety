@@ -4,6 +4,18 @@
 sensor_dayhr_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
 sensor_day_df   <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
+sensor_dayhr_df %>%
+  dplyr::filter(sacco %in% "2NK SACCO") %>%
+  ggplot() +
+  geom_col(aes(x = datetime_eat,
+               y = speed_max)) +
+  facet_wrap(~regno_clean)
+
+
+sensor_day_df$speed_max
+
+
+
 # No speed data but have violation data: HOURLY
 weird_cases <- sensor_dayhr_df[is.na(sensor_dayhr_df$speed_max) & sensor_dayhr_df$N_violation > 0,]
 weird_cases %>%

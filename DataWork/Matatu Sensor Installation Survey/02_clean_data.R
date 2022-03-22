@@ -6,7 +6,6 @@ survey_df <- read_dta(file.path(sensor_install_survey_dir, "FinalData", "psv_sen
 
 #### SACCO Info
 sacco_df <- read_csv(file.path(sacco_route_dir, "RawData", "sacco_route_information.csv"))
-sacco_df <- sacco_df
 
 # Corrections ------------------------------------------------------------------
 survey_df$matatu_sacco[survey_df$matatu_regno %in% "KCV 924M"] <- "Simba_Coach_Limited"
@@ -38,6 +37,8 @@ survey_df <- survey_df %>%
 # Route ------------------------------------------------------------------------
 survey_df <- survey_df %>%
   left_join(sacco_df, by = "sacco")
+
+survey_df$sacco[survey_df$route %>% is.na()] %>% unique() %>% sort()
 
 # Subset Variables -------------------------------------------------------------
 #survey_df <- survey_df %>%
