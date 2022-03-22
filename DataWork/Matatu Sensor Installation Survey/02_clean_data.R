@@ -28,6 +28,7 @@ survey_df <- survey_df %>%
                   matatu_sacco == "DAR LUK SACCO" ~ "DAR LUX SACCO",
                   matatu_sacco == "Unique Shuttle" ~ "Unique Shuttle SACCO",
                   matatu_sacco == "Narok Safaris" ~ "Narok Safaris SACCO",
+                  matatu_sacco == "Narok Shuttle transporter" ~ "Narok Shuttle Transporter",
                   TRUE ~ matatu_sacco
                 )) %>%
   dplyr::rename(sacco = matatu_sacco,
@@ -37,8 +38,6 @@ survey_df <- survey_df %>%
 # Route ------------------------------------------------------------------------
 survey_df <- survey_df %>%
   left_join(sacco_df, by = "sacco")
-
-survey_df$sacco[survey_df$route %>% is.na()] %>% unique() %>% sort()
 
 # Subset Variables -------------------------------------------------------------
 #survey_df <- survey_df %>%
