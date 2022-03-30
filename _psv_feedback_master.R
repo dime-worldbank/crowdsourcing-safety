@@ -82,6 +82,7 @@ library(sfheaders)
 library(googlesheets4)
 library(leaflet)
 library(progress)
+library(ggpubr)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))

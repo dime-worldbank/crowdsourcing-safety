@@ -98,11 +98,11 @@ PILOT_3_DATE <- "2020-07-29"
 PILOT_4_DATE <- "2020-09-05" 
 
 # Load Data --------------------------------------------------------------------
-data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", 
+data <- readRDS(file.path(dropbox_dir, "Data", "Rider Feedback", 
                           "All Data", "FinalData", "rider_feedback.Rds"))
 
-pilot_df <- read.csv(file.path(dropbox_file_path, "Data", 
-                               "Pilot Information", "pilot_info.csv"),
+pilot_df <- read.csv(file.path(dropbox_dir, "Data", 
+                               "Matatu Data - Pilot", "pilot_info.csv"),
                      stringsAsFactors = F)
 
 # Prep Data --------------------------------------------------------------------
@@ -198,8 +198,9 @@ df_first30days <- lapply(unique(data$subset_type), function(subset_type){
   filter(!is.na(pilot_number))
 
 data %>%
-  filter(!is.na(complete_date)) %>%
-  mutate(pilot_number = replace_na(pilot_number, "Unknown - No Reg. No.")) %>%
+  dplyr::filter(!is.na(complete_date)) %>%
+  dplyr::mutate(pilot_number = as.character(pilot_number),
+                pilot_number = tidyr::replace_na(pilot_number, "Unknown - No Reg. No.")) %>%
   group_by(pilot_number, award_type) %>%
   dplyr::summarise(N = n()) %>%
   left_join(pilot_df_adj, by = c("pilot_number", "award_type")) %>%
@@ -218,6 +219,52 @@ data %>%
 ```
 
 # Feedback 
+
+## Overall - All Vehicles
+```{r, fig.height=4}
+
+data %>%
+  dplyr::filter(!is.na(driver_rating)) %>%
+  group_by(driver_rating) %>%
+  dplyr::summarise(N = n()) %>%
+  dplyr::mutate(driver_rating = driver_rating %>%
+                  factor(levels = c("very safe",
+                                    "safe",
+                                    "unsafe",
+                                    "very unsafe"))) %>%
+  ggplot(aes(x = driver_rating,
+             y = N)) +  geom_col(fill = "dodgerblue3") +
+  geom_text(aes(label = N,
+                y = N + 100),
+            fill = "dodgerblue3") +
+  theme_classic2() +
+  labs(x = NULL,
+       title = "How would you rate your Matatu driver?")
+
+```
+
+```{r, fig.height=4}
+
+data %>%
+  dplyr::filter(!is.na(speed_rating)) %>%
+  group_by(speed_rating) %>%
+  dplyr::summarise(N = n()) %>%
+  dplyr::mutate(speed_rating = speed_rating %>%
+                  factor(levels = c("too slow",
+                                    "okay",
+                                    "fast",
+                                    "dangerously fast"))) %>%
+  ggplot(aes(x = speed_rating,
+             y = N)) +
+  geom_col(fill = "dodgerblue3") +
+  geom_text(aes(label = N,
+                y = N + 100),
+            fill = "dodgerblue3") +
+  theme_classic2() +
+  labs(x = NULL,
+       title = "How would you describe your Matatu driver's speed?")
+
+```
 
 ## Questions by Vehicle
 ```{r, fig.height=30}
@@ -332,7 +379,8 @@ data %>%
 ```{r}
 data %>%
   filter(response_method %in% "shortcode") %>%
-  mutate(pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
+  mutate(pilot_number = pilot_number %>% as.character(),
+         pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
   group_by(pilot_number) %>%
   summarise("Completed Survey: Yes" = sum(completed_survey),
             "Completed Survey: No" = sum(completed_survey %in% F),
@@ -347,7 +395,8 @@ data %>%
 ```{r}
 data %>%
   filter(!is.na(complete_date)) %>%
-  mutate(pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
+  mutate(pilot_number = pilot_number %>% as.character(),
+         pilot_number = replace_na(pilot_number, "UNKNOWN - No Reg. No.")) %>%
   group_by(pilot_number) %>%
   summarise("Shortcode" = sum(response_method %in% "shortcode"),
             "QR Code" = sum(response_method %in% "qr code"),
@@ -368,7 +417,8 @@ data %>%
   dplyr::summarise(qr_N = sum(response_method %in% "qr code"),
                    sr_N = sum(response_method %in% "shortcode")) %>%
   ungroup() %>%
-  mutate(pilot_number = replace_na(pilot_number, "Unknown")) %>%
+  mutate(pilot_number = pilot_number %>% as.character(),
+         pilot_number = replace_na(pilot_number, "Unknown")) %>%
   mutate(shortcode    = replace_na(shortcode, "Unknown")) %>%
   dplyr::rename("Pilot" = pilot_number,
                 "Shortcode on Sticker?" = shortcode,
