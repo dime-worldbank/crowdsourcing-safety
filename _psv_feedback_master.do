@@ -9,7 +9,7 @@ di "The user, in this case, is: " c(username)
 	if ("`c(username)'" == "robmarty") {
 		global onedrive_dir "" // OneDrive not on personal computer
 		global dropbox_dir "/Users/robmarty/Dropbox/PSV Rider Feedback"
-		global github_dir "/Users/robmarty/Documents/Github/PSV Rider Feedback"
+		global github_dir "/Users/robmarty/Documents/Github/PSV-Rider-Feedback"
 	}	
 	else if ( "`c(username)'" == "WB521633" ) { // Rob
 		global onedrive_dir "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
