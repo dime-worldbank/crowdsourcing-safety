@@ -11,27 +11,40 @@ st_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_datapo
 # Ensure variable types are the same
 ed_df$reg_no_id <- ed_df$reg_no_id %>% as.character()
 
+# Restrict to current vehicles -------------------------------------------------
+wailonid_df <- read.csv(file.path(sensors_dir, "RawData", "wialon_ids", "user_ids.csv"))
+
+ed_df <- ed_df[ed_df$reg_no_id %in% wailonid_df$id,]
+st_df <- st_df[st_df$reg_no_id %in% wailonid_df$id,]
+st_sf <- st_sf[st_sf$reg_no_id %in% wailonid_df$id,]
+
+# Clean variables --------------------------------------------------------------
+# Some regno are inconsisent in the raw data; rely on reg no from wailon id dataframe
+
+ed_df$reg_no <- NULL
+st_df$reg_no <- NULL
+st_sf$reg_no <- NULL
+
 # Echo/Sensor Data -------------------------------------------------------------
+regno_df <- wailonid_df %>%
+  dplyr::rename(reg_no    = nm,
+                reg_no_id = id) %>%
+  dplyr::select(reg_no, reg_no_id) %>%
+  dplyr::mutate(regno_clean = reg_no %>%
+                  as.character() %>%
+                  str_replace_all(" ", "") %>%
+                  tolower() %>%
+                  str_sub(-7,-1),
+                reg_no_id = reg_no_id %>% 
+                  as.character())
+
 sensor_df <- st_df %>%
-  full_join(ed_df, by = c("reg_no_id", "reg_no", "datetime_eat"))
+  full_join(ed_df, by = c("reg_no_id", "datetime_eat")) %>%
+  left_join(regno_df, by = "reg_no_id")
 
 sensor_sf <- st_sf %>%
-  full_join(ed_df, by = c("reg_no_id", "reg_no", "datetime_eat"))
-
-# Clean Reg No -----------------------------------------------------------------
-clean_reg_no <- function(x){
-  x %>%
-    as.character() %>%
-    str_replace_all(" ", "") %>%
-    tolower() %>%
-    str_sub(-7,-1)
-}
-
-sensor_df <- sensor_df %>%
-  mutate(regno_clean = reg_no %>% clean_reg_no())
-
-sensor_sf <- sensor_sf %>%
-  mutate(regno_clean = reg_no %>% clean_reg_no())
+  full_join(ed_df, by = c("reg_no_id", "datetime_eat")) %>%
+  left_join(regno_df, by = "reg_no_id")
 
 # Merge survey -----------------------------------------------------------------
 sensor_df <- sensor_df %>%

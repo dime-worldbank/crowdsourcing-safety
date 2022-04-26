@@ -20,38 +20,6 @@ raw_sensor_files <- file.path(sensors_dir, "RawData", "sensor_tracing_individual
              recursive = T,
              full.names = T)
 
-# sensortracing_24260915_2021-12-30.Rds
-
-
-# df <- map_df(raw_sensor_files, function(raw_sensor_files_i){
-#   
-#   df_tmp <- read_parquet(raw_sensor_files_i)
-#   
-#   DATA_ISSUE_1 <- sum(is.na(df_tmp$longitude)) > 0
-#   DATA_ISSUE_2 <- sum(is.na(df_tmp$latitude)) > 0
-#   DATA_ISSUE_3 <- sum(df_tmp$longitude > 360, na.rm = T) > 0
-#   DATA_ISSUE_3 <- sum(df_tmp$latitude > 180, na.rm = T) > 0
-#   
-#   if(DATA_ISSUE_1 | 
-#      DATA_ISSUE_2 | 
-#      DATA_ISSUE_3 | 
-#      DATA_ISSUE_4){
-#     DELETE <- T
-#   } else{
-#     DELETE <- F
-#   }
-#   
-#   return(data.frame(file = raw_sensor_files_i,
-#              DELETE = DELETE))
-# })
-# 
-# df_d <- df[df$DELETE %in% T,]
-# 
-# for(file_i in df_d$file){
-#   file.remove(file_i)
-# }
-
-
 # If overwrite, delete ---------------------------------------------------------
 if(OVERWRITE_EXTRACTED_DATA){
   tmp <- file.path(sensors_dir, "FinalData", "sensortracing_hourly_individual_files",
@@ -67,9 +35,6 @@ if(OVERWRITE_EXTRACTED_DATA){
     lapply(file.remove)
 }
 
-#raw_sensor_filepath_i = "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback/Data/Sensor Data/RawData/sensor_tracing_individual_data/2021-07-01/sensortracing_24260915_2021-12-30.gz.parquet"
-
-#raw_sensor_filepath_i = raw_sensor_files[7000]
 for(raw_sensor_filepath_i in raw_sensor_files){
   
   ## Path for output
@@ -89,11 +54,6 @@ for(raw_sensor_filepath_i in raw_sensor_files){
     
     ## Load and aggregate
     sensor_df <- read_parquet(raw_sensor_filepath_i)
-    
-    ## Need some positive lat/lon
-    #if(sum(!is.na(sensor_df$latitude)) %in% 0){
-    #  sensor_df <- data.frame(NULL)
-    #}
     
     if(nrow(sensor_df) %in% 0){
       polyline_sf <- data.frame(NULL)
