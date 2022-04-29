@@ -84,6 +84,7 @@ for(raw_sensor_filepath_i in raw_sensor_files){
                          speed_p90 = quantile(speed, probs = 0.90) %>% as.numeric(),
                          speed_p95 = quantile(speed, probs = 0.95) %>% as.numeric(),
                          speed_max = max(speed),
+                         speed_mean = mean(speed),
                          N_speed_over_0   = sum(speed > 0),
                          N_speed_over_50  = sum(speed > 50),
                          N_speed_over_100 = sum(speed > 100),
@@ -106,7 +107,7 @@ for(raw_sensor_filepath_i in raw_sensor_files){
       
       if(nrow(sensor_latlon_df) %in% 0){
         polyline_sf <- data.frame(NULL)
-        only_data_df <- sensor_df
+        only_data_df <- sensor_sum_df
       } else{
         
         polyline_sf <- sf_linestring(sensor_latlon_df, 
