@@ -1,7 +1,8 @@
 # Merge Sensor Data with Survey Data
 
 # Load Data --------------------------------------------------------------------
-survey_df <- readRDS(file.path(sensor_install_survey_dir, "FinalData", "psv_sensor_installation_clean.Rds"))
+#survey_df <- readRDS(file.path(sensor_install_survey_dir, "FinalData", "psv_sensor_installation_clean.Rds"))
+veh_data_df <- readRDS(file.path(matatu_data_dir, "FinalData", "vehicle_info.Rds"))
 
 ed_df <- readRDS(file.path(sensors_dir, "FinalData", "echodriving_dayhr.Rds"))
 st_df <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
@@ -46,12 +47,60 @@ sensor_sf <- st_sf %>%
   full_join(ed_df, by = c("reg_no_id", "datetime_eat")) %>%
   left_join(regno_df, by = "reg_no_id")
 
-# Merge survey -----------------------------------------------------------------
+# Date/time to EAT -------------------------------------------------------------
+## Add Hour and Date
 sensor_df <- sensor_df %>%
-  left_join(survey_df, by = "regno_clean")
+  dplyr::mutate(date = datetime_eat %>% as.Date(tz = "Africa/Nairobi"),
+                hour = datetime_eat %>% hour())
 
 sensor_sf <- sensor_sf %>%
-  left_join(survey_df, by = "regno_clean")
+  dplyr::mutate(date = datetime_eat %>% as.Date(tz = "Africa/Nairobi"),
+                hour = datetime_eat %>% hour())
+
+# Add installation date --------------------------------------------------------
+sensor_df <- sensor_df %>%
+  dplyr::group_by(regno_clean) %>%
+  dplyr::mutate(install_datetime = min(datetime_eat[which(N_obs_speed > 0)])) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(install_date = install_datetime %>% as.Date(tz = "Africa/Nairobi"))
+
+sensor_sf <- sensor_sf %>%
+  dplyr::group_by(regno_clean) %>%
+  dplyr::mutate(install_datetime = min(datetime_eat[which(N_obs_speed > 0)])) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(install_date = install_datetime %>% as.Date(tz = "Africa/Nairobi"))
+
+# Complete data only dataframe -------------------------------------------------
+sensor_df <- sensor_df %>%
+  complete( nesting(reg_no_id,
+                    regno_clean,
+                    reg_no,
+                    install_datetime,
+                    install_date),
+            
+            nesting(datetime_eat,
+                    date,
+                    hour),
+            
+            fill = list(N_obs_speed = 0)
+            
+  ) %>%
+  
+  # Only keep if date/time is after the install date/time  
+  dplyr::filter(datetime_eat >= install_datetime)
+
+# Merge survey -----------------------------------------------------------------
+veh_data_df <- veh_data_df %>%
+  dplyr::rename(regno_clean = reg_no) %>%
+  dplyr::mutate(regno_clean = regno_clean %>% 
+                  tolower() %>%
+                  str_replace_all(" ", ""))
+
+sensor_df <- sensor_df %>%
+  left_join(veh_data_df, by = "regno_clean")
+
+sensor_sf <- sensor_sf %>%
+  left_join(veh_data_df, by = "regno_clean")
 
 # Adjust Variables -------------------------------------------------------------
 ## Make reg number in format AAA AAAA (add space and make upper)
@@ -75,15 +124,6 @@ sensor_df <- sensor_df %>%
 sensor_sf <- sensor_sf %>%
   dplyr::mutate_at(vars(contains("N_violation"),
                         contains("_valueg")), ~ replace_na(., 0))
-
-## Add Hour and Date
-sensor_df <- sensor_df %>%
-  dplyr::mutate(date = datetime_eat %>% as.Date(tz = "Africa/Nairobi"),
-                hour = datetime_eat %>% hour())
-
-sensor_sf <- sensor_sf %>%
-  dplyr::mutate(date = datetime_eat %>% as.Date(tz = "Africa/Nairobi"),
-                hour = datetime_eat %>% hour())
 
 # Export -----------------------------------------------------------------------
 write_parquet(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.gz.parquet"), 

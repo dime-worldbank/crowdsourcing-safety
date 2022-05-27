@@ -2,12 +2,14 @@
 
 # Load Data --------------------------------------------------------------------
 sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
+sensor_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.Rds"))
 
 # Aggregate --------------------------------------------------------------------
 sensor_nonsum_df <- sensor_df %>%
-  dplyr::filter(!is.na(N_obs_speed),
-                N_obs_speed > 0) %>%
-  group_by(reg_no, reg_no_id, regno_clean, sacco, route, date) %>%
+  #dplyr::filter(!is.na(N_obs_speed), #TODO: shouldn't be filtering
+  #              N_obs_speed > 0) %>%
+  dplyr::filter(N_obs_speed > 0) %>%
+  group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, install_date) %>%
   dplyr::summarise(speed_min = min(speed_min),
                    speed_p05 = weighted.mean(x = speed_p05, w = N_obs_speed),
                    speed_p10 = weighted.mean(x = speed_p10, w = N_obs_speed),
@@ -24,12 +26,13 @@ sensor_nonsum_df <- sensor_df %>%
 
 sensor_sum_df <- sensor_df %>%
   dplyr::select(-n_drivers_per_veh_q) %>% # starts with N // is character
-  dplyr::group_by(reg_no, reg_no_id, regno_clean, sacco, route, date) %>%
+  dplyr::group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, install_date) %>%
   dplyr::summarise_at(vars(matches("\\bN_")),
                       sum)
 
-sensor_agg_df <- merge(sensor_nonsum_df, sensor_sum_df, 
-                       by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date"))
+sensor_agg_df <- merge(sensor_sum_df, sensor_nonsum_df, 
+                       by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date", "install_date"),
+                       all = T)
 
 # Aggregate Polylines ----------------------------------------------------------
 # Using method of: summarize(geometry = st_union(geometry)) was inefficient, so
@@ -117,7 +120,4 @@ saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
 ## Data with Polyline
 saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
-
-
-
 

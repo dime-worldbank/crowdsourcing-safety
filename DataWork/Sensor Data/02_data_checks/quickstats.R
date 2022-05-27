@@ -4,6 +4,10 @@
 sensor_dayhr_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
 sensor_day_df   <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
+sensor_day_df$route %>% is.na %>% table()
+sensor_day_df$sacco %>% is.na %>% table()
+sensor_day_df$regno_clean %>% unique()
+
 sensor_dayhr_df %>%
   dplyr::filter(sacco %in% "2NK SACCO") %>%
   ggplot() +

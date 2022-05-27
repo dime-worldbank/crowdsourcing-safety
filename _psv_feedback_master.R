@@ -51,6 +51,8 @@ data_dir                  <- file.path(dropbox_dir, "Data")
 sensors_dir               <- file.path(data_dir, "Sensor Data")
 sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Survey")
 sacco_route_dir           <- file.path(data_dir, "Sacco Route Data")
+driver_message_dir        <- file.path(data_dir, "Send Messages to Drivers")
+matatu_data_dir           <- file.path(data_dir, "Matatu Data")
 
 # Packages ---------------------------------------------------------------------
 library(tidyverse)
@@ -83,6 +85,8 @@ library(googlesheets4)
 library(leaflet)
 library(progress)
 library(ggpubr)
+library(twilio)
+library(raster)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))
