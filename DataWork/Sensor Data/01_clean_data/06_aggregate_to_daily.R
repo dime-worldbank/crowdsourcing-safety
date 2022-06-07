@@ -5,6 +5,7 @@ sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
 sensor_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.Rds"))
 
 # Aggregate --------------------------------------------------------------------
+## Summarize numeric variables; not taking sums
 sensor_nonsum_df <- sensor_df %>%
   #dplyr::filter(!is.na(N_obs_speed), #TODO: shouldn't be filtering
   #              N_obs_speed > 0) %>%
@@ -24,15 +25,27 @@ sensor_nonsum_df <- sensor_df %>%
                    distance_minmax_latlon_km = sum(distance_minmax_latlon_km),
                    distance_hourly_sum_km = sum(distance_km))
 
+## Summarize numeric variables; taking sums
 sensor_sum_df <- sensor_df %>%
   #dplyr::select(-n_drivers_per_veh_q) %>% # starts with N // is character
   dplyr::group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, install_date) %>%
   dplyr::summarise_at(vars(matches("\\bN_")),
                       sum)
 
+## Vehicle-specific attributes to merge in
+sensor_vehlevel_df <- sensor_df %>%
+  distinct(regno_clean, 
+           drvr_feedback_treat_id, 
+           drvr_feedback_treat, 
+           drvr_feedback_treat_sticker,
+           drvr_feedback_treat_feedback)
+
 sensor_agg_df <- merge(sensor_sum_df, sensor_nonsum_df, 
                        by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date", "install_date"),
                        all = T)
+
+sensor_agg_df <- sensor_agg_df %>%
+  left_join(sensor_vehlevel_df, by = "regno_clean")
 
 # Aggregate Polylines ----------------------------------------------------------
 # Using method of: summarize(geometry = st_union(geometry)) was inefficient, so

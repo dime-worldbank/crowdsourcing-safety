@@ -6,7 +6,7 @@ sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
 # Checks -----------------------------------------------------------------------
 end_date   <- sensor_df$date %>% max()
-start_date <- end_date - 3
+start_date <- end_date - 4
 
 regno_nospeed <- sensor_df %>%
   dplyr::filter(date <= end_date,
@@ -16,6 +16,23 @@ regno_nospeed <- sensor_df %>%
   ungroup() %>%
   dplyr::filter(N_obs_speed %in% 0) %>%
   pull(regno_clean)
+
+sensor_df %>%
+  distinct(regno_clean, .keep_all = T) %>%
+  dplyr::filter(regno_clean %in% regno_nospeed) %>%
+  pull(drvr_feedback_treat) %>%
+  table()
+
+sensor_df %>%
+  distinct(regno_clean, .keep_all = T) %>%
+  dplyr::filter(regno_clean %in% regno_nospeed) %>%
+  pull(sacco) %>%
+  table()
+
+sensor_df %>%
+  distinct(regno_clean, .keep_all = T) %>%  
+  pull(sacco) %>%
+  table()
 
 ## Data
 nospeed_df <- sensor_df %>%

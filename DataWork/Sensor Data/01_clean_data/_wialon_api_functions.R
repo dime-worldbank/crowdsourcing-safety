@@ -498,7 +498,29 @@ report_json_to_df <- function(results_list,
     
   }
   
-  ####  List to dataframe
+  # Speedings
+  if(report_id %in% 5){
+    col_names <- c("regno",
+                   "time_str",
+                   "time_int",
+                   "latitude",
+                   "longitude",
+                   "location",
+                   "latitude2",
+                   "longitude2",
+                   "duration",
+                   "max_speed",
+                   "latitude3",
+                   "longitude3",
+                   "speed_limit",
+                   "count",
+                   "duration2",
+                   "distance",
+                   "distance_adjusted",
+                   "avg_speed")
+  }
+  
+  ####  List to datafra
   if(show_progress) print(paste0("--", user_id, "; N Obs: ", length(results_list)))
   
   if(length(results_list) > 0){
@@ -515,7 +537,7 @@ report_json_to_df <- function(results_list,
     DATA_PROCESSED <- F
     
     # Quick method of extracting data ------------------------------------------
-    if( (((length(unlist(results_list)) %% 13) %in% 0) & (report_id == 2) & (length(unlist(results_list[[1]])) %in% 13) ) | (report_id == 1)  ){
+    if( (((length(unlist(results_list)) %% 13) %in% 0) & (report_id == 2) & (length(unlist(results_list[[1]])) %in% 13) ) | (report_id == 1) | (report_id == 5)  ){
       print("Quick extract!")
       
       ## Extract data
@@ -558,6 +580,24 @@ report_json_to_df <- function(results_list,
                           str_squish() %>%
                           as.numeric,
                         time_str = time_str %>% dmy_hms(tz = "UTC"),
+                        latitude = latitude %>% as.character %>% as.numeric,
+                        longitude = longitude %>% as.character %>% as.numeric,
+                        location = location %>% as.character(),
+                        time_str = time_str %>% as.character()) 
+      }
+      
+      if(report_id == 5){
+        df_out <- df_out %>%
+          dplyr::select(time_str,
+                        latitude,
+                        longitude,
+                        location,
+                        duration,
+                        max_speed,
+                        avg_speed,
+                        distance,
+                        speed_limit) %>%
+          dplyr::mutate(time_str = time_str %>% dmy_hms(tz = "UTC"),
                         latitude = latitude %>% as.character %>% as.numeric,
                         longitude = longitude %>% as.character %>% as.numeric,
                         location = location %>% as.character(),
@@ -742,6 +782,25 @@ report_json_to_df <- function(results_list,
                         location = location %>% as.character(),
                         time_str = time_str %>% as.character()) 
       }
+      
+      if(report_id == 5){
+        df_out <- df_out %>%
+          dplyr::select(time_str,
+                        latitude,
+                        longitude,
+                        location,
+                        duration,
+                        max_speed,
+                        avg_speed,
+                        distance,
+                        speed_limit) %>%
+          dplyr::mutate(time_str = time_str %>% dmy_hms(tz = "UTC"),
+                        latitude = latitude %>% as.character %>% as.numeric,
+                        longitude = longitude %>% as.character %>% as.numeric,
+                        location = location %>% as.character(),
+                        time_str = time_str %>% as.character()) 
+      }
+      
     }
     
     # Cleanup ------------------------------------------------------------------

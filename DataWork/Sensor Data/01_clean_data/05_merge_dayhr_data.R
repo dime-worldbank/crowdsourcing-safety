@@ -131,6 +131,3 @@ write_parquet(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.gz.pa
 saveRDS(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.Rds"))
 
 saveRDS(sensor_sf, file.path(sensors_dir, "FinalData", "sensor_dayhr_polyline.Rds"))
-
-
-

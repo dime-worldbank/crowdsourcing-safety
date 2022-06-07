@@ -1,5 +1,32 @@
 # Quick Stats
 
+# Daily ------------------------------------------------------------------------
+daily_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
+#daily_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
+
+daily_sub_df <- daily_df %>%
+  dplyr::filter(distance_km >= 100) %>%
+  dplyr::mutate(prop_speed_over_110 = N_speed_over_110 / N_obs_speed,
+                prop_speed_over_100 = N_speed_over_100 / N_obs_speed,
+                prop_speed_over_95 = N_speed_over_95 / N_obs_speed,
+                prop_speed_over_90 = N_speed_over_90 / N_obs_speed)
+
+daily_sub_df$prop_speed_over_110 %>% summary()
+daily_sub_df$prop_speed_over_100 %>% summary()
+daily_sub_df$prop_speed_over_95 %>% summary()
+daily_sub_df$prop_speed_over_90 %>% summary()
+
+daily_sub_df$N_speed_over_110 %>%
+  mean(na.rm=T)
+
+
+issue_df <- daily_sf %>%
+  dplyr::filter(distance_km >= 100,
+                speed_max %in% 0)
+
+a <- daily_sub_df[daily_sub_df$speed_max %in% 0,]
+daily_sub_df$speed_max %>% hist()
+
 # Echo Driving -----------------------------------------------------------------
 # Vehicle and acceleration types
 echo_df <- read_parquet(file.path(sensors_dir, "FinalData", "echodriving.gz.parquet"))

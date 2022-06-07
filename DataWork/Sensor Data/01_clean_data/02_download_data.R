@@ -16,6 +16,7 @@
 # If FALSE, skips data already scraped
 OVERWRITE_DATA_SENSORTRACING <- F
 OVERWRITE_DATA_ECHODRIVING   <- F
+OVERWRITE_DATA_SPEEDINGS     <- F
 
 # Load Token/IDS ---------------------------------------------------------------
 # Load token associated with account and IDs (numeric IDs for vehicles, reports
@@ -42,6 +43,38 @@ dates <- seq(from = ymd("2021-07-01"),
              by = 1
 ) %>%
   as.character()
+
+# Download Speedings Data ------------------------------------------------------
+for(date_i in rev(dates)){
+  print(date_i)
+  
+  file_name <- paste0("speedings_", date_i, ".gz.parquet")
+  file_dir <- file.path(sensors_dir, "RawData", "speedings_individual_data", file_name)
+  
+  if(!file.exists(file_dir) | OVERWRITE_DATA_SPEEDINGS){
+    df_out <- map_df(unique(users_df$id), function(user_id_i){
+      
+      json_tmp <- get_report_raw_json(user_id = user_id_i, 
+                                      report_id = report_df$id[report_df$n %in% "Speedings"], 
+                                      resource_id = resource_id, 
+                                      datetime_begin = paste(date_i, "00:00:00") %>% ymd_hms(tz = "UTC") %>% as.numeric(), 
+                                      datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric(),
+                                      wialon_token,
+                                      users_df)
+      
+      df_out_i <- report_json_to_df(results_list = json_tmp,
+                                    report_id = report_df$id[report_df$n %in% "Speedings"],
+                                    user_id = user_id_i,
+                                    users_df = users_df)
+      
+      return(df_out_i)
+    })
+    
+    write_parquet(df_out, file_dir, compression = "gzip", compression_level = 5)
+    rm(df_out)
+  }
+  
+}
 
 # Download Echo Driving Report -------------------------------------------------
 for(date_i in rev(dates)){
@@ -87,7 +120,7 @@ for(date_i in rev(dates)){
 for(date_i in rev(dates)){
   print(date_i)
   for(user_id_i in unique(users_df$id)){
-
+    
     # Parquet is final data while rds is temp data, later to be turned into parquet
     file_name_parquet <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
     file_name_rds     <- paste0("sensortracing_", user_id_i, "_", date_i, ".Rds")
