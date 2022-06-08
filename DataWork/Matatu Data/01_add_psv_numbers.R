@@ -6,10 +6,13 @@ set.seed(42)
 # Load data --------------------------------------------------------------------
 veh_df <- read_csv(file.path(matatu_data_dir, "RawData", "vehicle_info.csv"))
 
+veh_df <- veh_df %>%
+  arrange(id)
+
 # Assign PSV number ------------------------------------------------------------
 psv_nums <- seq(from = 1,
                 to = 999,
-                by = 4)
+                by = 3)
 
 # Must have 3 digits
 psv_nums <- psv_nums[psv_nums >= 100]
