@@ -23,7 +23,9 @@ sensor_nonsum_df <- sensor_df %>%
                    speed_p95 = weighted.mean(x = speed_p95, w = N_obs_speed),
                    speed_max = max(speed_max),
                    distance_minmax_latlon_km = sum(distance_minmax_latlon_km),
-                   distance_hourly_sum_km = sum(distance_km))
+                   distance_hourly_sum_km = sum(distance_km),
+                   distance_km_over_110kmh = sum(distance_km_over_110kmh), #TODO: NAs?
+                   duration_seconds_over_110kmh = sum(duration_seconds_over_110kmh))  #TODO: NAs?
 
 ## Summarize numeric variables; taking sums
 sensor_sum_df <- sensor_df %>%

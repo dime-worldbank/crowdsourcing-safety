@@ -4,6 +4,7 @@
 #survey_df <- readRDS(file.path(sensor_install_survey_dir, "FinalData", "psv_sensor_installation_clean.Rds"))
 veh_data_df <- readRDS(file.path(matatu_data_dir, "FinalData", "vehicle_info.Rds"))
 
+sp_df <- readRDS(file.path(sensors_dir, "FinalData", "speedings_dayhr.Rds"))
 ed_df <- readRDS(file.path(sensors_dir, "FinalData", "echodriving_dayhr.Rds"))
 st_df <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
 st_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_datapolyline.Rds"))
@@ -11,10 +12,12 @@ st_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensortracing_dayhr_datapo
 # Individual dataset fixes -----------------------------------------------------
 # Ensure variable types are the same
 ed_df$reg_no_id <- ed_df$reg_no_id %>% as.character()
+sp_df$reg_no_id <- sp_df$reg_no_id %>% as.character()
 
 # Restrict to current vehicles -------------------------------------------------
 wailonid_df <- read.csv(file.path(sensors_dir, "RawData", "wialon_ids", "user_ids.csv"))
 
+sp_df <- sp_df[sp_df$reg_no_id %in% wailonid_df$id,]
 ed_df <- ed_df[ed_df$reg_no_id %in% wailonid_df$id,]
 st_df <- st_df[st_df$reg_no_id %in% wailonid_df$id,]
 st_sf <- st_sf[st_sf$reg_no_id %in% wailonid_df$id,]
@@ -41,10 +44,12 @@ regno_df <- wailonid_df %>%
 
 sensor_df <- st_df %>%
   full_join(ed_df, by = c("reg_no_id", "datetime_eat")) %>%
+  full_join(sp_df, by = c("reg_no_id", "datetime_eat")) %>%
   left_join(regno_df, by = "reg_no_id")
 
 sensor_sf <- st_sf %>%
   full_join(ed_df, by = c("reg_no_id", "datetime_eat")) %>%
+  full_join(sp_df, by = c("reg_no_id", "datetime_eat")) %>%
   left_join(regno_df, by = "reg_no_id")
 
 # Date/time to EAT -------------------------------------------------------------
