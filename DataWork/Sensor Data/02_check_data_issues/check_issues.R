@@ -4,56 +4,48 @@
 sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 #wialon_df <- read.csv(file.path(sensors_dir, "RawData", "wialon_ids", "user_ids.csv"))
 
-# Checks -----------------------------------------------------------------------
-end_date   <- sensor_df$date %>% max()
-start_date <- end_date - 4
+# Cleanup ----------------------------------------------------------------------
+# Add variables / clean data in way relevant for all analysis
+sensor_df <- sensor_df %>%
+  mutate(has_speed_data = as.numeric(N_obs_speed > 0))
 
-regno_nospeed <- sensor_df %>%
-  dplyr::filter(date <= end_date,
-                date >= start_date) %>%
-  group_by(regno_clean) %>%
-  dplyr::summarise(N_obs_speed = sum(N_obs_speed)) %>%
-  ungroup() %>%
-  dplyr::filter(N_obs_speed %in% 0) %>%
-  pull(regno_clean)
+# Continuous days with no data -------------------------------------------------
+# regno_clean_i <- "KCZ 750E"
+cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
 
-sensor_df %>%
-  distinct(regno_clean, .keep_all = T) %>%
-  dplyr::filter(regno_clean %in% regno_nospeed) %>%
-  pull(drvr_feedback_treat) %>%
-  table()
+  sensor_df_i <- sensor_df[sensor_df$regno_clean %in% regno_clean_i,]
+  
+  sensor_df_i <- sensor_df_i %>%
+    dplyr::select(date, has_speed_data) %>%
+    arrange(date)
+  
+  lastest_date_has_speed_data <- sensor_df_i %>%
+    tail(1) %>%
+    pull(has_speed_data)
+  
+  if(lastest_date_has_speed_data){
+    n_dats_no_speed <- 0
+  } else{
+    n_dats_no_speed <- sensor_df_i %>%
+      ungroup() %>%
+      dplyr::mutate(date_max_data = max(date[has_speed_data %in% 1])) %>%
+      dplyr::filter(date > date_max_data) %>%
+      nrow()
+  }
+  
+  out_df <- data.frame(
+    regno_clean = regno_clean_i,
+    n_days_no_speed = n_dats_no_speed
+  )
+  
+  return(out_df)
+  
+})
 
-sensor_df %>%
-  distinct(regno_clean, .keep_all = T) %>%
-  dplyr::filter(regno_clean %in% regno_nospeed) %>%
-  pull(sacco) %>%
-  table()
+#View(cont_nodata_df)
 
-sensor_df %>%
-  distinct(regno_clean, .keep_all = T) %>%  
-  pull(sacco) %>%
-  table()
+cont_nodata_df$n_days_no_speed %>% table()
 
-## Data
-nospeed_df <- sensor_df %>%
-  dplyr::filter(reg_no_clean %in% regno_nospeed) %>%
-  group_by(reg_no_clean) %>%
-  dplyr::summarise(date_issue = min(date[N_obs_speed %in% 0])) %>%
-  ungroup() %>%
-  dplyr::mutate(days_issue = difftime(end_date, date_issue))
+table(cont_nodata_df$n_days_no_speed > 7)
 
-head(nospeed_df)
-
-## Figure
-sensor_df %>%
-  dplyr::filter(regno_clean %in% regno_nospeed,
-                date >= ymd("2022-01-01")) %>%
-  dplyr::mutate(title = paste0(regno_clean, "\nInstalled = ", install_date)) %>%
-  ggplot() +
-  geom_col(aes(x = date,
-               y = speed_p85)) +
-  labs(y = "Speed (85th Percentile)",
-       x = NULL) +
-  facet_wrap(~title) +
-  theme_minimal()
 

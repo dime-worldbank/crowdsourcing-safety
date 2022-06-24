@@ -22,7 +22,6 @@ if(F){
   gs4_auth()
 }
 
-
 # Filepaths --------------------------------------------------------------------
 #### Root
 # Rob (Personal Comptuer)
@@ -87,6 +86,7 @@ library(progress)
 library(ggpubr)
 library(twilio)
 library(raster)
+library(magick)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))

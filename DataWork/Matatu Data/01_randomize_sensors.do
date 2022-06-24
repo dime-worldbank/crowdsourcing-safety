@@ -10,6 +10,7 @@ sort id
 
 keep if route != "Nairobi to Marsabit"
 keep if original_150 == 1
+keep if phase == "june2022-sensor-driverfeedback"
 
 *** Encode variables
 * randtreat doesn't allow strings as inputs
