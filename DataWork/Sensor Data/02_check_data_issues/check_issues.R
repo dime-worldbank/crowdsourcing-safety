@@ -1,5 +1,7 @@
 # Check Data Issues
 
+# drvr_feedback_treat_sticker
+
 # Load data --------------------------------------------------------------------
 sensor_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 #wialon_df <- read.csv(file.path(sensors_dir, "RawData", "wialon_ids", "user_ids.csv"))
@@ -10,13 +12,15 @@ sensor_df <- sensor_df %>%
   mutate(has_speed_data = as.numeric(N_obs_speed > 0))
 
 # Continuous days with no data -------------------------------------------------
+# TODO: Add relevant variables (eg, treat status, install date, etc) -- old install date has more issues?
+# drvr_feedback_treat_sticker
+
 # regno_clean_i <- "KCZ 750E"
 cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
 
   sensor_df_i <- sensor_df[sensor_df$regno_clean %in% regno_clean_i,]
   
   sensor_df_i <- sensor_df_i %>%
-    dplyr::select(date, has_speed_data) %>%
     arrange(date)
   
   lastest_date_has_speed_data <- sensor_df_i %>%
@@ -38,6 +42,8 @@ cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
     n_days_no_speed = n_dats_no_speed
   )
   
+  out_df$install_date <- sensor_df_i$install_date[1]
+  
   return(out_df)
   
 })
@@ -47,5 +53,6 @@ cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
 cont_nodata_df$n_days_no_speed %>% table()
 
 table(cont_nodata_df$n_days_no_speed > 7)
+
 
 
