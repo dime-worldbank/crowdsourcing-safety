@@ -122,9 +122,13 @@ if(RUN_CODE){
     source(file.path(sensor_code_dir, "04a_echodriving_to_hourly_individual_files.R"))
     source(file.path(sensor_code_dir, "04b_append_echodriving_hr_data.R"))
     
+    # Process Speed Data
+    source(file.path(sensor_code_dir, "05a_append_speedings_raw.R"))
+    source(file.path(sensor_code_dir, "05b_speedings_to_hr.R"))
+    
     # Create Day and Day/Hour data with sensor tracing + echo driving merged in
-    source(file.path(sensor_code_dir, "05_merge_dayhr_data.R"))
-    source(file.path(sensor_code_dir, "06_aggregate_to_daily.R"))
+    source(file.path(sensor_code_dir, "06_merge_dayhr_data.R"))
+    source(file.path(sensor_code_dir, "07_aggregate_to_daily.R"))
   }
   
   # Process Sensor Installation Survey -----------------------------------------
