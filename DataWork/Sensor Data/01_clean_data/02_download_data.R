@@ -44,40 +44,44 @@ dates <- seq(from = ymd("2021-07-01"),
 ) %>%
   as.character()
 
-# Download Speedings Data ------------------------------------------------------
-for(date_i in rev(dates)){
+#dates <- c("2022-10-03", "2022-10-04", "2022-10-05")
+
+# Download Sensor Tracing Data -------------------------------------------------
+for(date_i in dates){
   print(date_i)
-  
-  file_name <- paste0("speedings_", date_i, ".gz.parquet")
-  file_dir <- file.path(sensors_dir, "RawData", "speedings_individual_data", file_name)
-  
-  if(!file.exists(file_dir) | OVERWRITE_DATA_SPEEDINGS){
-    df_out <- map_df(unique(users_df$id), function(user_id_i){
-      
-      json_tmp <- get_report_raw_json(user_id = user_id_i, 
-                                      report_id = report_df$id[report_df$n %in% "Speedings"], 
-                                      resource_id = resource_id, 
-                                      datetime_begin = paste(date_i, "00:00:00") %>% ymd_hms(tz = "UTC") %>% as.numeric(), 
-                                      datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric(),
-                                      wialon_token,
-                                      users_df)
-      
-      df_out_i <- report_json_to_df(results_list = json_tmp,
-                                    report_id = report_df$id[report_df$n %in% "Speedings"],
-                                    user_id = user_id_i,
-                                    users_df = users_df)
-      
-      return(df_out_i)
-    })
+  for(user_id_i in unique(users_df$id)){
     
-    write_parquet(df_out, file_dir, compression = "gzip", compression_level = 5)
-    rm(df_out)
+    # Parquet is final data while rds is temp data, later to be turned into parquet
+    file_name_parquet <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
+    file_name_rds     <- paste0("sensortracing_", user_id_i, "_", date_i, ".Rds")
+    
+    dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i))
+    dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_temp_raw_jsons", date_i))
+    
+    file_dir_parquet <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i, file_name_parquet)
+    file_dir_rds <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_temp_raw_jsons", date_i, file_name_rds)
+    
+    if(!(file.exists(file_dir_parquet) | file.exists(file_dir_rds)) | OVERWRITE_DATA_SENSORTRACING){
+      print(user_id_i)
+      
+      df_out <- get_report_raw_json(user_id = user_id_i, 
+                                    report_id = report_df$id[report_df$n %in% "Units Sensors Tracing - all"], 
+                                    resource_id = resource_id, 
+                                    datetime_begin = paste(date_i, "00:00:00") %>% ymd_hms(tz = "UTC") %>% as.numeric(), 
+                                    datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric(),
+                                    wialon_token,
+                                    users_df)
+      
+      saveRDS(df_out, file_dir_rds)
+      rm(df_out)
+      #write_parquet(df_out, file_dir, compression = "gzip", compression_level = 5)
+    }
+    
   }
-  
 }
 
 # Download Echo Driving Report -------------------------------------------------
-for(date_i in rev(dates)){
+for(date_i in dates){
   print(date_i)
   
   file_name <- paste0("echodriving_", date_i, ".gz.parquet")
@@ -116,37 +120,36 @@ for(date_i in rev(dates)){
 # wialon_token
 # users_df
 
-# Download Sensor Tracing Data -------------------------------------------------
-for(date_i in rev(dates)){
+# Download Speedings Data ------------------------------------------------------
+for(date_i in dates){
   print(date_i)
-  for(user_id_i in unique(users_df$id)){
-    
-    # Parquet is final data while rds is temp data, later to be turned into parquet
-    file_name_parquet <- paste0("sensortracing_", user_id_i, "_", date_i, ".gz.parquet")
-    file_name_rds     <- paste0("sensortracing_", user_id_i, "_", date_i, ".Rds")
-    
-    dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i))
-    dir.create(file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_temp_raw_jsons", date_i))
-    
-    file_dir_parquet <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data", date_i, file_name_parquet)
-    file_dir_rds <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_temp_raw_jsons", date_i, file_name_rds)
-    
-    if(!(file.exists(file_dir_parquet) | file.exists(file_dir_rds)) | OVERWRITE_DATA_SENSORTRACING){
-      print(user_id_i)
+  
+  file_name <- paste0("speedings_", date_i, ".gz.parquet")
+  file_dir <- file.path(sensors_dir, "RawData", "speedings_individual_data", file_name)
+  
+  if(!file.exists(file_dir) | OVERWRITE_DATA_SPEEDINGS){
+    df_out <- map_df(unique(users_df$id), function(user_id_i){
       
-      df_out <- get_report_raw_json(user_id = user_id_i, 
-                                    report_id = report_df$id[report_df$n %in% "Units Sensors Tracing - all"], 
-                                    resource_id = resource_id, 
-                                    datetime_begin = paste(date_i, "00:00:00") %>% ymd_hms(tz = "UTC") %>% as.numeric(), 
-                                    datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric(),
-                                    wialon_token,
-                                    users_df)
+      json_tmp <- get_report_raw_json(user_id = user_id_i, 
+                                      report_id = report_df$id[report_df$n %in% "Speedings"], 
+                                      resource_id = resource_id, 
+                                      datetime_begin = paste(date_i, "00:00:00") %>% ymd_hms(tz = "UTC") %>% as.numeric(), 
+                                      datetime_end = paste(date_i, "23:59:59") %>% ymd_hms(tz = "UTC") %>% as.numeric(),
+                                      wialon_token,
+                                      users_df)
       
-      saveRDS(df_out, file_dir_rds)
-      rm(df_out)
-      #write_parquet(df_out, file_dir, compression = "gzip", compression_level = 5)
-    }
+      df_out_i <- report_json_to_df(results_list = json_tmp,
+                                    report_id = report_df$id[report_df$n %in% "Speedings"],
+                                    user_id = user_id_i,
+                                    users_df = users_df)
+      
+      return(df_out_i)
+    })
     
+    write_parquet(df_out, file_dir, compression = "gzip", compression_level = 5)
+    rm(df_out)
   }
+  
 }
+
 

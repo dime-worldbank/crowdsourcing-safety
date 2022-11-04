@@ -206,6 +206,16 @@ get_report <- function(user_id,
                     "longitude",
                     "time_str")
     
+    col_names9 <- c("no",
+                    "time_str",
+                    "speed",
+                    "blank",
+                    "location",
+                    "latitute",
+                    "longitude",
+                    "no1",
+                    "time_str1")
+    
     col_names6 <- c("no",
                     "group",
                     "speed",
@@ -479,6 +489,33 @@ report_json_to_df <- function(results_list,
                    "latitude2",
                    "longitude2")
     
+    col_names16 <- c("no",
+                     "time_str",
+                     "speed",
+                     "coordinates",
+                     "latitude",
+                     "longitude",
+                     "id",
+                     "location",
+                     "latitude1",
+                     "longitude1",
+                     "id1",
+                     "time_str1",
+                     "time_int",
+                     "latitude2",
+                     "longitude2",
+                     "id2")
+    
+    col_names9 <- c("no",
+                    "time_str",
+                    "speed",
+                    "blank",
+                    "location",
+                    "latitute",
+                    "longitude",
+                    "no1",
+                    "time_str1")
+    
     # Sometimes there's only 8 or 6 columns
     col_names8 <- c("no",
                     "group",
@@ -689,6 +726,14 @@ report_json_to_df <- function(results_list,
           df_i$diff_num_vars_rawdata <- T # flag to check data later
         } else if (report_id %in% 2 & ncol(df_i) %in% 6){
           names(df_i) <- col_names6
+          df_i$diff_num_vars_rawdata <- T # flag to check data later
+          df_i$location <- NA
+        } else if (report_id %in% 2 & ncol(df_i) %in% 9){
+          names(df_i) <- col_names9
+          df_i$diff_num_vars_rawdata <- T # flag to check data later
+          df_i$location <- NA
+        } else if (report_id %in% 2 & ncol(df_i) %in% 16){
+          names(df_i) <- col_names16
           df_i$diff_num_vars_rawdata <- T # flag to check data later
           df_i$location <- NA
         } else{

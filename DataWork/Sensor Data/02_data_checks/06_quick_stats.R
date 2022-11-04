@@ -4,6 +4,16 @@
 daily_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 #daily_sf <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
 
+a <- daily_df %>%
+  dplyr::filter(N_obs_speed > 0) %>%
+  group_by(date) %>%
+  dplyr::summarise(n = n())
+
+a %>%
+  ggplot() +
+  geom_col(aes(x = date, y = n))
+
+
 daily_sub_df <- daily_df %>%
   dplyr::filter(distance_km >= 100) %>%
   dplyr::mutate(prop_speed_over_110 = N_speed_over_110 / N_obs_speed,

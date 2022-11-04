@@ -43,6 +43,8 @@ cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
   )
   
   out_df$install_date <- sensor_df_i$install_date[1]
+  out_df$route        <- sensor_df_i$route[1]
+  out_df$sacco        <- sensor_df_i$sacco[1]
   
   return(out_df)
   
@@ -50,9 +52,24 @@ cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
 
 #View(cont_nodata_df)
 
+# good_df <- cont_nodata_df[cont_nodata_df$n_days_no_speed %in% 0,]
+# good_df <- good_df %>%
+#   dplyr::select(regno_clean)
+# 
+# write.csv(good_df, "~/Desktop/regnos_with_data.csv", row.names = F)
+
 cont_nodata_df$n_days_no_speed %>% table()
 
-table(cont_nodata_df$n_days_no_speed > 7)
+table(cont_nodata_df$n_days_no_speed >= 7)
+table(cont_nodata_df$n_days_no_speed >= 14)
+table(cont_nodata_df$n_days_no_speed >= 21)
+table(cont_nodata_df$n_days_no_speed >= 31)
+table(cont_nodata_df$n_days_no_speed >= 50)
 
+issues_to_check <- cont_nodata_df %>%
+  filter(n_days_no_speed >= 31) %>%
+  arrange(-n_days_no_speed) %>%
+  dplyr::select(regno_clean, sacco, route, n_days_no_speed)
 
+write_csv(issues_to_check, "~/Desktop/sensor_issues.csv")
 

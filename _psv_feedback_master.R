@@ -52,6 +52,7 @@ sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Sur
 sacco_route_dir           <- file.path(data_dir, "Sacco Route Data")
 driver_message_dir        <- file.path(data_dir, "Send Messages to Drivers")
 matatu_data_dir           <- file.path(data_dir, "Matatu Data")
+ntsa_speed_dir            <- file.path(data_dir, "NTSA - Speed Data")
 
 # Packages ---------------------------------------------------------------------
 library(tidyverse)
@@ -87,6 +88,7 @@ library(ggpubr)
 library(twilio)
 library(raster)
 library(magick)
+library(janitor)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))

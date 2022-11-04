@@ -18,8 +18,10 @@ IN_FILES <- file.path(sensors_dir, "RawData", "sensor_tracing_individual_data_te
              full.names = T) 
 
 if(!(Sys.info()[["user"]] %in% "WB521633")){
-  IN_FILES <- rev(IN_FILES)
+  #IN_FILES <- rev(IN_FILES)
 }
+
+#IN_FILES <- IN_FILES %>% str_subset("2022-10-04|2022-10-03|2022-10-05") %>% str_subset("24647423|24271205|23256276")
 
 tmp <- lapply(IN_FILES, function(file_i){
   print(file_i)
@@ -38,6 +40,9 @@ tmp <- lapply(IN_FILES, function(file_i){
     str_replace_all("sensortracing_", "") %>% 
     str_replace_all(".*/", "") %>%
     str_replace_all("_.*", "")
+  
+  date_folder <- OUT_FILE_i %>% str_replace_all("/sensortracing_.*", "")
+  dir.create(date_folder)
   
   df_out <- report_json_to_df(results_list = json_tmp,
                               report_id = report_id,

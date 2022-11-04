@@ -8,7 +8,7 @@ veh_df <- veh_df %>%
                 phase %in% "june2022-sensor-driverfeedback") 
 
 veh_df <- veh_df %>%
-  dplyr::select(psv_num)
+  dplyr::select(reg_no, psv_num)
 
 ## Export as csv [For requiring response]
 write_csv(veh_df, file.path(matatu_data_dir, "Outputs", "june22_psvnums.csv"))
