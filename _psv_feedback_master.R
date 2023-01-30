@@ -27,7 +27,8 @@ if(F){
 # Rob (Personal Comptuer)
 if(Sys.info()[["user"]] == "robmarty"){
   dropbox_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
-  onedrive_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
+  db_pii_dir  <- "/Volumes/PSV_Rider_Feedback_PII"
+  #onedrive_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
   github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
 }
 
@@ -45,7 +46,7 @@ if(Sys.info()[["user"]] == "wb575963"){
   onedrive_dir <- "C:/Users/wb575963/WBG/Robert Andrew Marty - PSV Rider Feedback"
 }
 
-#### From Root
+#### From Dropbox
 data_dir                  <- file.path(dropbox_dir, "Data")
 sensors_dir               <- file.path(data_dir, "Sensor Data")
 sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Survey")
@@ -53,6 +54,16 @@ sacco_route_dir           <- file.path(data_dir, "Sacco Route Data")
 driver_message_dir        <- file.path(data_dir, "Send Messages to Drivers")
 matatu_data_dir           <- file.path(data_dir, "Matatu Data")
 ntsa_speed_dir            <- file.path(data_dir, "NTSA - Speed Data")
+
+#### Encrypted Data
+data_pii_dir              <- file.path(db_pii_dir, "Data")
+rider_feedback_pii_dir    <- file.path(data_pii_dir, "Rider Feedback")
+
+# API Keys ---------------------------------------------------------------------
+if(Sys.info()[["user"]] == "robmarty"){
+  api_keys_df <- read.csv(file.path("~/Dropbox", "World Bank", "Webscraping", "Files for Server", "api_keys.csv"),
+                          stringsAsFactors = F)
+}
 
 # Packages ---------------------------------------------------------------------
 library(tidyverse)
