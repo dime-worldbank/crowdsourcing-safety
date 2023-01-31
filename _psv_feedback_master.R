@@ -38,6 +38,12 @@ if(Sys.info()[["user"]] == "WB521633"){
   onedrive_dir <- "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
 }
 
+# Tom (personal computer)
+if(Sys.info()[["user"]] == "Tom"){
+  dropbox_dir <- "/Users/Tom/Dropbox/PSV Rider Feedback/"
+  github_dir <- "~/Google Drive/My Drive/Google Drive (iamtomharris98@gmail.com)/DIME 2/PSV-Rider-Feedback/"
+}
+
 # Ruiwen (WB Computer)
 if(Sys.info()[["user"]] == "wb575963"){
   dropbox_dir <- "C:/Users/wb575963/Dropbox/PSV Rider Feedback"
