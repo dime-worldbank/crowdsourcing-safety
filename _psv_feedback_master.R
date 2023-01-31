@@ -39,6 +39,12 @@ if(Sys.info()[["user"]] == "WB521633"){
   onedrive_dir <- "C:/Users/wb521633/OneDrive - WBG/PSV Rider Feedback"
 }
 
+# Tom (personal computer)
+if(Sys.info()[["user"]] == "Tom"){
+  dropbox_dir <- "/Users/Tom/Dropbox/PSV Rider Feedback/"
+  github_dir <- "~/Google Drive/My Drive/Google Drive (iamtomharris98@gmail.com)/DIME 2/PSV-Rider-Feedback/"
+}
+
 # Ruiwen (WB Computer)
 if(Sys.info()[["user"]] == "wb575963"){
   dropbox_dir <- "C:/Users/wb575963/Dropbox/PSV Rider Feedback"
@@ -48,6 +54,7 @@ if(Sys.info()[["user"]] == "wb575963"){
 
 #### From Dropbox
 data_dir                  <- file.path(dropbox_dir, "Data")
+rider_feedback_dir        <- file.path(data_dir, "Rider Feedback")
 sensors_dir               <- file.path(data_dir, "Sensor Data")
 sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Survey")
 sacco_route_dir           <- file.path(data_dir, "Sacco Route Data")
