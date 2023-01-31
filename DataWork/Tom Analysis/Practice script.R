@@ -1,7 +1,16 @@
 # Tom Harris
 # Practice script
 
-#### Before any new scripts, open and run the master script! Sets all root directories
+# n.b. Before any new scripts, run psv_feedback_master.R
+
+if (!require("pacman")) {
+  install.packages("pacman")
+}
+pacman::p_load(tidyr,
+               dplyr,
+               plotly,
+               ggplot2,
+               data.table)
 
 
 sensor_data <-
@@ -82,8 +91,4 @@ plot_1 <- ggplot(final_data) +
 plot_1
 
 # interactive version
-library(plotly)
 ggplotly(plot_1)
-
-
-
