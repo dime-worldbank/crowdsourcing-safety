@@ -159,7 +159,8 @@ plot_1
 ggplotly(plot_1)
 
 
-# plot of number of 80kmh speed violations per km by Sacco
+
+# plot of number of 80kmh speed violations per km by sticker treatment
 plot_2 <- ggplot(final_data) +
   aes(
     x = distance_km,
@@ -186,3 +187,89 @@ plot_2
 
 # interactive version
 ggplotly(plot_2)
+
+
+# plot of number of 80kmh speed violations per km by feedback treatment
+plot_3 <- ggplot(final_data) +
+  aes(
+    x = distance_km,
+    y = final_data$over_80_by_km,
+    colour = as.factor(final_data$drvr_feedback_treat_feedback)
+  ) +
+  geom_point(
+    shape = "circle",
+    size = 2,
+    alpha = 0.6
+  ) +
+  labs(
+    x = "Average Journey Distance (km)",
+    y = "Count of >80km/h violations per km",
+    title = ">80km/h speed violations per km",
+    color = 'Sticker Treatment'
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  xlim(0, 1000) + 
+  scale_color_manual(values=c( "#9E0142", "#5E4FA2","#999999"))
+
+plot_3
+
+# interactive version
+ggplotly(plot_3)
+
+
+# G-force violations
+
+# plot of number of 80kmh speed violations per km by feedback treatment
+plot_4 <- ggplot(final_data) +
+  aes(
+    x = distance_km,
+    y = (final_data$N_violation / final_data$distance_km),
+    colour = sacco
+  ) +
+  geom_point(
+    shape = "circle",
+    size = 2,
+    alpha = 0.6
+  ) +
+  labs(
+    x = "Average Journey Distance (km)",
+    y = "Count of G violations per km",
+    title = "G violations per km",
+    color = 'Sacco'
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  xlim(0, 1000)
+plot_4
+
+# interactive version
+ggplotly(plot_4)
+
+# plot of number of 80kmh speed violations per km by feedback treatment
+plot_5 <- ggplot(final_data) +
+  aes(
+    x = distance_km,
+    y = (final_data$N_violation / final_data$distance_km),
+    colour = as.factor(final_data$drvr_feedback_treat_feedback)
+  ) +
+  geom_point(
+    shape = "circle",
+    size = 2,
+    alpha = 0.6
+  ) +
+  labs(
+    x = "Average Journey Distance (km)",
+    y = "Count of G violations per km",
+    title = "G violations per km",
+    color = 'Sticker Treatment'
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  xlim(0, 1000) + 
+  scale_color_manual(values=c( "#9E0142", "#5E4FA2","#999999"))
+
+plot_5
+
+# interactive version
+ggplotly(plot_5)
