@@ -111,9 +111,19 @@ library(janitor)
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))
 source(file.path(github_dir, "Functions", "load_sensortracing_raw.R"))
+source("https://raw.githubusercontent.com/ramarty/r_google_translate/main/r_google_translate.R")
 
 # Code -------------------------------------------------------------------------
 if(RUN_CODE){
+  
+  # Process Rider Feedback Data ------------------------------------------------
+  rider_feedback_code_dir <- file.path(github_dir, "DataWork", "Rider Feedback")
+  
+  source(file.path(rider_feedback_code_dir, "01_clean_data.R"))
+  source(file.path(rider_feedback_code_dir, "02a_translate_comments.R"))
+  source(file.path(rider_feedback_code_dir, "02b_append_translated_comments.R"))
+  source(file.path(rider_feedback_code_dir, "03_merge_data.R"))
+  source(file.path(rider_feedback_code_dir, "04_create_comments_to_code.R"))
   
   # Process Sensor Data --------------------------------------------------------
   if(PROCESS_SENSOR_DATA){
