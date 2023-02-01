@@ -18,7 +18,6 @@ pacman::p_load(tidyr,
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
-
 feedback_data <-
   readRDS(file.path(rider_feedback_dir, "FinalData", "rider_feedback.Rds"))
 
@@ -29,16 +28,12 @@ feedback_trans_data <- readRDS(file.path(
 ))
 
 ### Notes to self...
-
 ## common id is probs regno_clean
 
 ## first step, aggregate everything to the vehicle level
 #how safe does sensor data say vehicle, how safe does feedback data say it is.... do these corr?
 # how do we define 'safe' . e,g, avg speed, make other indicators .... proportion of time spent over 80 kmh etc.
 # eventually some kidn of index of dangerous driving ....
-
-# Load sample data
-
 
 #### Weighted Average method (I'm not sure about this...) ####
 #
@@ -76,7 +71,7 @@ feedback_trans_data <- readRDS(file.path(
 # plot_1 <- ggplot(final_data) +
 #   aes(x = distance_km, y = over_80_by_km, colour = sacco) +
 #   geom_point(shape = "circle",
-#              size = 1.5,
+#              size = 3,
 #              alpha = 0.6) +
 #   scale_color_hue(direction = 1) +
 #   labs(
@@ -95,7 +90,6 @@ feedback_trans_data <- readRDS(file.path(
 # # interactive version
 # ggplotly(plot_1)
 
-
 #### Simple Average method (I'm not sure about this...) ####
 
 # Load sample data
@@ -108,7 +102,6 @@ grouped_data <- sensor_data %>%
 # biased by buses which drive longer routes.
 grouped_data$over_80_by_km <-
   grouped_data$N_speed_over_80 / grouped_data$distance_km
-
 
 # ### Specify which columns we want to take weighted average of:
 variablesToAvg <-
@@ -139,7 +132,7 @@ plot_1 <- ggplot(final_data) +
       y = final_data$over_80_by_km,
       colour = sacco) +
   geom_point(shape = "circle",
-             size = 1.5,
+             size = 3,
              alpha = 0.6) +
   scale_color_hue(direction = 1) +
   labs(
@@ -159,7 +152,6 @@ plot_1
 ggplotly(plot_1)
 
 
-
 # plot of number of 80kmh speed violations per km by sticker treatment
 plot_2 <- ggplot(final_data) +
   aes(
@@ -167,11 +159,9 @@ plot_2 <- ggplot(final_data) +
     y = final_data$over_80_by_km,
     colour = as.factor(final_data$drvr_feedback_treat_sticker)
   ) +
-  geom_point(
-    shape = "circle",
-    size = 2,
-    alpha = 0.6
-  ) +
+  geom_point(shape = "circle",
+             size = 3,
+             alpha = 0.6) +
   labs(
     x = "Average Journey Distance (km)",
     y = "Count of >80km/h violations per km",
@@ -180,8 +170,8 @@ plot_2 <- ggplot(final_data) +
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
-  xlim(0, 1000) + 
-  scale_color_manual(values=c( "#9E0142", "#5E4FA2","#999999"))
+  xlim(0, 1000) +
+  scale_color_manual(values = c("#9E0142", "#5E4FA2", "#999999"))
 
 plot_2
 
@@ -196,11 +186,9 @@ plot_3 <- ggplot(final_data) +
     y = final_data$over_80_by_km,
     colour = as.factor(final_data$drvr_feedback_treat_feedback)
   ) +
-  geom_point(
-    shape = "circle",
-    size = 2,
-    alpha = 0.6
-  ) +
+  geom_point(shape = "circle",
+             size = 3,
+             alpha = 0.6) +
   labs(
     x = "Average Journey Distance (km)",
     y = "Count of >80km/h violations per km",
@@ -209,8 +197,8 @@ plot_3 <- ggplot(final_data) +
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
-  xlim(0, 1000) + 
-  scale_color_manual(values=c( "#9E0142", "#5E4FA2","#999999"))
+  xlim(0, 1000) +
+  scale_color_manual(values = c("#9E0142", "#5E4FA2", "#999999"))
 
 plot_3
 
@@ -227,11 +215,9 @@ plot_4 <- ggplot(final_data) +
     y = (final_data$N_violation / final_data$distance_km),
     colour = sacco
   ) +
-  geom_point(
-    shape = "circle",
-    size = 2,
-    alpha = 0.6
-  ) +
+  geom_point(shape = "circle",
+             size = 3,
+             alpha = 0.6) +
   labs(
     x = "Average Journey Distance (km)",
     y = "Count of G violations per km",
@@ -253,11 +239,9 @@ plot_5 <- ggplot(final_data) +
     y = (final_data$N_violation / final_data$distance_km),
     colour = as.factor(final_data$drvr_feedback_treat_feedback)
   ) +
-  geom_point(
-    shape = "circle",
-    size = 2,
-    alpha = 0.6
-  ) +
+  geom_point(shape = "circle",
+             size = 3,
+             alpha = 0.6) +
   labs(
     x = "Average Journey Distance (km)",
     y = "Count of G violations per km",
@@ -266,8 +250,8 @@ plot_5 <- ggplot(final_data) +
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
-  xlim(0, 1000) + 
-  scale_color_manual(values=c( "#9E0142", "#5E4FA2","#999999"))
+  xlim(0, 1000) +
+  scale_color_manual(values = c("#9E0142", "#5E4FA2", "#999999"))
 
 plot_5
 
