@@ -18,6 +18,8 @@ pacman::p_load(tidyr,
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
+sensor_data$sacco <- sensor_data$sacco.x
+
 feedback_data <-
   readRDS(file.path(rider_feedback_dir, "FinalData", "rider_feedback.Rds"))
 
@@ -105,7 +107,7 @@ grouped_data$over_80_by_km <-
 
 # ### Specify which columns we want to take weighted average of:
 variablesToAvg <-
-  names(grouped_data)[c(1, 2, 10:66, 68:70)] ## you may want to tweak which variables you average
+  names(grouped_data)[c(1, 2, 10:72, 75, 77, 78, 80)] ## you may want to tweak which variables you average
 
 ### set as data table
 grouped_data <-
@@ -193,7 +195,7 @@ plot_3 <- ggplot(final_data) +
     x = "Average Journey Distance (km)",
     y = "Count of >80km/h violations per km",
     title = ">80km/h speed violations per km",
-    color = 'Sticker Treatment'
+    color = 'Feedback Treatment'
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
