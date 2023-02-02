@@ -37,10 +37,23 @@ sensor_sum_df <- sensor_df %>%
 ## Vehicle-specific attributes to merge in
 sensor_vehlevel_df <- sensor_df %>%
   distinct(regno_clean, 
+           
+           ## Vehicle info
+           sacco, 
+           route,
            drvr_feedback_treat_id, 
            drvr_feedback_treat, 
            drvr_feedback_treat_sticker,
-           drvr_feedback_treat_feedback)
+           drvr_feedback_treat_feedback,
+           
+           ## Rider feedback
+           n_rider_feedback_total,
+           date_first_rider_feedback,
+           
+           ## Sticker installation survey
+           sticker_install_date, 
+           n_stickers_installed, 
+           sticker_installed)
 
 sensor_agg_df <- merge(sensor_sum_df, sensor_nonsum_df, 
                        by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date", "install_date"),

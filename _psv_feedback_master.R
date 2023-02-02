@@ -53,18 +53,20 @@ if(Sys.info()[["user"]] == "wb575963"){
 }
 
 #### From Dropbox
-data_dir                  <- file.path(dropbox_dir, "Data")
-rider_feedback_dir        <- file.path(data_dir, "Rider Feedback")
-sensors_dir               <- file.path(data_dir, "Sensor Data")
-sensor_install_survey_dir <- file.path(data_dir, "Matatu Sensor Installation Survey")
-sacco_route_dir           <- file.path(data_dir, "Sacco Route Data")
-driver_message_dir        <- file.path(data_dir, "Send Messages to Drivers")
-matatu_data_dir           <- file.path(data_dir, "Matatu Data")
-ntsa_speed_dir            <- file.path(data_dir, "NTSA - Speed Data")
+data_dir                   <- file.path(dropbox_dir, "Data")
+rider_feedback_dir         <- file.path(data_dir, "Rider Feedback")
+sensors_dir                <- file.path(data_dir, "Sensor Data")
+sensor_install_survey_dir  <- file.path(data_dir, "Matatu Sensor Installation Survey")
+sticker_install_survey_dir <- file.path(data_dir, "Sticker Installation Survey")
+sacco_route_dir            <- file.path(data_dir, "Sacco Route Data")
+driver_message_dir         <- file.path(data_dir, "Send Messages to Drivers")
+matatu_data_dir            <- file.path(data_dir, "Matatu Data")
+ntsa_speed_dir             <- file.path(data_dir, "NTSA - Speed Data")
 
 #### Encrypted Data
-data_pii_dir              <- file.path(db_pii_dir, "Data")
-rider_feedback_pii_dir    <- file.path(data_pii_dir, "Rider Feedback")
+data_pii_dir                   <- file.path(db_pii_dir, "Data")
+rider_feedback_pii_dir         <- file.path(data_pii_dir, "Rider Feedback")
+sticker_install_survey_pii_dir <- file.path(data_pii_dir, "Sticker Installation Survey")
 
 # API Keys ---------------------------------------------------------------------
 if(Sys.info()[["user"]] == "robmarty"){
@@ -115,6 +117,11 @@ source("https://raw.githubusercontent.com/ramarty/r_google_translate/main/r_goog
 
 # Code -------------------------------------------------------------------------
 if(RUN_CODE){
+  
+  # Process Sticker Installation Survey ----------------------------------------
+  sticker_install_survey_code_dir <- file.path(github_dir, "DataWork", "Sticker Installation Survey")
+  
+  source(file.path(sticker_install_survey_code_dir, "01_clean_data.R"))
   
   # Process Rider Feedback Data ------------------------------------------------
   rider_feedback_code_dir <- file.path(github_dir, "DataWork", "Rider Feedback")

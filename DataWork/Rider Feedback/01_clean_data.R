@@ -4,9 +4,15 @@
 ## Main Data
 df <- read_csv(file.path(rider_feedback_pii_dir, "RawData - PII", "rider_feedback.csv"))
 
-## Data to Merge Into
-valid_reg_df <- read_csv(file.path(data_dir, "Valid Reg Numbers", "valid_psv_nums.csv"))
+## Sticker installation data
+st_insll_df <- readRDS(file.path(sticker_install_survey_dir, "FinalData", 
+                             "sticker_install_survey.Rds"))
 
+## Matatu info
+psv_df <- readRDS(file.path(matatu_data_dir, "FinalData", "vehicle_info.Rds"))
+
+## Data to Merge Into
+#valid_reg_df <- read_csv(file.path(data_dir, "Valid Reg Numbers", "valid_psv_nums.csv"))
 
 # Clean var names --------------------------------------------------------------
 df <- df %>%
@@ -50,9 +56,6 @@ df <- df %>%
                 invite_date     = invite_datetime     %>% date(),
                 start_date      = start_datetime      %>% date(),
                 completion_date = completion_datetime %>% date()) 
-
-## Indicate if valid PSV number
-df$valid_psvnum <- df$psvnum_label %in% as.character(valid_reg_df$psv_num)
 
 # English and order factors ----------------------------------------------------
 ## Order factors so that low is unsafe, and high is safe
@@ -100,6 +103,37 @@ df <- df %>%
                                                           "Very fast [80+]"))
   )
 
+# Merge with other datasets ----------------------------------------------------
+psv_df <- psv_df %>%
+  dplyr::rename(regno_clean = reg_no) %>% 
+  dplyr::select(psv_num, regno_clean,
+                drvr_feedback_treat_id, drvr_feedback_treat, 
+                drvr_feedback_treat_sticker, drvr_feedback_treat_feedback) %>%
+  dplyr::mutate(valid_psvnum = T)
+
+st_insll_df <- st_insll_df %>%
+  dplyr::mutate(sticker_install_date = starttime %>% date()) %>%
+  dplyr::rename(matatu_route_stk_inst_srvy = matatu_route,
+                matatu_sacco_stk_inst_srvy = matatu_sacco,
+                matatu_n_seats_stk_inst_srvy = matatu_seats) %>%
+  dplyr::select(c(regno_clean, sticker_install_date, 
+                  matatu_route_stk_inst_srvy, matatu_sacco_stk_inst_srvy,
+                  matatu_n_seats_stk_inst_srvy,
+                  n_stickers_installed)) 
+
+# First merge sticker installation data with PSV data. Use a left join, so only
+# consider PSVs where a sticker has actually been installed
+## TODO: Could also check date installed.
+psv_sticker_df <- st_insll_df %>%
+  left_join(psv_df, by = "regno_clean")
+
+df <- df %>% 
+  dplyr::mutate(psv_num = psvnum_label %>%
+                  str_squish() %>%
+                  as.numeric()) %>%
+  left_join(psv_sticker_df, by = "psv_num")
+
+df$valid_psvnum[is.na(df$valid_psvnum)] <- F
 
 # Remove PII -------------------------------------------------------------------
 df_nonpii <- df %>%
