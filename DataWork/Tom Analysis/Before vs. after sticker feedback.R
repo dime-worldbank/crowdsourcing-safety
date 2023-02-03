@@ -80,6 +80,13 @@ feedback_data$speed_numeric <-
 # Generating variable for 'number of days since sticker installed'...
 
 feedback_data$days_since_sticker <-
-  difftime(feedback_data$completion_date,
-           feedback_data$sticker_install_date,
-           units = "days")
+  as.numeric(
+    difftime(
+      feedback_data$completion_date,
+      feedback_data$sticker_install_date,
+      units = "days"
+    )
+  )
+
+
+
