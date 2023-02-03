@@ -45,7 +45,11 @@ feedback_data$safety_numeric <- feedback_data$safety_label_en
 feedback_data$safety_numeric <-
   mapvalues(
     feedback_data$safety_numeric,
-    from = c("Not Very Safe", "Not Safe", "Safe", "Very Safe"),
+    from = c("Not Very Safe",
+             "Not Safe",
+             "Safe",
+             "Very Safe"),
+    #I'm not sure here if 'not very safe' is better than 'not safe'?
     to = c(4, 3, 2, 1)
   )
 
@@ -84,7 +88,7 @@ grouped_data <- feedback_data %>%
 
 # ### Specify which columns we want to take weighted average of:
 variablesToAvg <-
-  names(grouped_data)[c(1, 2, 10:72, 75, 77, 78, 80)] ## you may want to tweak which variables you average
+  names(grouped_data)[c(25, 26, 27, 29, 30, 32, 33)] ## you may want to tweak which variables you average
 
 ### set as data table
 grouped_data <-
@@ -92,7 +96,7 @@ grouped_data <-
 
 # getting rid of rows where N_speed_over_0 is 'na' or zero as this doesn't make sense..
 grouped_data <- grouped_data %>%
-  filter(!is.na(N_speed_over_0) & N_speed_over_0 != 0)
+  filter(!is.na(safety_numeric) &  !is.na(speed_numeric))
 
 
 ### collapse to FB postcode level using weighted means
@@ -103,44 +107,36 @@ final_data <-
                .SDcols = variablesToAvg] ## specifies columns to average
 
 final_data$sacco <-
-  grouped_data$sacco[match(final_data$regno_clean, grouped_data$regno_clean)]
-
-
-
-
-
-
-
-
-
+  grouped_data$matatu_sacco_stk_inst_srvy[match(final_data$regno_clean, grouped_data$regno_clean)]
 
 
 
 # Q. does safety rating correlate with speed rating?
 
 # plot of number of 80kmh speed violations per km by Sacco
-plot_1 <- ggplot(feedback_data) +
+plot_1 <- ggplot(final_data) +
   aes(
-    x = feedback_data$safety_numeric,
-    y = feedback_data$speed_numeric,
-    colour = feedback_data$matatu_sacco_stk_inst_srvy
+    x = final_data$safety_numeric,
+    y = final_data$speed_numeric,
+    color = sacco
   ) +
   geom_point(shape = "circle",
              size = 3,
              alpha = 0.6) +
   scale_color_hue(direction = 1) +
   labs(
-    x = "asdf",
-    y = "asdf",
-    title = "asdf",
+    x = "Safety Rating (1 = Very safe, 4 = Very unsafe)",
+    y = "Speed Rating (1 = Very slow, 5 = Very fast",
+    title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
-  labs(fill = "Sacco Company")
+  labs(fill = "Sacco Company") +
+  xlim(2.5, 4) +
+  ylim(1.5, 5)
 
 plot_1
 
 # interactive version
 ggplotly(plot_1)
-
