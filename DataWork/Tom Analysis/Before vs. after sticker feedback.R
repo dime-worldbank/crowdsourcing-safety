@@ -88,5 +88,14 @@ feedback_data$days_since_sticker <-
     )
   )
 
+# an issue here is there are no points 'before', i.e. with a negative number of days
+# that's because for observations where the sticker hasn't been installed yet, the date is NA
 
 
+## Plotting
+ggplot(feedback_data) +
+  aes(x = days_since_sticker, y = safety_numeric) +
+  geom_point(shape = "circle",
+             size = 1.5,
+             colour = "#112446") +
+  theme_minimal()
