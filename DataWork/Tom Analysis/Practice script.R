@@ -261,13 +261,8 @@ plot_5
 ggplotly(plot_5)
 
 
-
+# Notes to self:
 ##  sticker treatment adsfasdf need to make sure it's after teh sticker has actually been installed
-# event study type plot before and after... 
-# more analysis of has treatment worked 
+# event study type plot before and after...
+# more analysis of has treatment worked
 ###### compare sensor data to feedback data --- now has common id
-
-
-
-
-
