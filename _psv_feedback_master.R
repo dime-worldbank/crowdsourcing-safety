@@ -109,6 +109,7 @@ library(twilio)
 library(raster)
 library(magick)
 library(janitor)
+library(qrcode)
 
 # Functions --------------------------------------------------------------------
 source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))

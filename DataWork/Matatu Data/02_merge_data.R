@@ -16,7 +16,7 @@ ntsa_sacco_df <- ntsa_sacco_df %>%
 
 # Merge data -------------------------------------------------------------------
 veh_df <- veh_df %>%
-  left_join(psv_num_df, by = "reg_no") %>%
+  left_join(psv_num_df, by = "id") %>%
   left_join(driver_rand_df, by = "reg_no") %>%
   dplyr::select(-blank_var)
 

@@ -10,7 +10,7 @@ sensor_nonsum_df <- sensor_df %>%
   #dplyr::filter(!is.na(N_obs_speed), #TODO: shouldn't be filtering
   #              N_obs_speed > 0) %>%
   dplyr::filter(N_obs_speed > 0) %>%
-  group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, install_date) %>%
+  group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, gps_install_date) %>%
   dplyr::summarise(speed_min = min(speed_min),
                    speed_p05 = weighted.mean(x = speed_p05, w = N_obs_speed),
                    speed_p10 = weighted.mean(x = speed_p10, w = N_obs_speed),
@@ -30,37 +30,48 @@ sensor_nonsum_df <- sensor_df %>%
 ## Summarize numeric variables; taking sums
 sensor_sum_df <- sensor_df %>%
   #dplyr::select(-n_drivers_per_veh_q) %>% # starts with N // is character
-  dplyr::group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, install_date) %>%
-  dplyr::summarise_at(vars(matches("\\bN_")),
+  dplyr::group_by(reg_no, reg_no_id, regno_clean, sacco, route, date, gps_install_date) %>%
+  dplyr::summarise_at(vars(matches("\\bN_obs_"),
+                           matches("\\bN_valueg_"),
+                           matches("\\bN_speed_"),
+                           matches("\\bN_violation_")),
                       sum)
 
 ## Vehicle-specific attributes to merge in
-sensor_vehlevel_df <- sensor_df %>%
-  distinct(regno_clean, 
-           
-           ## Vehicle info
-           sacco, 
-           route,
-           drvr_feedback_treat_id, 
-           drvr_feedback_treat, 
-           drvr_feedback_treat_sticker,
-           drvr_feedback_treat_feedback,
-           
-           ## Rider feedback
-           n_rider_feedback_total,
-           date_first_rider_feedback,
-           
-           ## Sticker installation survey
-           sticker_install_date, 
-           n_stickers_installed, 
-           sticker_installed)
+# First non-na
+first_nonna <- function(x){
+  x[!is.na(x)][1]
+}
 
+min_nonna <- function(x){
+  min(x[!is.na(x)])
+}
+
+sensor_vehlevel_df <- sensor_df %>%
+  group_by(regno_clean) %>%
+  dplyr::summarise(drvr_feedback_treat_id       = drvr_feedback_treat_id %>% first_nonna(),
+                   drvr_feedback_treat          = drvr_feedback_treat %>% first_nonna(),
+                   drvr_feedback_treat_sticker  = drvr_feedback_treat_sticker %>% first_nonna(),
+                   drvr_feedback_treat_feedback = drvr_feedback_treat_feedback %>% first_nonna(),
+                   
+                   n_rider_feedback_total    = n_rider_feedback_total %>% first_nonna(),
+                   date_first_rider_feedback = date_first_rider_feedback %>% first_nonna(),
+                   
+                   sticker_install_date      = sticker_install_date %>% min_nonna(),
+                   n_stickers_installed      = n_stickers_installed %>% first_nonna(),
+                   sticker_installed         = sticker_installed %>% first_nonna()) %>%
+  ungroup()
+  
 sensor_agg_df <- merge(sensor_sum_df, sensor_nonsum_df, 
-                       by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date", "install_date"),
+                       by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date", "gps_install_date"),
                        all = T)
 
 sensor_agg_df <- sensor_agg_df %>%
   left_join(sensor_vehlevel_df, by = "regno_clean")
+
+# sensor_vehlevel_df <- sensor_vehlevel_df %>%
+#   dplyr::filter(regno_clean %in% "KCH 834K")
+# 
 
 # Aggregate Polylines ----------------------------------------------------------
 # Using method of: summarize(geometry = st_union(geometry)) was inefficient, so
@@ -149,3 +160,39 @@ saveRDS(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 ## Data with Polyline
 saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.Rds"))
 
+
+
+
+# sensor_agg_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
+# 
+# df_clean <- sensor_agg_df %>%
+#   
+#   # Only consider vehicles with sensor installed
+#   dplyr::filter(sticker_installed %in% T) %>%
+#   
+#   # Days since installation
+#   dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
+#   
+#   # Only look 30 days before/after installed
+#   dplyr::filter(abs(days_since_sticker) <= 30) %>%
+#   
+#   # Make facet title
+#   dplyr::mutate(ftitle = paste0(regno_clean, "\n",
+#                                 "NS: ", n_stickers_installed, "; ",
+#                                 "NF: ", n_rider_feedback_total))
+#   
+# df_clean %>%
+#   ggplot() +
+#   geom_vline(aes(xintercept = 0),
+#              color = "red") +
+#   geom_line(aes(x = days_since_sticker, 
+#                y = speed_max)) +
+#   facet_wrap(~ftitle) + 
+#   labs(x = "Days Since Sticker Installed",
+#        caption = "NS = Number of stickers installed; NF = number of passenger feedback surveys") +
+#   theme_minimal() +
+#   theme(strip.text = element_text(face = "bold"))
+# 
+# 
+# 
+# 

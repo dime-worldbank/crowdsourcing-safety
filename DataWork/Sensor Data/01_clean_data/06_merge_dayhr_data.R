@@ -16,7 +16,8 @@ veh_data_df <- veh_data_df %>%
                 drvr_feedback_treat_sticker, drvr_feedback_treat_feedback) %>%
   dplyr::mutate(regno_clean = regno_clean %>% 
                   tolower() %>%
-                  str_replace_all(" ", ""))
+                  str_replace_all(" ", "")) %>%
+  dplyr::filter(regno_clean != "unassigned")
 
 #### Sticker installation survey
 st_insll_df <- readRDS(file.path(sticker_install_survey_dir, "FinalData", 
@@ -169,6 +170,15 @@ sensor_df <- sensor_df %>%
 sensor_sf <- sensor_sf %>%
   dplyr::mutate_at(vars(contains("N_violation"),
                         contains("_valueg")), ~ replace_na(., 0))
+
+# Cleanup variable names -------------------------------------------------------
+sensor_df <- sensor_df %>%
+  dplyr::rename(gps_install_date = install_date,
+                gps_install_datetime = install_datetime)
+
+sensor_sf <- sensor_sf %>%
+  dplyr::rename(gps_install_date = install_date,
+                gps_install_datetime = install_datetime)
 
 # Export -----------------------------------------------------------------------
 write_parquet(sensor_df, file.path(sensors_dir, "FinalData", "sensor_dayhr.gz.parquet"), 

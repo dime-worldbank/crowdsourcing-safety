@@ -11,7 +11,7 @@ veh_df <- veh_df %>%
 
 # Assign PSV number ------------------------------------------------------------
 psv_nums <- seq(from = 1,
-                to = 999,
+                to = 9999,
                 by = 3)
 
 # Must have 3 digits
@@ -47,7 +47,7 @@ veh_df$psv_num <- psv_nums[1:nrow(veh_df)]
 
 # Export -----------------------------------------------------------------------
 veh_df <- veh_df %>%
-  dplyr::select(reg_no, psv_num)
+  dplyr::select(id, psv_num)
 
 saveRDS(veh_df, file.path(matatu_data_dir, "FinalData", "individual_files", "psv_num.Rds"))
 
