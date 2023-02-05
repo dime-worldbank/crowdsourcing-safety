@@ -1,5 +1,6 @@
 # Tom Harris
 # Practice script
+# Need to re-do this because underlying data has changed and column index is diff...!
 
 # n.b. Before any new scripts, run psv_feedback_master.R
 
@@ -152,7 +153,6 @@ plot_1
 
 # interactive version
 ggplotly(plot_1)
-
 
 # plot of number of 80kmh speed violations per km by sticker treatment
 plot_2 <- ggplot(final_data) +
