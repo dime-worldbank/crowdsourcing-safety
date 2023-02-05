@@ -239,18 +239,25 @@ plot_3
 ggplotly(plot_3)
 
 
-### Now looking at date since first rider feedback
+#### Now looking at date since first rider feedback ####
 
+#Generating a variable for days since first feedback
 sensor_plot_data$days_since_first_feedback <-
   as.numeric(sensor_plot_data$date - sensor_plot_data$date_first_rider_feedback)
 
+sensor_plot_data <- sensor_plot_data %>%
+  filter(abs(sensor_plot_data$days_since_first_feedback) <= 50)
+
+sensor_feedback_plot_data <-
+  subset(sensor_plot_data,
+         sensor_plot_data$drvr_feedback_treat_feedback == 1)
 
 
 plot_4 <-
   ggplot(
-    sensor_plot_data,
+    sensor_feedback_plot_data,
     aes(
-      x = sensor_plot_data$days_since_first_feedback,
+      x = sensor_feedback_plot_data$days_since_first_feedback,
       y = over_80_by_km,
       color = regno_clean,
       group = 1
@@ -260,7 +267,7 @@ plot_4 <-
              color = "red") +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
-  labs(x = "Days Since Sticker Installed", y = ">80km/h violations per km") +
+  labs(x = "Days Since First Feedback Received", y = ">80km/h violations per km") +
   theme_minimal() +
   theme(strip.text = element_text(face = "bold"))
 
@@ -273,10 +280,10 @@ ggplotly(plot_4)
 
 plot_5 <-
   ggplot(
-    sensor_plot_data,
+    sensor_feedback_plot_data,
     aes(
-      x = sensor_plot_data$days_since_first_feedback,
-      y = sensor_plot_data$total_g_violations,
+      x = sensor_feedback_plot_data$days_since_first_feedback,
+      y = sensor_feedback_plot_data$total_g_violations,
       color = regno_clean,
       group = 1
     )
@@ -285,8 +292,8 @@ plot_5 <-
              color = "red") +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
-  labs(x = "Days Since Sticker Installed", y = "Number of G force violations") +
-  theme_minimal() +
+  labs(x = "Days Since First Feedback Received", y = "G violations") +
+  theme_minimal() + ylim(0, 150) +
   theme(strip.text = element_text(face = "bold"))
 
 plot_5
