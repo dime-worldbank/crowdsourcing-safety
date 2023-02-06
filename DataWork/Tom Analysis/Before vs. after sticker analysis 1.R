@@ -20,7 +20,7 @@ pacman::p_load(tidyr,
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
-sensor_data$sacco <- sensor_data$sacco.x
+# sensor_data$sacco <- sensor_data$sacco.x
 
 feedback_data <-
   readRDS(file.path(rider_feedback_dir, "FinalData", "rider_feedback.Rds"))
