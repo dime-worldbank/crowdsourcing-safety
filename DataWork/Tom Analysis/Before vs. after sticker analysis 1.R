@@ -278,7 +278,7 @@ ggplotly(plot_4)
 # ones which have started receiving feedback differ in certain ways.
 
 
-plot_5 <-
+plot_5 <- 
   ggplot(
     sensor_feedback_plot_data,
     aes(
