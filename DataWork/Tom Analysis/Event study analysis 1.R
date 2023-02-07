@@ -15,6 +15,7 @@ pacman::p_load(
   wesanderson,
   plotly,
   ggplot2,
+  stargazer,
   tidymodels,
   data.table,
   tidyverse,
@@ -72,13 +73,22 @@ analysis_data <- sensor_data_clean %>%
 
 # Regression results
 
-res_es <- felm(over_80_by_km ~ factor(days_since_sticker) | regno_clean + date | 0 | regno_clean,
+res_es <-
+  felm(over_80_by_km ~ factor(days_since_sticker) |
+         regno_clean + date | 0 | regno_clean,
        data = analysis_data)
 res_es
 
-res_dind <- felm(over_80_by_km ~ after |  regno_clean + date | 0 | regno_clean, 
-                 data = analysis_data)
+stargazer(res_es, type = 'text')
+
+res_dind <-
+  felm(over_80_by_km ~ after |
+         regno_clean + date | 0 | regno_clean,
+       data = analysis_data)
 res_dind
+
+stargazer(res_dind, type = 'text')
+
 
 # Variable label
 labels <- c()
@@ -108,10 +118,15 @@ fig_data <- tibble(
     dind_se = ifelse(label >= 0, dind_se, 0)
   )
 
-# Figure
+
+# Figure 1
+
 ggplot(fig_data, aes(x = label, y = es_coef)) +
-  geom_pointrange(aes(ymin = es_coef - 1.96 * es_se, ymax = es_coef + 1.96 * es_se),
-                  alpha = 0.7) +
+  geom_pointrange(
+    aes(ymin = es_coef - 1.96 * es_se, ymax = es_coef + 1.96 * es_se),
+    alpha = 0.7,
+    color = 'navy'
+  ) +
   geom_vline(
     xintercept = -0.5,
     alpha = 0.3,
@@ -162,7 +177,7 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
 
 
 
-# Visualisation 2
+# Figure 2
 
 fig_data <- tibble(
   label = labels,
@@ -204,5 +219,5 @@ ggplot(fig_data, aes(x = label, y = coef)) +
     axis.title = element_text(size = 14),
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10)
-  ) + 
+  ) +
   ggtitle("Event study, >80km/h violations per km")
