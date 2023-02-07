@@ -181,7 +181,7 @@ ggplot(fig_data, aes(x = label, y = coef)) +
   geom_vline(xintercept = -0.5, alpha = 0.3, linetype = "dashed", size = 0.3) +
   theme_classic() +
   geom_hline(yintercept = 0, alpha = 0.5, size = 0.5) +
-  scale_fill_manual(name = "Confidence Intervals", values = c("90%" = "grey12", "95%" = "grey12")) +
+  scale_fill_manual(name = "Confidence Intervals", values = c("90%" = "navy", "95%" = "blue")) +
   guides(fill = guide_legend(override.aes = list(alpha = c(0.4, 0.2)))) +
   ylab("Coefficient estimates & Confidence Intervals") +
   xlab("Year relative to adoption of implied contract exception") +
