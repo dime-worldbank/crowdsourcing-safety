@@ -136,15 +136,16 @@ df_clean %>%
              color = "red") +
   geom_line(aes(x = days_since_sticker,
                 y = speed_max)) +
-  facet_wrap( ~ ftitle) +
+  facet_wrap(~ ftitle) +
   labs(x = "Days Since Sticker Installed",
        note = "NS = Number of stickers installed; NF = number of passenger feedback surveys") +
   theme_minimal() +
   theme(strip.text = element_text(face = "bold"))
 
 
-## adsf
+#### Comparing before and after using sensor data ####
 
+# Creating data for plot
 sensor_plot_data <- sensor_data %>%
   
   # Only consider vehicles with sensor installed
@@ -157,13 +158,13 @@ sensor_plot_data <- sensor_data %>%
   dplyr::filter(abs(days_since_sticker) <= 50)
 
 
-# Need a variable which measures number of violations per km, otherwise
+# Need a variable which measures number of speed violations per km, otherwise
 # biased by buses which drive longer routes.
 sensor_plot_data$over_80_by_km <-
   sensor_plot_data$N_speed_over_80 / sensor_plot_data$distance_km
 
-
-# Generating variable to capture all g-force related violations
+# Generating variable to capture all g-force related violations 
+# should this also be 'per km'?
 sensor_plot_data$total_g_violations <-
   sensor_plot_data$N_violation_acceleration +
   sensor_plot_data$N_violation_brake +
@@ -278,7 +279,7 @@ ggplotly(plot_4)
 # ones which have started receiving feedback differ in certain ways.
 
 
-plot_5 <- 
+plot_5 <-
   ggplot(
     sensor_feedback_plot_data,
     aes(
