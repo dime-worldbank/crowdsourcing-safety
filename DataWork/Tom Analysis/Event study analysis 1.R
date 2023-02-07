@@ -161,3 +161,33 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   xlab("Days relative to installation of sticker") +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14))
+
+
+
+#plooooot
+
+
+fig_data <- tibble(
+  label = labels,
+  coef = summary(res_es)$coef[var_list, "Estimate"] * 100,
+  se = summary(res_es)$coef[var_list, "Cluster s.e."] * 100
+) %>%
+  add_row(label = -1, coef = 0, se = 0)
+
+ggplot(fig_data, aes(x = label, y = coef)) +
+  geom_point() +
+  geom_ribbon(aes(ymin = coef - 1.645 * se, ymax = coef + 1.645 * se, fill = "90%"), alpha = 0.4) +
+  geom_ribbon(aes(ymin = coef - 1.96 * se, ymax = coef + 1.96 * se, fill = "95%"), alpha = 0.2) +
+  geom_vline(xintercept = -0.5, alpha = 0.3, linetype = "dashed", size = 0.3) +
+  theme_classic() +
+  geom_hline(yintercept = 0, alpha = 0.5, size = 0.5) +
+  scale_fill_manual(name = "Confidence Intervals", values = c("90%" = "grey12", "95%" = "grey12")) +
+  guides(fill = guide_legend(override.aes = list(alpha = c(0.4, 0.2)))) +
+  ylab("Coefficient estimates & Confidence Intervals") +
+  xlab("Year relative to adoption of implied contract exception") +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
