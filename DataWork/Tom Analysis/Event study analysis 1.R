@@ -65,22 +65,19 @@ analysis_data <- sensor_data_clean %>%
   ungroup() %>%
   mutate(
     days_since_sticker = relevel(as.factor(days_since_sticker), ref = "-1"),
-    regno_clean = as.factor(regno_clean)
+    regno_clean = as.factor(regno_clean),
+    date = as.factor(date)
   )
-
 
 
 # Regression results
 
-res_es <-
-  felm(over_80_by_km ~ factor(days_since_sticker) |
-         regno_clean | 0 | regno_clean,
+res_es <- felm(over_80_by_km ~ factor(days_since_sticker) | regno_clean + date | 0 | regno_clean,
        data = analysis_data)
 res_es
 
-res_dind <-
-  felm(over_80_by_km ~ after |
-         regno_clean | 0 | regno_clean, data = analysis_data)
+res_dind <- felm(over_80_by_km ~ after |  regno_clean + date | 0 | regno_clean, 
+                 data = analysis_data)
 res_dind
 
 # Variable label
@@ -160,12 +157,12 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   ylab("Coefficient estimates & 95% CI") +
   xlab("Days relative to installation of sticker") +
   theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14))
+        axis.title = element_text(size = 14)) +
+  ggtitle("Event study, >80km/h violations per km")
 
 
 
-#plooooot
-
+# Visualisation 2
 
 fig_data <- tibble(
   label = labels,
@@ -176,18 +173,36 @@ fig_data <- tibble(
 
 ggplot(fig_data, aes(x = label, y = coef)) +
   geom_point() +
-  geom_ribbon(aes(ymin = coef - 1.645 * se, ymax = coef + 1.645 * se, fill = "90%"), alpha = 0.4) +
-  geom_ribbon(aes(ymin = coef - 1.96 * se, ymax = coef + 1.96 * se, fill = "95%"), alpha = 0.2) +
-  geom_vline(xintercept = -0.5, alpha = 0.3, linetype = "dashed", size = 0.3) +
+  geom_ribbon(aes(
+    ymin = coef - 1.645 * se,
+    ymax = coef + 1.645 * se,
+    fill = "90%"
+  ),
+  alpha = 0.3) +
+  geom_ribbon(aes(
+    ymin = coef - 1.96 * se,
+    ymax = coef + 1.96 * se,
+    fill = "95%"
+  ), alpha = 0.2) +
+  geom_vline(
+    xintercept = -0.5,
+    alpha = 0.3,
+    linetype = "dashed",
+    size = 0.3
+  ) +
   theme_classic() +
-  geom_hline(yintercept = 0, alpha = 0.5, size = 0.5) +
-  scale_fill_manual(name = "Confidence Intervals", values = c("90%" = "navy", "95%" = "blue")) +
-  guides(fill = guide_legend(override.aes = list(alpha = c(0.4, 0.2)))) +
-  ylab("Coefficient estimates & Confidence Intervals") +
+  geom_hline(yintercept = 0,
+             alpha = 0.5,
+             size = 0.5) +
+  scale_fill_manual(name = "Confidence Intervals",
+                    values = c("90%" = "navy", "95%" = "blue")) +
+  guides(fill = guide_legend(override.aes = list(alpha = c(0.3, 0.2)))) +
+  ylab("Coefficient estimates & CIs") +
   xlab("Days relative to sticker installation") +
   theme(
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10)
-  )
+  ) + 
+  ggtitle("Event study, >80km/h violations per km")
