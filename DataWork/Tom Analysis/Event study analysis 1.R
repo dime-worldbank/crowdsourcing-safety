@@ -27,21 +27,14 @@ pacman::p_load(
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
-
 # Creating data for analysis
-
-# Creating data for plot
 sensor_data_clean <- sensor_data %>%
-  
   # Only consider vehicles with sensor installed
   dplyr::filter(sticker_installed %in% T) %>%
-  
   # Days since installation
   dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
-  
   # Only look 30 days before/after installed
   dplyr::filter(abs(days_since_sticker) <= 30)
-
 
 # Need a variable which measures number of speed violations per km, otherwise
 # biased by buses which drive longer routes.
@@ -73,7 +66,6 @@ analysis_data <- sensor_data_clean %>%
 #### Speed violations event study ####
 
 # Regression results
-
 res_es <-
   felm(over_80_by_km ~ factor(days_since_sticker) |
          regno_clean + date | 0 | regno_clean,
@@ -89,7 +81,6 @@ res_dind <-
 res_dind
 
 stargazer(res_dind, type = 'text')
-
 
 # Variable label
 labels <- c()
@@ -118,7 +109,6 @@ fig_data <- tibble(
     dind_coef = ifelse(label >= 0, dind_coef, 0),
     dind_se = ifelse(label >= 0, dind_se, 0)
   )
-
 
 # Figure 1
 
@@ -175,8 +165,6 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) +
   ggtitle("Event study, >80km/h violations per km")
-
-
 
 # Figure 2
 
@@ -329,8 +317,6 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) +
   ggtitle("Event study, G force violations")
-
-
 
 # Figure 2
 
