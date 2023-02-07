@@ -184,7 +184,7 @@ ggplot(fig_data, aes(x = label, y = coef)) +
   scale_fill_manual(name = "Confidence Intervals", values = c("90%" = "navy", "95%" = "blue")) +
   guides(fill = guide_legend(override.aes = list(alpha = c(0.4, 0.2)))) +
   ylab("Coefficient estimates & Confidence Intervals") +
-  xlab("Year relative to adoption of implied contract exception") +
+  xlab("Days relative to sticker installation") +
   theme(
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14),
