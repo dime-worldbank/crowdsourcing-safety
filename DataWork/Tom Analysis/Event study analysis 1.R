@@ -67,20 +67,24 @@ analysis_data <- sensor_data_clean %>%
 
 # Regression results
 res_es <-
-  felm(over_80_by_km ~ factor(days_since_sticker) |
-         regno_clean + date | 0 | regno_clean,
-       data = analysis_data)
+  felm(
+    over_80_by_km ~ factor(days_since_sticker) |
+      regno_clean + date | 0 | regno_clean,
+    data = analysis_data
+  )
 res_es
 
-stargazer(res_es, type = 'text')
+stargazer(res_es, type = "text")
 
 res_dind <-
-  felm(over_80_by_km ~ after |
-         regno_clean + date | 0 | regno_clean,
-       data = analysis_data)
+  felm(
+    over_80_by_km ~ after |
+      regno_clean + date | 0 | regno_clean,
+    data = analysis_data
+  )
 res_dind
 
-stargazer(res_dind, type = 'text')
+stargazer(res_dind, type = "text")
 
 # Variable label
 labels <- c()
@@ -89,8 +93,10 @@ for (num in seq(-30, 30)) {
   if (num != -1) {
     labels <- c(labels, num)
     var_list <-
-      c(var_list,
-        paste0("factor(days_since_sticker)", as.character(num)))
+      c(
+        var_list,
+        paste0("factor(days_since_sticker)", as.character(num))
+      )
   }
 }
 
@@ -102,9 +108,11 @@ fig_data <- tibble(
   dind_coef = summary(res_dind)$coef["afterTRUE", "Estimate"] * 100,
   dind_se = summary(res_dind)$coef["afterTRUE", "Cluster s.e."] * 100
 ) %>%
-  add_row(label = -1,
-          es_coef = 0,
-          es_se = 0) %>%
+  add_row(
+    label = -1,
+    es_coef = 0,
+    es_se = 0
+  ) %>%
   mutate(
     dind_coef = ifelse(label >= 0, dind_coef, 0),
     dind_se = ifelse(label >= 0, dind_se, 0)
@@ -116,7 +124,7 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   geom_pointrange(
     aes(ymin = es_coef - 1.96 * es_se, ymax = es_coef + 1.96 * es_se),
     alpha = 0.7,
-    color = 'navy'
+    color = "navy"
   ) +
   geom_vline(
     xintercept = -0.5,
@@ -157,13 +165,17 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
     alpha = 0.7
   ) +
   theme_classic() +
-  geom_hline(yintercept = 0,
-             alpha = 0.5,
-             size = 0.5) +
+  geom_hline(
+    yintercept = 0,
+    alpha = 0.5,
+    size = 0.5
+  ) +
   ylab("Coefficient estimates & 95% CI") +
   xlab("Days relative to installation of sticker") +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14)
+  ) +
   ggtitle("Event study, >80km/h violations per km")
 
 # Figure 2
@@ -177,12 +189,14 @@ fig_data <- tibble(
 
 ggplot(fig_data, aes(x = label, y = coef)) +
   geom_point() +
-  geom_ribbon(aes(
-    ymin = coef - 1.645 * se,
-    ymax = coef + 1.645 * se,
-    fill = "90%"
-  ),
-  alpha = 0.3) +
+  geom_ribbon(
+    aes(
+      ymin = coef - 1.645 * se,
+      ymax = coef + 1.645 * se,
+      fill = "90%"
+    ),
+    alpha = 0.3
+  ) +
   geom_ribbon(aes(
     ymin = coef - 1.96 * se,
     ymax = coef + 1.96 * se,
@@ -195,11 +209,15 @@ ggplot(fig_data, aes(x = label, y = coef)) +
     size = 0.3
   ) +
   theme_classic() +
-  geom_hline(yintercept = 0,
-             alpha = 0.5,
-             size = 0.5) +
-  scale_fill_manual(name = "Confidence Intervals",
-                    values = c("90%" = "navy", "95%" = "blue")) +
+  geom_hline(
+    yintercept = 0,
+    alpha = 0.5,
+    size = 0.5
+  ) +
+  scale_fill_manual(
+    name = "Confidence Intervals",
+    values = c("90%" = "navy", "95%" = "blue")
+  ) +
   guides(fill = guide_legend(override.aes = list(alpha = c(0.3, 0.2)))) +
   ylab("Coefficient estimates & CIs") +
   xlab("Days relative to sticker installation") +
@@ -217,20 +235,24 @@ ggplot(fig_data, aes(x = label, y = coef)) +
 # Regression results
 
 res_es <-
-  felm(total_g_violations ~ factor(days_since_sticker) |
-         regno_clean + date | 0 | regno_clean,
-       data = analysis_data)
+  felm(
+    total_g_violations ~ factor(days_since_sticker) |
+      regno_clean + date | 0 | regno_clean,
+    data = analysis_data
+  )
 res_es
 
-stargazer(res_es, type = 'text')
+stargazer(res_es, type = "text")
 
 res_dind <-
-  felm(total_g_violations ~ after |
-         regno_clean + date | 0 | regno_clean,
-       data = analysis_data)
+  felm(
+    total_g_violations ~ after |
+      regno_clean + date | 0 | regno_clean,
+    data = analysis_data
+  )
 res_dind
 
-stargazer(res_dind, type = 'text')
+stargazer(res_dind, type = "text")
 
 
 # Variable label
@@ -240,8 +262,10 @@ for (num in seq(-30, 30)) {
   if (num != -1) {
     labels <- c(labels, num)
     var_list <-
-      c(var_list,
-        paste0("factor(days_since_sticker)", as.character(num)))
+      c(
+        var_list,
+        paste0("factor(days_since_sticker)", as.character(num))
+      )
   }
 }
 
@@ -253,9 +277,11 @@ fig_data <- tibble(
   dind_coef = summary(res_dind)$coef["afterTRUE", "Estimate"] * 100,
   dind_se = summary(res_dind)$coef["afterTRUE", "Cluster s.e."] * 100
 ) %>%
-  add_row(label = -1,
-          es_coef = 0,
-          es_se = 0) %>%
+  add_row(
+    label = -1,
+    es_coef = 0,
+    es_se = 0
+  ) %>%
   mutate(
     dind_coef = ifelse(label >= 0, dind_coef, 0),
     dind_se = ifelse(label >= 0, dind_se, 0)
@@ -268,7 +294,7 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   geom_pointrange(
     aes(ymin = es_coef - 1.96 * es_se, ymax = es_coef + 1.96 * es_se),
     alpha = 0.7,
-    color = 'navy'
+    color = "navy"
   ) +
   geom_vline(
     xintercept = -0.5,
@@ -309,13 +335,17 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
     alpha = 0.7
   ) +
   theme_classic() +
-  geom_hline(yintercept = 0,
-             alpha = 0.5,
-             size = 0.5) +
+  geom_hline(
+    yintercept = 0,
+    alpha = 0.5,
+    size = 0.5
+  ) +
   ylab("Coefficient estimates & 95% CI") +
   xlab("Days relative to installation of sticker") +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14)
+  ) +
   ggtitle("Event study, G force violations")
 
 # Figure 2
@@ -329,12 +359,14 @@ fig_data <- tibble(
 
 ggplot(fig_data, aes(x = label, y = coef)) +
   geom_point() +
-  geom_ribbon(aes(
-    ymin = coef - 1.645 * se,
-    ymax = coef + 1.645 * se,
-    fill = "90%"
-  ),
-  alpha = 0.3) +
+  geom_ribbon(
+    aes(
+      ymin = coef - 1.645 * se,
+      ymax = coef + 1.645 * se,
+      fill = "90%"
+    ),
+    alpha = 0.3
+  ) +
   geom_ribbon(aes(
     ymin = coef - 1.96 * se,
     ymax = coef + 1.96 * se,
@@ -347,11 +379,15 @@ ggplot(fig_data, aes(x = label, y = coef)) +
     size = 0.3
   ) +
   theme_classic() +
-  geom_hline(yintercept = 0,
-             alpha = 0.5,
-             size = 0.5) +
-  scale_fill_manual(name = "Confidence Intervals",
-                    values = c("90%" = "navy", "95%" = "blue")) +
+  geom_hline(
+    yintercept = 0,
+    alpha = 0.5,
+    size = 0.5
+  ) +
+  scale_fill_manual(
+    name = "Confidence Intervals",
+    values = c("90%" = "navy", "95%" = "blue")
+  ) +
   guides(fill = guide_legend(override.aes = list(alpha = c(0.3, 0.2)))) +
   ylab("Coefficient estimates & CIs") +
   xlab("Days relative to sticker installation") +
@@ -362,4 +398,3 @@ ggplot(fig_data, aes(x = label, y = coef)) +
     legend.text = element_text(size = 10)
   ) +
   ggtitle("Event study, G force violations")
-
