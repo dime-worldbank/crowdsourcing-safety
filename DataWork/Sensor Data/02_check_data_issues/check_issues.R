@@ -50,6 +50,7 @@ cont_nodata_df <- map_df(unique(sensor_df$regno_clean), function(regno_clean_i){
   
 })
 
+
 #View(cont_nodata_df)
 
 # good_df <- cont_nodata_df[cont_nodata_df$n_days_no_speed %in% 0,]
@@ -72,4 +73,16 @@ issues_to_check <- cont_nodata_df %>%
   dplyr::select(regno_clean, sacco, route, n_days_no_speed)
 
 write_csv(issues_to_check, "~/Desktop/sensor_issues.csv")
+
+
+
+sensor_df %>%
+  dplyr::filter() %>%
+  ggplot() +
+  geom_col(aes(x = date, y = N_obs_speed)) +
+  facet_wrap(~regno_clean)
+
+
+
+
 

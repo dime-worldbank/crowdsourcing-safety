@@ -14,11 +14,11 @@ df %>%
 df %>%
   dplyr::filter(valid_psvnum %in% T,
                 !is.na(completion_date)) %>% 
-  dplyr::filter(invite_date >= ymd("2022-01-15")) %>%
+  dplyr::filter(invite_date >= ymd("2022-01-20")) %>%
   group_by(regno_clean, psv_num) %>%
   dplyr::summarise(n = n()) %>%
   arrange(-n) %>%
-  head(10)
+  head(15)
 
 
 a <- df %>%
