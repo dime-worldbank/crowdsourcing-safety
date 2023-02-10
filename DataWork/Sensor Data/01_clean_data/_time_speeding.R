@@ -3,6 +3,7 @@
 # Aggregate data to calculate the following:
 # 1. Total time moving
 # 2. Total time moving above certain speeds (50 kph, 80, 100, etc)
+# 3. Could also consider distance moving above certain speeds
 
 # The files are originally stored per vehicle per day. So this code loads data 
 # for a single vehicle in a day, then aggregates that. 
