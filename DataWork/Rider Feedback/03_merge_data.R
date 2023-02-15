@@ -16,8 +16,9 @@ comments_coded_df <- file.path(data_dir, "Rider Feedback", "FinalData",
   dplyr::select(c(case_key,
                   needs_crosschecking, comments_checking_relevance, coding_relevant_comments,
                   additional_notes)) %>%
-  dplyr::mutate(comment_coded = T)
-
+  dplyr::mutate(comment_coded = T) %>%
+  dplyr::rename(comment_driver_sentiment_relev = comments_checking_relevance,
+                comment_driver_sentiment_code = coding_relevant_comments)
 
 df <- df %>%
   left_join(comments_en_df, by = "case_key") %>%

@@ -44,4 +44,34 @@ files_travel_df <- files_df %>%
 ## Load single vehicle/day
 speed_df <- read_parquet(files_travel_df$filename[1])
 
+speed_sum_df <- speed_df %>%
+  mutate(time_str = time_str %>% ymd_hms()) %>%
+  arrange(time_str) %>%
+  mutate(over_t = speed >= 100) %>%
+  mutate(event = cumsum(c(TRUE, abs(diff(over_t)) >= 1))) %>%
+  dplyr::mutate(event_lag = lag(event)) %>%
+  mutate(event_final = case_when(
+    speed >= 100 ~ event,
+    speed < 100 ~ event_lag
+  )) %>%
+  group_by(event_final) %>%
+  mutate(speed_max = max(speed)) %>%
+  ungroup() %>%
+  filter(speed_max >= 100) %>%
+  group_by(event_final) %>%
+  dplyr::summarise(time = difftime(max(time_str), min(time_str), units = "secs"))
 
+speed_df$event %>% table()
+
+  ungroup
+
+
+
+
+library(dplyr)
+
+df <- df %>%
+  mutate(event_date = as.Date(event_date)) %>%
+  group_by(id) %>%
+  mutate(event = cumsum(c(TRUE, diff(event_date) > 1))) %>%
+  ungroup
