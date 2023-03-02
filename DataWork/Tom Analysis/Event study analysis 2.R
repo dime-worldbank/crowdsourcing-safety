@@ -61,8 +61,6 @@ sensor_data_clean <- joined_data %>%
   # Only look 30 days before/after installed
   dplyr::filter(abs(days_since_sticker) <= 30)
 
-# # change so that we only have observations where time driving > 0
-# sensor_data_clean <- subset(sensor_data_clean, sensor_data_clean$time_mov_s > 120) # 2 mins
 
 # Generating variable to capture all g-force related violations
 # Q. should this also be 'per km'?
@@ -77,7 +75,6 @@ sensor_data_clean$total_g_violations_per_hour <-
 
 # renaming to this for ease ... temporary
 sensor_data_clean$total_g_violations <- sensor_data_clean$total_g_violations_per_hour
-  
 
 # Preparing data for event study analysis
 analysis_data <- sensor_data_clean %>%
@@ -281,8 +278,8 @@ res_es <-
       regno_clean + date | 0 | regno_clean,
     data = analysis_data
   )
-res_es
 
+res_es
 stargazer(res_es, type = "text")
 
 res_dind <-
@@ -291,8 +288,8 @@ res_dind <-
       regno_clean + date | 0 | regno_clean,
     data = analysis_data
   )
-res_dind
 
+res_dind
 stargazer(res_dind, type = "text")
 
 
@@ -330,7 +327,6 @@ fig_data <- tibble(
 
 
 # Figure 1
-
 ggplot(fig_data, aes(x = label, y = es_coef)) +
   geom_pointrange(
     aes(ymin = es_coef - 1.96 * es_se, ymax = es_coef + 1.96 * es_se),
@@ -390,7 +386,6 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
   ggtitle("Event study, G force violations")
 
 # Figure 2
-
 fig_data <- tibble(
   label = labels,
   coef = summary(res_es)$coef[var_list, "Estimate"] * 100,
