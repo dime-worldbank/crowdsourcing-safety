@@ -1,10 +1,10 @@
 # Tom Harris
 # Event study analysis 2
-# running on time spent over x km/h
+# Running analysis using time spent over 80 km/h as outcome variable
 
 # n.b. Before any new scripts, run psv_feedback_master.R
 
-# Installing packages
+# Installing further required packages
 if (!require("pacman")) {
   install.packages("pacman")
 }
@@ -24,33 +24,33 @@ pacman::p_load(
   lfe
 )
 
-# Loading data
+#### Loading and joining data ####
+
+# Loading sensor data
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
-# Convert the 'Name' column to lower case
+# Convert the 'reg_no' column to lower case
 sensor_data <- sensor_data %>% mutate(reg_no = tolower(reg_no))
 
+# Loading sensor data with time spent over xkm/h
 time_data <-
   read_parquet(file.path(sensors_dir, "FinalData", "time_moving_day.gz.parquet"))
 
-# Remove double spaces from 'reg_no' column only
+# Remove double spaces from 'reg_no' column
 time_data <- time_data %>% mutate(reg_no = gsub("\\s+", " ", reg_no))
 
-### join by regno and date
+# Join data by reg_no and date
 joined_data <- left_join(sensor_data, time_data, by = c("reg_no", "date"))
 
+# Generating variable for proportion of time spent over 80km/h
+joined_data$prop_80 <- joined_data$time_spd80_s / joined_data$time_mov_s
 
-
-
-
-
-
-time_data$prop_80 <- time_data$time_spd80_s / time_data$time_mov_s
-
+# Generating variable for proportion of time spent over 100km/h
+joined_data$prop_100 <- joined_data$time_spd100_s / joined_data$time_mov_s
 
 # Creating data for analysis
-sensor_data_clean <- sensor_data %>%
+sensor_data_clean <- joined_data %>%
   # Only consider vehicles with sensor installed
   dplyr::filter(sticker_installed %in% T) %>%
   # Days since installation
@@ -58,20 +58,14 @@ sensor_data_clean <- sensor_data %>%
   # Only look 30 days before/after installed
   dplyr::filter(abs(days_since_sticker) <= 30)
 
-# Need a variable which measures number of speed violations per km, otherwise
-# biased by buses which drive longer routes.
-sensor_data_clean$over_80_by_km <-
-  sensor_data_clean$N_speed_over_80 / sensor_data_clean$distance_km
-
 # Generating variable to capture all g-force related violations
-# should this also be 'per km'?
+# Q. should this also be 'per km'?
 sensor_data_clean$total_g_violations <-
   sensor_data_clean$N_violation_acceleration +
   sensor_data_clean$N_violation_brake +
   sensor_data_clean$N_violation_turn
 
-###
-
+# Preparing data for event study analysis
 analysis_data <- sensor_data_clean %>%
   group_by(regno_clean) %>%
   mutate(
@@ -85,28 +79,35 @@ analysis_data <- sensor_data_clean %>%
     date = as.factor(date)
   )
 
-#### Speed violations event study ####
 
-# Regression results
+#### Event Study Analysis ####
+
+#### Speed Event Study ####
+
+# Event study regression with FE for mutatu and date
 res_es <-
   felm(
-    over_80_by_km ~ factor(days_since_sticker) |
+    prop_80 ~ factor(days_since_sticker) |
       regno_clean + date | 0 | regno_clean,
     data = analysis_data
   )
+
 res_es
+stargazer(res_es, type = "text") # visualising results
 
-stargazer(res_es, type = "text")
-
+# Regression of outcome on 'after' variable for overall effect over the entire post period
 res_dind <-
   felm(
-    over_80_by_km ~ after |
+    prop_80 ~ after |
       regno_clean + date | 0 | regno_clean,
     data = analysis_data
   )
-res_dind
 
+res_dind
 stargazer(res_dind, type = "text")
+
+
+#### Plotting event study ####
 
 # Variable label
 labels <- c()
@@ -142,7 +143,7 @@ fig_data <- tibble(
 
 # Figure 1
 
-ggplot(fig_data, aes(x = label, y = es_coef)) +
+plot_1 <- ggplot(fig_data, aes(x = label, y = es_coef)) +
   geom_pointrange(
     aes(ymin = es_coef - 1.96 * es_se, ymax = es_coef + 1.96 * es_se),
     alpha = 0.7,
@@ -198,7 +199,10 @@ ggplot(fig_data, aes(x = label, y = es_coef)) +
     axis.text = element_text(size = 12),
     axis.title = element_text(size = 14)
   ) +
-  ggtitle("Event study, >80km/h violations per km")
+  ggtitle("Event study, Proportion of time >80km/h")
+
+plot_1
+ggplotly(plot_1) # interactive version
 
 # Figure 2
 
@@ -209,7 +213,7 @@ fig_data <- tibble(
 ) %>%
   add_row(label = -1, coef = 0, se = 0)
 
-ggplot(fig_data, aes(x = label, y = coef)) +
+plot_2 <- ggplot(fig_data, aes(x = label, y = coef)) +
   geom_point() +
   geom_ribbon(
     aes(
@@ -249,13 +253,14 @@ ggplot(fig_data, aes(x = label, y = coef)) +
     legend.title = element_text(size = 12),
     legend.text = element_text(size = 10)
   ) +
-  ggtitle("Event study, >80km/h violations per km")
+  ggtitle("Event study, Proportion of time >80km/h")
 
+plot_2
+ggplotly(plot_2) # not visualising correctly in my R
 
-#### G violations event study ####
+#### G-force violations event study ####
 
 # Regression results
-
 res_es <-
   felm(
     total_g_violations ~ factor(days_since_sticker) |
@@ -420,4 +425,3 @@ ggplot(fig_data, aes(x = label, y = coef)) +
     legend.text = element_text(size = 10)
   ) +
   ggtitle("Event study, G force violations")
-
