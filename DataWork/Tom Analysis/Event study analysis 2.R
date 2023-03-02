@@ -40,8 +40,11 @@ time_data <-
 # Remove double spaces from 'reg_no' column
 time_data <- time_data %>% mutate(reg_no = gsub("\\s+", " ", reg_no))
 
+# subset to journeys longer than 10 minutes
+time_data <- subset(time_data, time_data$time_mov_s > 600)
+
 # Join data by reg_no and date
-joined_data <- left_join(sensor_data, time_data, by = c("reg_no", "date"))
+joined_data <- left_join(time_data, sensor_data, by = c("reg_no", "date"))
 
 # Generating variable for proportion of time spent over 80km/h
 joined_data$prop_80 <- joined_data$time_spd80_s / joined_data$time_mov_s
@@ -58,12 +61,23 @@ sensor_data_clean <- joined_data %>%
   # Only look 30 days before/after installed
   dplyr::filter(abs(days_since_sticker) <= 30)
 
+# # change so that we only have observations where time driving > 0
+# sensor_data_clean <- subset(sensor_data_clean, sensor_data_clean$time_mov_s > 120) # 2 mins
+
 # Generating variable to capture all g-force related violations
 # Q. should this also be 'per km'?
 sensor_data_clean$total_g_violations <-
-  sensor_data_clean$N_violation_acceleration +
-  sensor_data_clean$N_violation_brake +
-  sensor_data_clean$N_violation_turn
+  (sensor_data_clean$N_violation_acceleration +
+    sensor_data_clean$N_violation_brake +
+    sensor_data_clean$N_violation_turn)
+
+# this is now per hour moving
+sensor_data_clean$total_g_violations_per_hour <-
+  sensor_data_clean$total_g_violations / (sensor_data_clean$time_mov_s / 3600)
+
+# renaming to this for ease ... temporary
+sensor_data_clean$total_g_violations <- sensor_data_clean$total_g_violations_per_hour
+  
 
 # Preparing data for event study analysis
 analysis_data <- sensor_data_clean %>%
