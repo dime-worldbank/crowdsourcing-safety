@@ -73,73 +73,58 @@ clean_data$n_stickers_installed <- if_else(is.na(clean_data$n_stickers_installed
 
 
 
-## plotting 
+## Box plots by number of stickers
 
-# install.packages("ggplot2")
-library(ggplot2)
-
-# Data
-set.seed(8)
-y <- rnorm(200)
-group <- sample(LETTERS[1:3],
-                size = 200,
-                replace = TRUE)
-df <- data.frame(y, group)
-
-# Box plot by group with jitter
-ggplot(df, aes(x = group, y = y,
-               colour = group,
-               shape = group)) + 
+# Proportion of time over 80km/h
+ggplot(clean_data, aes(
+  x = as.factor(clean_data$n_stickers_installed), y = clean_data$prop_80,
+  colour = as.factor(n_stickers_installed), alpha = 0.1
+)) +
   geom_boxplot(outlier.shape = NA) +
-  geom_jitter() 
+  geom_jitter() +
+  coord_flip() +
+  xlab("Number of Stickers Installed") +
+  ylab("Proportion of time spent >80km/h") +
+  ggtitle("Testing bias in number of stickers") +
+  theme_bw() +
+  scale_color_discrete(
+    name = "Number of Stickers",
+    labels = c("None", "Two", "Three", "Four", "Five", "Six")
+  )
+
+# Proportion of time over 100km/h
+
+ggplot(clean_data, aes(
+  x = as.factor(clean_data$n_stickers_installed), y = clean_data$prop_100,
+  colour = as.factor(n_stickers_installed), alpha = 0.1
+)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  coord_flip() +
+  xlab("Number of Stickers Installed") +
+  ylab("Proportion of time spent >100 km/h") +
+  ggtitle("Testing bias in number of stickers") +
+  theme_bw() +
+  scale_color_discrete(
+    name = "Number of Stickers",
+    labels = c("None", "Two", "Three", "Four", "Five", "Six")
+  )
 
 
+# G force violations per adsf
 
-
-
-# Creating data for analysis
-sensor_data_sticker <- joined_data %>%
-  # Only consider vehicles with sensor installed
-  dplyr::filter(sticker_installed %in% T) %>%
-  # Days since installation
-  dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
-  # Only look before sticker installed to see if there are pre diffs
-  dplyr::filter(days_since_sticker < 0)
-
-# Creating data for analysis
-sensor_data_sticker <- joined_data %>%
-  # Only consider vehicles with sensor installed
-  dplyr::filter(sticker_installed %in% T) %>%
-  # Days since installation
-  dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
-  # Only look before sticker installed to see if there are pre diffs
-  dplyr::filter(days_since_sticker < 0)
-
-
-# Generating variable to capture all g-force related violations
-# Q. should this also be 'per km'?
-sensor_data_clean$total_g_violations <-
-  (sensor_data_clean$N_violation_acceleration +
-    sensor_data_clean$N_violation_brake +
-    sensor_data_clean$N_violation_turn)
-
-# this is now per hour moving
-sensor_data_clean$total_g_violations_per_hour <-
-  sensor_data_clean$total_g_violations / (sensor_data_clean$time_mov_s / 3600)
-
-# renaming to this for ease ... temporary
-sensor_data_clean$total_g_violations <- sensor_data_clean$total_g_violations_per_hour
-
-# Preparing data for event study analysis
-analysis_data <- sensor_data_clean %>%
-  group_by(regno_clean) %>%
-  mutate(
-    days_since_sticker = as.numeric(date - sticker_install_date),
-    after = ifelse(days_since_sticker > 0, TRUE, FALSE)
-  ) %>%
-  ungroup() %>%
-  mutate(
-    days_since_sticker = relevel(as.factor(days_since_sticker), ref = "-1"),
-    regno_clean = as.factor(regno_clean),
-    date = as.factor(date)
+ggplot(clean_data, aes(
+  x = as.factor(clean_data$n_stickers_installed), y = clean_data$total_g_violations_per_hour,
+  colour = as.factor(n_stickers_installed), alpha = 0.1
+)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  coord_flip() +
+  xlab("Number of Stickers Installed") +
+  ylab("Total G Force Violations Per Hour") +
+  ggtitle("Testing bias in number of stickers") +
+  theme_bw() +
+  scale_color_discrete(
+    name = "Number of Stickers",
+    labels = c("None", "Two", "Three", "Four", "Five", "Six")
   )
