@@ -218,3 +218,35 @@ plot_1
 
 # interactive version
 ggplotly(plot_1)
+
+
+
+#### Comparing sensor to feedback data ####
+# focus on proportion of responses that are fast or very fast instead of average of 1 to 5
+
+plot_1 <- ggplot(joined_data) +
+  aes(
+    x = joined_data$total_g_violations_per_hour,
+    y = joined_data$safety_numeric
+  ) +
+  geom_point(
+    shape = "circle",
+    size = 3,
+    alpha = 0.6,
+    aes(color = sacco)
+  ) +
+  scale_color_hue(direction = 1) +
+  labs(
+    x = "Total G force violations per hour",
+    y = "Safety Rating (1 = Very safe, 5 = Very unsafe",
+    title = "Comparing Rider Feedback on Speed vs. Safety",
+    subtitle = " "
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  geom_smooth(method = "lm", se = TRUE)
+# labs(fill = "Sacco Company") +
+# xlim(2.5, 4) +
+# ylim(1.5, 5)
+
+plot_1
