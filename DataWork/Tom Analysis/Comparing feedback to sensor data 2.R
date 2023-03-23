@@ -27,6 +27,9 @@ sensor_data <-
 # Convert the 'reg_no' column to lower case
 sensor_data <- sensor_data %>% mutate(reg_no = tolower(reg_no))
 
+# subsetting to only those journeys over 100 km distance
+# sensor_data <- subset(sensor_data, sensor_data$distance_km > 1)
+
 # Loading sensor data with time spent over xkm/h
 time_data <-
   read_parquet(file.path(sensors_dir, "FinalData", "time_moving_day.gz.parquet"))
@@ -34,8 +37,8 @@ time_data <-
 # Remove double spaces from 'reg_no' column
 time_data <- time_data %>% mutate(reg_no = gsub("\\s+", " ", reg_no))
 
-# subset to journeys longer than 10 minutes
-time_data <- subset(time_data, time_data$time_mov_s > 600)
+# subset to journeys longer than 60 minutes
+time_data <- subset(time_data, time_data$time_mov_s > (60 * 60))
 
 # Join data by reg_no and date
 joined_data <- left_join(time_data, sensor_data, by = c("reg_no", "date"))
@@ -186,24 +189,26 @@ ggplotly(plot_1)
 
 plot_1 <- ggplot(joined_data) +
   aes(
-    x = joined_data$prop_80,
-    y = joined_data$speed_numeric  ) +
+    x = joined_data$prop_100,
+    y = joined_data$speed_numeric
+  ) +
   geom_point(
     shape = "circle",
     size = 3,
-    alpha = 0.6, 
+    alpha = 0.6,
     aes(color = sacco)
   ) +
   scale_color_hue(direction = 1) +
   labs(
-    x = "Proportion of time >80 km/h",
+    x = "Proportion of time >100 km/h",
     y = "Speed Rating (1 = Very slow, 5 = Very fast",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
   theme_minimal() +
-  theme(legend.position = "top") + 
-  geom_smooth(method = "lm", se = TRUE)
+  theme(legend.position = "top") +
+  geom_smooth(method = "lm", se = TRUE) +
+  xlim(0,0.02)
 
 # labs(fill = "Sacco Company") +
 # xlim(2.5, 4) +
