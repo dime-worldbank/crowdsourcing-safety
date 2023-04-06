@@ -81,36 +81,41 @@ grouped_data <- grouped_data %>%
 ### collapse to bus using means
 final_data <-
   grouped_data[,
-               lapply(.SD, mean), ## applies weighted mean function with weights w over specified columns
-               by = list(regno_clean),
-               .SDcols = variablesToAvg
+    lapply(.SD, mean), ## applies weighted mean function with weights w over specified columns
+    by = list(regno_clean),
+    .SDcols = variablesToAvg
   ] ## specifies columns to average
 
 final_data$sacco <-
   grouped_data$matatu_sacco_stk_inst_srvy[match(final_data$regno_clean, grouped_data$regno_clean)]
 
-feedback_grouped <- final_data
-
 
 ## finding the proportion of reviews which are a 3 or 4 (not safe) for each mutatu
 
-final_data <- grouped_data[, 
-                           lapply(.SD, function(x) mean(x %in% c(3,4,5))),
-                           by = list(regno_clean),
-                           .SDcols = variablesToAvg
+final_data <- grouped_data[,
+  lapply(.SD, function(x) mean(x %in% c(3, 4, 5))),
+  by = list(regno_clean),
+  .SDcols = variablesToAvg
 ]
 
 final_data$sacco <-
   grouped_data$matatu_sacco_stk_inst_srvy[match(final_data$regno_clean, grouped_data$regno_clean)]
 
 
-library(data.table)
 setDT(grouped_data)
-final_data <- grouped_data[,   .(safety_proportion = mean(safety_numeric %in% c(3,4)),     
-                                 speed_proportion = mean(speed_numeric %in% c(4,5))  ),  by = regno_clean]
+final_data <- grouped_data[, .(
+  safety_proportion = mean(safety_numeric %in% c(3, 4)),
+  speed_proportion = mean(speed_numeric %in% c(4, 5))
+), by = regno_clean]
+
+final_data$sacco <-
+  grouped_data$matatu_sacco_stk_inst_srvy[match(final_data$regno_clean, grouped_data$regno_clean)]
 
 
-library(ggplot2)
+
+feedback_grouped <- final_data
+
+
 ggplot(feedback_data, aes(x = safety_numeric)) +
   geom_histogram(binwidth = 1, color = "black", fill = "lightblue") +
   xlab("Safety Numeric") +
@@ -123,15 +128,6 @@ ggplot(feedback_data, aes(x = speed_numeric)) +
   xlab("Safety Numeric") +
   ylab("Frequency") +
   ggtitle("Histogram of Safety Numeric")
-
-
-
-
-
-
-
-
-
 
 
 #### Loading and cleaning sensor data ####
@@ -168,8 +164,8 @@ joined_data$prop_100 <- joined_data$time_spd100_s / joined_data$time_mov_s
 # Generating variable to capture all g-force related violations
 joined_data$total_g_violations <-
   (joined_data$N_violation_acceleration +
-     joined_data$N_violation_brake +
-     joined_data$N_violation_turn)
+    joined_data$N_violation_brake +
+    joined_data$N_violation_turn)
 
 # this is now per hour moving
 joined_data$total_g_violations_per_hour <-
@@ -191,13 +187,6 @@ sensor_grouped$regno_clean <- clean_data$regno_clean[match(
 
 
 
-
-
-
-
-
-
-
 #### Joining sensor and feedback data ####
 
 joined_data <- left_join(sensor_grouped, feedback_grouped)
@@ -207,8 +196,8 @@ joined_data <- left_join(sensor_grouped, feedback_grouped)
 # plot of number of 80kmh speed violations per km by Sacco
 plot_1 <- ggplot(feedback_grouped) +
   aes(
-    x = feedback_grouped$safety_numeric,
-    y = feedback_grouped$speed_numeric,
+    x = feedback_grouped$safety_proportion,
+    y = feedback_grouped$speed_proportion,
     color = sacco
   ) +
   geom_point(
@@ -218,8 +207,8 @@ plot_1 <- ggplot(feedback_grouped) +
   ) +
   scale_color_hue(direction = 1) +
   labs(
-    x = "Safety Rating (1 = Very safe, 4 = Very unsafe)",
-    y = "Speed Rating (1 = Very slow, 5 = Very fast",
+    x = "Proportion of Safety Ratings 3 or 4",
+    y = "Proportion of Speed Ratings 4 or 5",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
@@ -239,7 +228,7 @@ ggplotly(plot_1)
 plot_1 <- ggplot(joined_data) +
   aes(
     x = joined_data$prop_100,
-    y = joined_data$speed_numeric
+    y = joined_data$speed_proportion
   ) +
   geom_point(
     shape = "circle",
@@ -257,7 +246,7 @@ plot_1 <- ggplot(joined_data) +
   theme_minimal() +
   theme(legend.position = "top") +
   geom_smooth(method = "lm", se = TRUE) +
-  xlim(0,0.02)
+  xlim(0, 0.02)
 
 # labs(fill = "Sacco Company") +
 # xlim(2.5, 4) +
@@ -276,7 +265,7 @@ ggplotly(plot_1)
 plot_1 <- ggplot(joined_data) +
   aes(
     x = joined_data$total_g_violations_per_hour,
-    y = joined_data$safety_numeric
+    y = joined_data$safety_proportion
   ) +
   geom_point(
     shape = "circle",
@@ -287,7 +276,7 @@ plot_1 <- ggplot(joined_data) +
   scale_color_hue(direction = 1) +
   labs(
     x = "Total G force violations per hour",
-    y = "Safety Rating (1 = Very safe, 4 = Not very safe)",
+    y = "Safety Rating (proportion unsafe/very unsafe)",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
