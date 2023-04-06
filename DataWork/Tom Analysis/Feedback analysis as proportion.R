@@ -22,7 +22,7 @@ feedback_data <-
   readRDS(file.path(rider_feedback_dir, "FinalData", "rider_feedback.Rds"))
 
 # First, converting the safety and speed factor variables into numeric variables
-# which can be gruoped and averaged by regno_clean
+# which can be grouped and averaged by regno_clean
 
 feedback_data$safety_numeric <- feedback_data$safety_label_en
 
@@ -45,6 +45,16 @@ feedback_data$safety_numeric <-
 # converting speed feedback to numeric
 
 feedback_data$speed_numeric <- feedback_data$speed_label_en
+
+feedback_data$safety_label_en %>% as.numeric() %>% table()
+feedback_data$safety_label_en %>% table()
+######
+##
+#
+#
+### check these aren't flipped 
+
+#
 
 feedback_data$speed_numeric <-
   mapvalues(
@@ -125,9 +135,9 @@ ggplot(feedback_data, aes(x = safety_numeric)) +
 
 ggplot(feedback_data, aes(x = speed_numeric)) +
   geom_histogram(binwidth = 1, color = "black", fill = "lightblue") +
-  xlab("Safety Numeric") +
+  xlab("Speed Numeric") +
   ylab("Frequency") +
-  ggtitle("Histogram of Safety Numeric")
+  ggtitle("Histogram of Speed Numeric")
 
 
 #### Loading and cleaning sensor data ####
