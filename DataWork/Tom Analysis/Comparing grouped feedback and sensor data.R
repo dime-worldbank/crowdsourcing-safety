@@ -16,21 +16,52 @@ pacman::p_load(
   data.table
 )
 
-# Loading data
+#### Loading and joining data ####
+
+# Loading sensor data
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
-sensor_data$sacco <- sensor_data$sacco.x
+# Convert the 'reg_no' column to lower case
+sensor_data <- sensor_data %>% mutate(reg_no = tolower(reg_no))
+
+# Loading sensor data with time spent over xkm/h
+time_data <-
+  read_parquet(file.path(sensors_dir, "FinalData", "time_moving_day.gz.parquet"))
+
+# Remove double spaces from 'reg_no' column
+time_data <- time_data %>% mutate(reg_no = gsub("\\s+", " ", reg_no))
+
+# subset to journeys longer than 10 minutes
+time_data <- subset(time_data, time_data$time_mov_s > 600)
+
+# Join data by reg_no and date
+joined_data <- left_join(time_data, sensor_data, by = c("reg_no", "date"))
+
+# Generating variable for proportion of time spent over 80km/h
+joined_data$prop_80 <- joined_data$time_spd80_s / joined_data$time_mov_s
+
+# Generating variable for proportion of time spent over 100km/h
+joined_data$prop_100 <- joined_data$time_spd100_s / joined_data$time_mov_s
+
+
+# Generating variable to capture all g-force related violations
+# Q. should this also be 'per km'?
+joined_data$total_g_violations <-
+  (joined_data$N_violation_acceleration +
+     joined_data$N_violation_brake +
+     joined_data$N_violation_turn)
+
+# this is now per hour moving
+joined_data$total_g_violations_per_hour <-
+  joined_data$total_g_violations / (joined_data$time_mov_s / 3600)
+
+
+joined_data$days_since_sticker <- as.numeric(joined_data$date - joined_data$sticker_install_date)
+
 
 feedback_data <-
   readRDS(file.path(rider_feedback_dir, "FinalData", "rider_feedback.Rds"))
-
-## Looks like the translated data isn't there anymore...?
-# feedback_trans_data <- readRDS(file.path(
-#   rider_feedback_dir,
-#   "FinalData",
-#   "rider_feedback_translated.Rds"
-# ))
 
 
 ### Grouping the feedback data
@@ -79,7 +110,6 @@ feedback_data$speed_numeric <-
 
 feedback_data$speed_numeric <-
   as.numeric(feedback_data$speed_numeric)
-
 
 # Group the data by the "regno_clean" id variable
 grouped_data <- feedback_data %>%
@@ -153,8 +183,6 @@ ggplotly(plot_1)
 
 #### Now bringing in sensor data ####
 
-
-
 #### Simple Average method (I'm not sure about this...) ####
 
 # Load sample data
@@ -183,7 +211,7 @@ grouped_data <- grouped_data %>%
   filter(!is.na(N_speed_over_0) & N_speed_over_0 != 0)
 
 
-### collapse to FB postcode level using weighted means
+### collapse
 final_data <-
   grouped_data[,
     lapply(.SD, mean), ## applies weighted mean function with weights w over specified columns
