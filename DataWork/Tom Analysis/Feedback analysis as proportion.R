@@ -36,7 +36,7 @@ feedback_data$safety_numeric <-
       "Very Safe"
     ),
     # I'm not sure here if 'not very safe' is better than 'not safe'?
-    to = c(4, 3, 2, 1)
+    to = c(1, 2, 3, 4)
   )
 
 feedback_data$safety_numeric <-
@@ -46,15 +46,12 @@ feedback_data$safety_numeric <-
 
 feedback_data$speed_numeric <- feedback_data$speed_label_en
 
-feedback_data$safety_label_en %>% as.numeric() %>% table()
+## Checking that values have been stored properly as numeric values
+feedback_data$safety_label_en %>%
+  as.numeric() %>%
+  table()
 feedback_data$safety_label_en %>% table()
-######
-##
-#
-#
-### check these aren't flipped 
 
-#
 
 feedback_data$speed_numeric <-
   mapvalues(
@@ -71,6 +68,12 @@ feedback_data$speed_numeric <-
 
 feedback_data$speed_numeric <-
   as.numeric(feedback_data$speed_numeric)
+
+## Checking that values have been stored properly as numeric values
+feedback_data$speed_numeric %>%
+  as.numeric() %>%
+  table()
+feedback_data$speed_numeric %>% table()
 
 # Group the data by the "regno_clean" id variable
 grouped_data <- feedback_data %>%
@@ -114,7 +117,7 @@ final_data$sacco <-
 
 setDT(grouped_data)
 final_data <- grouped_data[, .(
-  safety_proportion = mean(safety_numeric %in% c(3, 4)),
+  safety_proportion = mean(safety_numeric %in% c(1, 2)),
   speed_proportion = mean(speed_numeric %in% c(4, 5))
 ), by = regno_clean]
 
@@ -125,17 +128,17 @@ final_data$sacco <-
 
 feedback_grouped <- final_data
 
-
+# plotting distribution of safety scores
 ggplot(feedback_data, aes(x = safety_numeric)) +
   geom_histogram(binwidth = 1, color = "black", fill = "lightblue") +
-  xlab("Safety Numeric") +
+  xlab("Safety Numeric (4 = 'very safe')") +
   ylab("Frequency") +
   ggtitle("Histogram of Safety Numeric")
 
-
+# plotting distribution of speed scores
 ggplot(feedback_data, aes(x = speed_numeric)) +
   geom_histogram(binwidth = 1, color = "black", fill = "lightblue") +
-  xlab("Speed Numeric") +
+  xlab("Speed Numeric (5 = 'very fast')") +
   ylab("Frequency") +
   ggtitle("Histogram of Speed Numeric")
 
@@ -196,7 +199,6 @@ sensor_grouped$regno_clean <- clean_data$regno_clean[match(
 )]
 
 
-
 #### Joining sensor and feedback data ####
 
 joined_data <- left_join(sensor_grouped, feedback_grouped)
@@ -217,8 +219,8 @@ plot_1 <- ggplot(feedback_grouped) +
   ) +
   scale_color_hue(direction = 1) +
   labs(
-    x = "Proportion of Safety Ratings 3 or 4",
-    y = "Proportion of Speed Ratings 4 or 5",
+    x = "Proportion of Safety Ratings Unsafe/Very unsafe",
+    y = "Proportion of Speed Ratings Fast/Very fast",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
@@ -249,7 +251,7 @@ plot_1 <- ggplot(joined_data) +
   scale_color_hue(direction = 1) +
   labs(
     x = "Proportion of time >100 km/h",
-    y = "Speed Rating (1 = Very slow, 5 = Very fast",
+    y = "Speed Rating (Proportion Fast/Very fast)",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
