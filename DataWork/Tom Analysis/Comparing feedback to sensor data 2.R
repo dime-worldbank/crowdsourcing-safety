@@ -238,7 +238,7 @@ plot_1 <- ggplot(joined_data) +
   scale_color_hue(direction = 1) +
   labs(
     x = "Total G force violations per hour",
-    y = "Safety Rating (1 = Very safe, 5 = Very unsafe",
+    y = "Safety Rating (1 = Very safe, 4 = Not very safe)",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
