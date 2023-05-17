@@ -60,14 +60,37 @@ wordcloud(
 
 #### Sentiment Analysis ####
 
-# # define safety related keywords
-# safety_keywords <- c("speed", "brake", "stop", "fast", "slow", "danger", "safe", "unsafe", "risk")
-#
-# # select only the comments that contain safety related keywords
-# feedback_data <- feedback_data[grep(paste(safety_keywords, collapse = "|"),
-#   feedback_data$comments_label_english,
-#   ignore.case = TRUE
-# ), ]
+# define safety related keywords
+safety_keywords <- c("speed", "brake", "stop", "fast", "slow", "danger", "safe", "unsafe", "risk")
+
+# From coding matatatu rider feedback documentation
+# Positive words
+positive_keywords <- c(
+  "careful driver", "obedient", "gentle", "praise", "fit",
+  "smart", "driving attentively", "strong", "powerful driver",
+  "safe", "good", "nice", "humble", "polite", "cares about passenger",
+  "did not drink while driving", "respect for passengers",
+  "knows how to follow the rules", "diligent", "industrious", "brave",
+  "kind to passengers", "congratulations", "beautiful", "mechanical driver",
+  "careful on the road", "safe driving", "tricycle in good condition",
+  "driver is alert", "drives methodically",
+  "attentively observing all the rules of the road", "driver was calm",
+  "spoke well to passenger"
+)
+
+# Negative words
+negative_keywords <- c(
+  "hurt you a lot", "busy", "unsafe driving",
+  "driver is very busy", "driver was drunk", "pay attention",
+  "should stop drinking alcohol", "they run a slam"
+)
+
+
+# select only the comments that contain safety related keywords
+feedback_data <- feedback_data[grep(paste(safety_keywords, collapse = "|"),
+  feedback_data$comments_label_english,
+  ignore.case = TRUE
+), ]
 
 # remove rows with NA in comments_label_english
 feedback_data <- feedback_data[complete.cases(feedback_data$comments_label_english), ]
@@ -87,7 +110,7 @@ feedback_data$sentiment_class <- ifelse(feedback_data$sentiment > 0, "positive",
 )
 
 
-#### adfadfadf ####
+#### Plotting sentiment ####
 
 # count the number of comments in each sentiment category
 sentiment_counts <- as.data.frame(table(feedback_data$sentiment_class))
@@ -107,6 +130,8 @@ ggplot(sentiment_counts, aes(x = sentiment_class, y = n)) +
 
 
 #### Assessing correlation with safety label ####
+
+## pull out examples of range of commments by sentiment
 
 # recode safety_label_en into numerical values
 feedback_data$safety_label_coded <- recode(feedback_data$safety_label_en,
@@ -139,7 +164,7 @@ plot <- ggplot(feedback_data, aes(
   color = sentiment
 )) +
   geom_point(
-    alpha = 0.7, aes(color = sentiment),
+    alpha = 0.5, aes(color = sentiment),
     position = position_jitter(width = 0.2, height = 0.2)
   ) +
   scale_color_gradientn(
@@ -156,3 +181,11 @@ plot <- ggplot(feedback_data, aes(
 
 plot
 ggplotly(plot)
+
+
+
+
+##### Quanteda package in R
+# negative binomial svm
+# docuemnt frequency matrix
+# https://rdrr.io/cran/quanteda.textmodels/man/textmodel_svm.html
