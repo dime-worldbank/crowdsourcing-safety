@@ -128,7 +128,6 @@ ggplot(sentiment_counts, aes(x = sentiment_class, y = n)) +
   theme_minimal()
 
 
-
 #### Assessing correlation with safety label ####
 
 ## pull out examples of range of commments by sentiment
@@ -141,7 +140,6 @@ feedback_data$safety_label_coded <- recode(feedback_data$safety_label_en,
   "Very Safe" = 4
 )
 
-
 # convert safety_label_en into a numeric variable
 feedback_data$safety_label_coded <- as.numeric(as.character(feedback_data$safety_label_coded))
 
@@ -152,16 +150,15 @@ correlation <- cor(feedback_data$sentiment, feedback_data$safety_label_coded, me
 print(correlation)
 
 
-
-## Plot
+#### Plotting relationship ####
 
 # Define custom color breakpoints
-custom_breaks <- c(-2, -1, -0.75, -0.5, 0, 0.5, 0.75, 1, 2)
+# custom_breaks <- c(-2, -1, -0.5, 0, 0.5, 1, 2)
 
 plot <- ggplot(feedback_data, aes(
   x = safety_label_coded, y = sentiment,
   text = comments_label_english,
-  color = sentiment
+  color = (sentiment - 0)
 )) +
   geom_point(
     alpha = 0.5, aes(color = sentiment),
@@ -169,20 +166,20 @@ plot <- ggplot(feedback_data, aes(
   ) +
   scale_color_gradientn(
     colors = brewer.pal(11, "Spectral"),
-    values = scales::rescale(custom_breaks),
-    breaks = custom_breaks,
+    # values = scales::rescale(custom_breaks),
+    # breaks = custom_breaks,
     name = "Sentiment Score"
   ) +
-  geom_smooth(method = "lm", se = TRUE, color = "maroon", aes(group = 1)) +
+  geom_smooth(method = "loess", se = TRUE, color = "maroon", aes(group = 1)) +
   labs(x = "Safety Label", y = "Sentiment Score") +
   theme_minimal() +
-  guides(color = guide_colorbar(barwidth = 1, barheight = 10, title.position = "top"))
+  guides(color = guide_colorbar(barwidth = 1, barheight = 10, title.position = "top")) +
+  ggtitle("Matatu Feedback Sentiment Analysis") +
+  scale_x_continuous(breaks = c(1, 2, 3, 4), labels = c("Very unsafe", "Unsafe", "Safe", "Very safe"))
 
 
 plot
 ggplotly(plot)
-
-
 
 
 ##### Quanteda package in R
