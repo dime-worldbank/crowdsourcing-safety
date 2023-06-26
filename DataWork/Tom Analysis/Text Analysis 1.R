@@ -1,6 +1,6 @@
 # Tom Harris
 # Text Analysis 1
-# ...
+# June 2023
 
 # n.b. Before any new scripts, run psv_feedback_master.R
 
@@ -181,8 +181,9 @@ plot <- ggplot(feedback_data, aes(
 plot
 ggplotly(plot)
 
-
-##### Quanteda package in R
+#### Next steps ####
+# Look into the Quantede package in R
 # negative binomial svm
 # docuemnt frequency matrix
 # https://rdrr.io/cran/quanteda.textmodels/man/textmodel_svm.html
+# Try to cross validate using the 'truth' data which Shaan and TH manually hardcoded as positive / negative
