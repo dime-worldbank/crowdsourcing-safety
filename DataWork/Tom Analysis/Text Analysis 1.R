@@ -1,5 +1,5 @@
 # Tom Harris
-# Text Analysis 1
+# Sentiment Analysis of PSV Rider Comments and correlation with safety rating
 # June 2023
 
 # n.b. Before any new scripts, run psv_feedback_master.R
