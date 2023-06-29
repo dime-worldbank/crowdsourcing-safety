@@ -7,14 +7,16 @@
 if (!require("pacman")) {
   install.packages("pacman")
 }
-pacman::p_load(tidyr,
-               dplyr,
-               plyr,
-               ggpmisc,
-               wesanderson,
-               plotly,
-               ggplot2,
-               data.table)
+pacman::p_load(
+  tidyr,
+  dplyr,
+  plyr,
+  ggpmisc,
+  wesanderson,
+  plotly,
+  ggplot2,
+  data.table
+)
 
 # Loading data
 sensor_data <-
@@ -40,18 +42,20 @@ feedback_data <-
 # Load sample data
 
 # First, converting the safety and speed factor variables into numeric variables
-# which can be gruoped and averaged by regno_clean
+# which can be grouped and averaged by regno_clean
 
 feedback_data$safety_numeric <- feedback_data$safety_label_en
 
 feedback_data$safety_numeric <-
   mapvalues(
     feedback_data$safety_numeric,
-    from = c("Not Very Safe",
-             "Not Safe",
-             "Safe",
-             "Very Safe"),
-    #I'm not sure here if 'not very safe' is better than 'not safe'?
+    from = c(
+      "Not Very Safe",
+      "Not Safe",
+      "Safe",
+      "Very Safe"
+    ),
+    # I'm not sure here if 'not very safe' is better than 'not safe'?
     to = c(4, 3, 2, 1)
   )
 
@@ -97,27 +101,25 @@ feedback_data$days_since_sticker <-
 ## Plotting
 ggplot(feedback_data) +
   aes(x = days_since_sticker, y = safety_numeric) +
-  geom_point(shape = "circle",
-             size = 1.5,
-             colour = "#112446") +
+  geom_point(
+    shape = "circle",
+    size = 1.5,
+    colour = "#112446"
+  ) +
   theme_minimal()
 
 
 
 #### Before / after analysis with sensor data ####
 
-#Rob's code
+# Rob's code
 df_clean <- sensor_data %>%
-  
   # Only consider vehicles with sensor installed
   dplyr::filter(sticker_installed %in% T) %>%
-  
   # Days since installation
   dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
-  
   # Only look 30 days before/after installed
   dplyr::filter(abs(days_since_sticker) <= 30) %>%
-  
   # Make facet title
   dplyr::mutate(
     ftitle = paste0(
@@ -133,12 +135,17 @@ df_clean <- sensor_data %>%
 df_clean %>%
   ggplot() +
   geom_vline(aes(xintercept = 0),
-             color = "red") +
-  geom_line(aes(x = days_since_sticker,
-                y = speed_max)) +
-  facet_wrap(~ ftitle) +
-  labs(x = "Days Since Sticker Installed",
-       note = "NS = Number of stickers installed; NF = number of passenger feedback surveys") +
+    color = "red"
+  ) +
+  geom_line(aes(
+    x = days_since_sticker,
+    y = speed_max
+  )) +
+  facet_wrap(~ftitle) +
+  labs(
+    x = "Days Since Sticker Installed",
+    note = "NS = Number of stickers installed; NF = number of passenger feedback surveys"
+  ) +
   theme_minimal() +
   theme(strip.text = element_text(face = "bold"))
 
@@ -147,13 +154,10 @@ df_clean %>%
 
 # Creating data for plot
 sensor_plot_data <- sensor_data %>%
-  
   # Only consider vehicles with sensor installed
   dplyr::filter(sticker_installed %in% T) %>%
-  
   # Days since installation
   dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
-  
   # Only look 30 days before/after installed
   dplyr::filter(abs(days_since_sticker) <= 50)
 
@@ -163,7 +167,7 @@ sensor_plot_data <- sensor_data %>%
 sensor_plot_data$over_80_by_km <-
   sensor_plot_data$N_speed_over_80 / sensor_plot_data$distance_km
 
-# Generating variable to capture all g-force related violations 
+# Generating variable to capture all g-force related violations
 # should this also be 'per km'?
 sensor_plot_data$total_g_violations <-
   sensor_plot_data$N_violation_acceleration +
@@ -182,7 +186,8 @@ plot_1 <-
     )
   ) +
   geom_vline(aes(xintercept = 0),
-             color = "red") +
+    color = "red"
+  ) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
   labs(x = "Days Since Sticker Installed", y = ">80km/h violations per km") +
@@ -205,11 +210,13 @@ plot_2 <-
     )
   ) +
   geom_vline(aes(xintercept = 0),
-             color = "red") +
+    color = "red"
+  ) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
   labs(x = "Days Since Sticker Installed", y = "Number of readings >100km/h") +
-  theme_minimal() + ylim(0, 50) +
+  theme_minimal() +
+  ylim(0, 50) +
   theme(strip.text = element_text(face = "bold"))
 
 plot_2
@@ -228,7 +235,8 @@ plot_3 <-
     )
   ) +
   geom_vline(aes(xintercept = 0),
-             color = "red") +
+    color = "red"
+  ) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
   labs(x = "Days Since Sticker Installed", y = "Number of G force violations") +
@@ -242,7 +250,7 @@ ggplotly(plot_3)
 
 #### Now looking at date since first rider feedback ####
 
-#Generating a variable for days since first feedback
+# Generating a variable for days since first feedback
 sensor_plot_data$days_since_first_feedback <-
   as.numeric(sensor_plot_data$date - sensor_plot_data$date_first_rider_feedback)
 
@@ -250,10 +258,13 @@ sensor_plot_data <- sensor_plot_data %>%
   filter(abs(sensor_plot_data$days_since_first_feedback) <= 50)
 
 sensor_feedback_plot_data <-
-  subset(sensor_plot_data,
-         sensor_plot_data$drvr_feedback_treat_feedback == 1)
+  subset(
+    sensor_plot_data,
+    sensor_plot_data$drvr_feedback_treat_feedback == 1
+  )
 
-
+# Note to self
+# only run for vehicles which have received feedback !
 plot_4 <-
   ggplot(
     sensor_feedback_plot_data,
@@ -265,7 +276,8 @@ plot_4 <-
     )
   ) +
   geom_vline(aes(xintercept = 0),
-             color = "red") +
+    color = "red"
+  ) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
   labs(x = "Days Since First Feedback Received", y = ">80km/h violations per km") +
@@ -290,13 +302,16 @@ plot_5 <-
     )
   ) +
   geom_vline(aes(xintercept = 0),
-             color = "red") +
+    color = "red"
+  ) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = loess, formula = y ~ x) +
   labs(x = "Days Since First Feedback Received", y = "G violations") +
-  theme_minimal() + ylim(0, 150) +
+  theme_minimal() +
+  ylim(0, 150) +
   theme(strip.text = element_text(face = "bold"))
 
 plot_5
 
 ggplotly(plot_5)
+

@@ -18,12 +18,17 @@ pacman::p_load(
 
 #### Loading and joining data ####
 
+#### Loading and cleaning sensor data ####
+
 # Loading sensor data
 sensor_data <-
   readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
 
 # Convert the 'reg_no' column to lower case
 sensor_data <- sensor_data %>% mutate(reg_no = tolower(reg_no))
+
+# subsetting to only those journeys over 100 km distance
+# sensor_data <- subset(sensor_data, sensor_data$distance_km > 1)
 
 # Loading sensor data with time spent over xkm/h
 time_data <-
@@ -32,8 +37,8 @@ time_data <-
 # Remove double spaces from 'reg_no' column
 time_data <- time_data %>% mutate(reg_no = gsub("\\s+", " ", reg_no))
 
-# subset to journeys longer than 10 minutes
-time_data <- subset(time_data, time_data$time_mov_s > 600)
+# subset to journeys longer than 60 minutes
+time_data <- subset(time_data, time_data$time_mov_s > (60 * 60))
 
 # Join data by reg_no and date
 joined_data <- left_join(time_data, sensor_data, by = c("reg_no", "date"))
@@ -44,31 +49,35 @@ joined_data$prop_80 <- joined_data$time_spd80_s / joined_data$time_mov_s
 # Generating variable for proportion of time spent over 100km/h
 joined_data$prop_100 <- joined_data$time_spd100_s / joined_data$time_mov_s
 
-
 # Generating variable to capture all g-force related violations
-# Q. should this also be 'per km'?
 joined_data$total_g_violations <-
   (joined_data$N_violation_acceleration +
-     joined_data$N_violation_brake +
-     joined_data$N_violation_turn)
+    joined_data$N_violation_brake +
+    joined_data$N_violation_turn)
 
 # this is now per hour moving
 joined_data$total_g_violations_per_hour <-
   joined_data$total_g_violations / (joined_data$time_mov_s / 3600)
 
-
 joined_data$days_since_sticker <- as.numeric(joined_data$date - joined_data$sticker_install_date)
 
+# Subset the data frame by column index numbers
+clean_data <- joined_data[, c(1:5, 7, 9:12, 74:81)]
+
+# Collapse the data frame by reg_no and calculate the average of x, y, and z
+sensor_grouped <- aggregate(clean_data[, 12:17], by = list(reg_no = clean_data$reg_no), FUN = mean)
+
+# Appending regno_clean name
+sensor_grouped$regno_clean <- clean_data$regno_clean[match(
+  sensor_grouped$reg_no,
+  clean_data$reg_no
+)]
+
+
+#### Loading and cleaning feedback data ####
 
 feedback_data <-
   readRDS(file.path(rider_feedback_dir, "FinalData", "rider_feedback.Rds"))
-
-
-### Grouping the feedback data
-
-#### Simple Average method (I'm not sure about this...) ####
-
-# Load sample data
 
 # First, converting the safety and speed factor variables into numeric variables
 # which can be gruoped and averaged by regno_clean
@@ -115,14 +124,9 @@ feedback_data$speed_numeric <-
 grouped_data <- feedback_data %>%
   group_by(regno_clean)
 
-# # Need a variable which measures number of violations per km, otherwise
-# # biased by buses which drive longer routes.
-# grouped_data$over_80_by_km <-
-#   grouped_data$N_speed_over_80 / grouped_data$distance_km
-
-# ### Specify which columns we want to take weighted average of:
+# Specify which columns we want to take weighted average of:
 variablesToAvg <-
-  names(grouped_data)[c(25, 26, 27, 29, 30, 32, 33)] ## you may want to tweak which variables you average
+  names(grouped_data)[c(25, 26, 27, 29, 30, 32, 33)] ##
 
 ### set as data table
 grouped_data <-
@@ -132,8 +136,7 @@ grouped_data <-
 grouped_data <- grouped_data %>%
   filter(!is.na(safety_numeric) & !is.na(speed_numeric))
 
-
-### collapse to bus using weighted means
+### collapse to bus using means
 final_data <-
   grouped_data[,
     lapply(.SD, mean), ## applies weighted mean function with weights w over specified columns
@@ -146,6 +149,9 @@ final_data$sacco <-
 
 feedback_grouped <- final_data
 
+#### Joining sensor and feedback data ####
+
+joined_data <- left_join(sensor_grouped, feedback_grouped)
 
 # Q. does safety rating correlate with speed rating?
 
@@ -170,9 +176,7 @@ plot_1 <- ggplot(feedback_grouped) +
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
-  labs(fill = "Sacco Company") +
-  xlim(2.5, 4) +
-  ylim(1.5, 5)
+  labs(fill = "Sacco Company")
 
 plot_1
 
@@ -180,87 +184,69 @@ plot_1
 ggplotly(plot_1)
 
 
-
-#### Now bringing in sensor data ####
-
-#### Simple Average method (I'm not sure about this...) ####
-
-# Load sample data
-
-# Group the data by the "regno_clean" id variable
-grouped_data <- sensor_data %>%
-  group_by(regno_clean)
-
-#### note to self
-# readings not taken per x seconds - based on change in speed --- so divide by journey time
-# Need a variable which measures number of violations per km, otherwise
-# biased by buses which drive longer routes.
-grouped_data$over_80_by_km <-
-  grouped_data$N_speed_over_80 / grouped_data$distance_km
-
-# Specify which columns we want to take weighted average of:
-variablesToAvg <-
-  names(grouped_data)[c(1, 2, 9:64, 73)] ## you may want to tweak which variables you average
-
-### set as data table
-grouped_data <-
-  data.table(grouped_data)
-
-# getting rid of rows where N_speed_over_0 is 'na' or zero as this doesn't make sense..
-grouped_data <- grouped_data %>%
-  filter(!is.na(N_speed_over_0) & N_speed_over_0 != 0)
-
-
-### collapse
-final_data <-
-  grouped_data[,
-    lapply(.SD, mean), ## applies weighted mean function with weights w over specified columns
-    by = list(regno_clean),
-    .SDcols = variablesToAvg
-  ] ## specifies columns to average
-
-# won't work as sacco variable no longer there...
-# final_data$sacco <-
-#   grouped_data$sacco[match(final_data$regno_clean, grouped_data$regno_clean)]
-
-sensor_grouped <- final_data
-
-
-## joining grouped data sets by regno_clean
-
-joined_data <- left_join(sensor_grouped, feedback_grouped)
-
-
-# plot of sensor vs. feedback data
-# note to self
+#### Comparing sensor to feedback data ####
 # focus on proportion of responses that are fast or very fast instead of average of 1 to 5
-
 
 plot_1 <- ggplot(joined_data) +
   aes(
-    x = joined_data$over_80_by_km,
-    y = joined_data$speed_numeric,
-    color = sacco
+    x = joined_data$prop_100,
+    y = joined_data$speed_numeric
   ) +
   geom_point(
     shape = "circle",
     size = 3,
-    alpha = 0.6
+    alpha = 0.6,
+    aes(color = sacco)
   ) +
   scale_color_hue(direction = 1) +
   labs(
-    x = ">80km/h violations per km",
+    x = "Proportion of time >100 km/h",
     y = "Speed Rating (1 = Very slow, 5 = Very fast",
     title = "Comparing Rider Feedback on Speed vs. Safety",
     subtitle = " "
   ) +
   theme_minimal() +
   theme(legend.position = "top") +
-  labs(fill = "Sacco Company") +
-  xlim(2.5, 4) +
-  ylim(1.5, 5)
+  geom_smooth(method = "lm", se = TRUE) +
+  xlim(0,0.02)
+
+# labs(fill = "Sacco Company") +
+# xlim(2.5, 4) +
+# ylim(1.5, 5)
 
 plot_1
 
 # interactive version
 ggplotly(plot_1)
+
+
+
+#### Comparing sensor to feedback data ####
+# focus on proportion of responses that are fast or very fast instead of average of 1 to 5
+
+plot_1 <- ggplot(joined_data) +
+  aes(
+    x = joined_data$total_g_violations_per_hour,
+    y = joined_data$safety_numeric
+  ) +
+  geom_point(
+    shape = "circle",
+    size = 3,
+    alpha = 0.6,
+    aes(color = sacco)
+  ) +
+  scale_color_hue(direction = 1) +
+  labs(
+    x = "Total G force violations per hour",
+    y = "Safety Rating (1 = Very safe, 4 = Not very safe)",
+    title = "Comparing Rider Feedback on Speed vs. Safety",
+    subtitle = " "
+  ) +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  geom_smooth(method = "lm", se = TRUE)
+# labs(fill = "Sacco Company") +
+# xlim(2.5, 4) +
+# ylim(1.5, 5)
+
+plot_1
