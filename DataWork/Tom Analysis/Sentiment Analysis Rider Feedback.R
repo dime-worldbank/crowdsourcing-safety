@@ -181,7 +181,7 @@ plot <- ggplot(feedback_data, aes(
 plot
 ggplotly(plot)
 
-#### Next steps ####
+#### Next steps, handover to Ruiwen ####
 # Look into the Quantede package in R
 # negative binomial svm
 # docuemnt frequency matrix

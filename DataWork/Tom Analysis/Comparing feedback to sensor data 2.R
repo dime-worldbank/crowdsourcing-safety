@@ -208,7 +208,7 @@ plot_1 <- ggplot(joined_data) +
   theme_minimal() +
   theme(legend.position = "top") +
   geom_smooth(method = "lm", se = TRUE) +
-  xlim(0,0.02)
+  xlim(0, 0.02)
 
 # labs(fill = "Sacco Company") +
 # xlim(2.5, 4) +
@@ -218,7 +218,6 @@ plot_1
 
 # interactive version
 ggplotly(plot_1)
-
 
 
 #### Comparing sensor to feedback data ####

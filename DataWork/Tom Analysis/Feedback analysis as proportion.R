@@ -270,7 +270,6 @@ plot_1
 ggplotly(plot_1)
 
 
-
 #### Comparing sensor to feedback data ####
 # focus on proportion of responses that are fast or very fast instead of average of 1 to 5
 
