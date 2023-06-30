@@ -1,4 +1,5 @@
 # Tom Harris
+# Feb 2023
 # Comparing grouped feedback and sensor data
 
 # n.b. Before any new scripts, run psv_feedback_master.R
@@ -49,8 +50,8 @@ joined_data$prop_100 <- joined_data$time_spd100_s / joined_data$time_mov_s
 # Q. should this also be 'per km'?
 joined_data$total_g_violations <-
   (joined_data$N_violation_acceleration +
-     joined_data$N_violation_brake +
-     joined_data$N_violation_turn)
+    joined_data$N_violation_brake +
+    joined_data$N_violation_turn)
 
 # this is now per hour moving
 joined_data$total_g_violations_per_hour <-
@@ -180,7 +181,6 @@ plot_1
 ggplotly(plot_1)
 
 
-
 #### Now bringing in sensor data ####
 
 #### Simple Average method (I'm not sure about this...) ####
@@ -225,16 +225,11 @@ final_data <-
 
 sensor_grouped <- final_data
 
-
 ## joining grouped data sets by regno_clean
 
 joined_data <- left_join(sensor_grouped, feedback_grouped)
 
-
 # plot of sensor vs. feedback data
-# note to self
-# focus on proportion of responses that are fast or very fast instead of average of 1 to 5
-
 
 plot_1 <- ggplot(joined_data) +
   aes(
