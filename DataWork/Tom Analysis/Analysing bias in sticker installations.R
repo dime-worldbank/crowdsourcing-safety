@@ -140,7 +140,6 @@ ggplot(clean_data, aes(
   )
 
 
-
 #### Repeat analysis by regno id ####
 
 ## Box plots by number of stickers
@@ -200,4 +199,3 @@ ggplot(agg_df, aes(
     name = "Number of Stickers",
     labels = c("None", "Two", "Three", "Four", "Five", "Six")
   )
-
