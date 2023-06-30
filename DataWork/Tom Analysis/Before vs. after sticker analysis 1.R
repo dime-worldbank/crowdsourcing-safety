@@ -1,5 +1,6 @@
 # Tom Harris
-# Before and after analysis
+# Feb 2023
+# Before and after analysis of sticker intervention
 
 # n.b. Before any new scripts, run psv_feedback_master.R
 
