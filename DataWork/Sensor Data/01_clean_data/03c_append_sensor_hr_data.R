@@ -45,6 +45,9 @@ print("Append data with data only (no polyline)")
 sensor_df <- sensor_files_dataonly %>%
   map_df(~read_clean_sensor(.)) 
 
+sensor_df <- sensor_df %>%
+  mutate(across(starts_with("time_over_"), ~replace(., is.na(.), 0)))
+
 saveRDS(sensor_df, file.path(sensors_dir, "FinalData", "sensortracing_dayhr_dataonly.Rds"))
 write_parquet(sensor_df, file.path(sensors_dir, "FinalData", 
                                    "sensortracing_dayhr_dataonly.gz.parquet"), 
@@ -75,6 +78,9 @@ sensor_sf <- sensor_files_data_polyline %>%
     return(out)
   }) %>%
   bind_rows()
+
+sensor_sf <- sensor_sf %>%
+  mutate(across(starts_with("time_over_"), ~replace(., is.na(.), 0)))
 
 saveRDS(sensor_sf, file.path(sensors_dir, "FinalData", "sensortracing_dayhr_datapolyline.Rds"))
 

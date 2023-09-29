@@ -12,6 +12,7 @@ comments_coded_df <- file.path(data_dir, "Rider Feedback", "FinalData",
                                "comments_coded", "coded") %>%
   list.files(pattern = "*.csv",
              full.names = T) %>%
+  str_subset("coded_main") %>%
   map_df(read_csv) %>%
   dplyr::select(c(case_key,
                   needs_crosschecking, comments_checking_relevance, coding_relevant_comments,
@@ -20,9 +21,22 @@ comments_coded_df <- file.path(data_dir, "Rider Feedback", "FinalData",
   dplyr::rename(comment_driver_sentiment_relev = comments_checking_relevance,
                 comment_driver_sentiment_code = coding_relevant_comments)
 
+comments_coded_check_df <- file.path(data_dir, "Rider Feedback", "FinalData", 
+                               "comments_coded", "coded") %>%
+  list.files(pattern = "*.csv",
+             full.names = T) %>%
+  str_subset("coded_random") %>%
+  map_df(read_csv) %>%
+  dplyr::select(c(case_key,
+                  comment_driver_sentiment_relev, comment_driver_sentiment_code)) %>%
+  dplyr::rename(comment_driver_sentiment_relev_check = comment_driver_sentiment_relev,
+                comment_driver_sentiment_code_check = comment_driver_sentiment_code) %>%
+  dplyr::mutate(comment_coded_check = T)
+
 df <- df %>%
   left_join(comments_en_df, by = "case_key") %>%
-  left_join(comments_coded_df, by = "case_key")
+  left_join(comments_coded_df, by = "case_key") %>%
+  left_join(comments_coded_check_df, by = "case_key")
 
 df$comment_coded[is.na(df$comment_coded)] <- F
 

@@ -22,10 +22,25 @@ sensor_nonsum_df <- sensor_df %>%
                    speed_p90 = weighted.mean(x = speed_p90, w = N_obs_speed),
                    speed_p95 = weighted.mean(x = speed_p95, w = N_obs_speed),
                    speed_max = max(speed_max),
+                   time_over_0kph_secs  = sum(time_over_0kph_secs),
+                   time_over_10kph_secs = sum(time_over_10kph_secs),
+                   time_over_20kph_secs = sum(time_over_20kph_secs),
+                   time_over_30kph_secs = sum(time_over_30kph_secs),
+                   time_over_40kph_secs = sum(time_over_40kph_secs),
+                   time_over_50kph_secs = sum(time_over_50kph_secs),
+                   time_over_60kph_secs = sum(time_over_60kph_secs),
+                   time_over_70kph_secs = sum(time_over_70kph_secs),
+                   time_over_80kph_secs = sum(time_over_80kph_secs),
+                   time_over_90kph_secs = sum(time_over_90kph_secs),
+                   time_over_100kph_secs = sum(time_over_100kph_secs),
+                   time_over_110kph_secs = sum(time_over_110kph_secs),
+                   time_over_120kph_secs = sum(time_over_120kph_secs),
+                   time_over_130kph_secs = sum(time_over_130kph_secs),
+                   time_over_140kph_secs = sum(time_over_140kph_secs),
+                   time_over_150kph_secs = sum(time_over_150kph_secs),
+                   time_over_160kph_secs = sum(time_over_160kph_secs),
                    distance_minmax_latlon_km = sum(distance_minmax_latlon_km),
-                   distance_hourly_sum_km = sum(distance_km),
-                   distance_km_over_110kmh = sum(distance_km_over_110kmh), #TODO: NAs?
-                   duration_seconds_over_110kmh = sum(duration_seconds_over_110kmh))  #TODO: NAs?
+                   distance_hourly_sum_km = sum(distance_km))  
 
 ## Summarize numeric variables; taking sums
 sensor_sum_df <- sensor_df %>%
@@ -47,27 +62,27 @@ min_nonna <- function(x){
   min(x[!is.na(x)])
 }
 
-sensor_vehlevel_df <- sensor_df %>%
-  group_by(regno_clean) %>%
-  dplyr::summarise(drvr_feedback_treat_id       = drvr_feedback_treat_id %>% first_nonna(),
-                   drvr_feedback_treat          = drvr_feedback_treat %>% first_nonna(),
-                   drvr_feedback_treat_sticker  = drvr_feedback_treat_sticker %>% first_nonna(),
-                   drvr_feedback_treat_feedback = drvr_feedback_treat_feedback %>% first_nonna(),
-                   
-                   n_rider_feedback_total    = n_rider_feedback_total %>% first_nonna(),
-                   date_first_rider_feedback = date_first_rider_feedback %>% first_nonna(),
-                   
-                   sticker_install_date      = sticker_install_date %>% min_nonna(),
-                   n_stickers_installed      = n_stickers_installed %>% first_nonna(),
-                   sticker_installed         = sticker_installed %>% first_nonna()) %>%
-  ungroup()
+# sensor_vehlevel_df <- sensor_df %>%
+#   group_by(regno_clean) %>%
+#   dplyr::summarise(drvr_feedback_treat_id       = drvr_feedback_treat_id %>% first_nonna(),
+#                    drvr_feedback_treat          = drvr_feedback_treat %>% first_nonna(),
+#                    drvr_feedback_treat_sticker  = drvr_feedback_treat_sticker %>% first_nonna(),
+#                    drvr_feedback_treat_feedback = drvr_feedback_treat_feedback %>% first_nonna(),
+#                    
+#                    n_rider_feedback_total    = n_rider_feedback_total %>% first_nonna(),
+#                    date_first_rider_feedback = date_first_rider_feedback %>% first_nonna(),
+#                    
+#                    sticker_install_date      = sticker_install_date %>% min_nonna(),
+#                    n_stickers_installed      = n_stickers_installed %>% first_nonna(),
+#                    sticker_installed         = sticker_installed %>% first_nonna()) %>%
+#   ungroup()
   
 sensor_agg_df <- merge(sensor_sum_df, sensor_nonsum_df, 
                        by = c("reg_no", "reg_no_id", "regno_clean", "sacco", "route", "date", "gps_install_date"),
                        all = T)
 
-sensor_agg_df <- sensor_agg_df %>%
-  left_join(sensor_vehlevel_df, by = "regno_clean")
+# sensor_agg_df <- sensor_agg_df %>%
+#   left_join(sensor_vehlevel_df, by = "regno_clean")
 
 # sensor_vehlevel_df <- sensor_vehlevel_df %>%
 #   dplyr::filter(regno_clean %in% "KCH 834K")
@@ -151,6 +166,15 @@ sensor_agg_df$geometry <- NULL
 sensor_agg_df$group_id <- NULL
 sensor_agg_sf$group_id <- NULL
 
+#### Rename
+sensor_agg_df <- sensor_agg_df %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_clean)
+
+sensor_agg_sf <- sensor_agg_sf %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_clean)
+
 # Export -----------------------------------------------------------------------
 ## Data Only
 write_parquet(sensor_agg_df, file.path(sensors_dir, "FinalData", "sensor_day.gz.parquet"), 
@@ -162,37 +186,3 @@ saveRDS(sensor_agg_sf, file.path(sensors_dir, "FinalData", "sensor_day_polyline.
 
 
 
-
-# sensor_agg_df <- readRDS(file.path(sensors_dir, "FinalData", "sensor_day.Rds"))
-# 
-# df_clean <- sensor_agg_df %>%
-#   
-#   # Only consider vehicles with sensor installed
-#   dplyr::filter(sticker_installed %in% T) %>%
-#   
-#   # Days since installation
-#   dplyr::mutate(days_since_sticker = as.numeric(date - sticker_install_date)) %>%
-#   
-#   # Only look 30 days before/after installed
-#   dplyr::filter(abs(days_since_sticker) <= 30) %>%
-#   
-#   # Make facet title
-#   dplyr::mutate(ftitle = paste0(regno_clean, "\n",
-#                                 "NS: ", n_stickers_installed, "; ",
-#                                 "NF: ", n_rider_feedback_total))
-#   
-# df_clean %>%
-#   ggplot() +
-#   geom_vline(aes(xintercept = 0),
-#              color = "red") +
-#   geom_line(aes(x = days_since_sticker, 
-#                y = speed_max)) +
-#   facet_wrap(~ftitle) + 
-#   labs(x = "Days Since Sticker Installed",
-#        caption = "NS = Number of stickers installed; NF = number of passenger feedback surveys") +
-#   theme_minimal() +
-#   theme(strip.text = element_text(face = "bold"))
-# 
-# 
-# 
-# 

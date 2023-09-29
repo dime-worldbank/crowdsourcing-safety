@@ -2,15 +2,15 @@
 
 # 1. LOAD DATA =================================================================
 ## Shortcode Data
-sc_data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "Echo Mobile Data", "RawData", 
+sc_data <- readRDS(file.path(dropbox_dir, "Data", "Rider Feedback - Pilot", "Echo Mobile Data", "RawData", 
                              "echo_data.Rds"))
 
 ## QR Data
-qr_data <- readRDS(file.path(dropbox_file_path, "Data", "Rider Feedback", "PSV Safety Systems Data", "RawData", 
+qr_data <- readRDS(file.path(dropbox_dir, "Data", "Rider Feedback - Pilot", "PSV Safety Systems Data", "RawData", 
                              "qr_data.Rds"))
 
 ## Sticker Data
-sticker_df <- read_xlsx(file.path(dropbox_file_path, "Data", "Matatu Data", 
+sticker_df <- read_xlsx(file.path(dropbox_dir, "Data", "Matatu Data", 
                                   "Sticker Information", "psv_sticker_information.xlsx"))
 
 # 2. CLEAN INDIVIDUAL DATASETS =================================================

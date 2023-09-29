@@ -27,7 +27,8 @@ if(F){
 # Rob (Personal Comptuer)
 if(Sys.info()[["user"]] == "robmarty"){
   dropbox_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
-  db_pii_dir  <- "/Volumes/PSV_Rider_Feedback_PII"
+  #db_pii_dir  <- "/Volumes/PSV_Rider_Feedback_PII"
+  db_pii_dir <- "~/Documents/World Bank/PSV Rider Feedback"
   #onedrive_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback"
   github_dir <- "~/Documents/Github/PSV-Rider-Feedback/"
 }

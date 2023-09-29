@@ -75,6 +75,17 @@ issues_to_check <- cont_nodata_df %>%
 write_csv(issues_to_check, "~/Desktop/sensor_issues.csv")
 
 
+sensors_working <- cont_nodata_df %>%
+  filter(n_days_no_speed <= 21) %>%
+  arrange(-n_days_no_speed) %>%
+  dplyr::select(regno_clean, sacco, route, n_days_no_speed)
+
+write_csv(sensors_working, "~/Desktop/sensor_issues_working.csv")
+
+
+
+
+
 
 sensor_df %>%
   dplyr::filter() %>%

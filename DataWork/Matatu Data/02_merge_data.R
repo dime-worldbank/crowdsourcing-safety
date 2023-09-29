@@ -20,12 +20,14 @@ veh_df <- veh_df %>%
   left_join(driver_rand_df, by = "reg_no") %>%
   dplyr::select(-blank_var)
 
-# veh_df$reg_no <- veh_df$reg_no %>% str_replace_all(" ", "")
-# 
-# veh_df <- veh_df %>%
-#   left_join(ntsa_sacco_df, by = "reg_no")
-# 
-# a <- veh_df[,c("sacco", "ntsa_sacco")]
+# Cleanup ----------------------------------------------------------------------
+veh_df <- veh_df %>%
+  dplyr::rename(regno = reg_no) %>%
+  dplyr::select(regno, sacco, route,
+                vehicle_type,
+                drvr_feedback_treat_id, drvr_feedback_treat,
+                drvr_feedback_treat_sticker, drvr_feedback_treat_feedback) %>%
+  dplyr::filter(regno != "UNASSIGNED")
 
 # Export -----------------------------------------------------------------------
 saveRDS(veh_df, file.path(matatu_data_dir, "FinalData", "vehicle_info.Rds"))

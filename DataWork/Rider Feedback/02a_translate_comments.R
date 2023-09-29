@@ -1,7 +1,7 @@
 # Translate Comments
 # Only translate comments where PSV number is valid
 
-TRANSLATE <- F
+TRANSLATE <- T
 
 # Load data --------------------------------------------------------------------
 if(TRANSLATE){
@@ -17,7 +17,6 @@ if(TRANSLATE){
                           "rider_feedback.Rds"))
   
   # Subset data ------------------------------------------------------------------
-  
   df <- df %>%
     dplyr::filter(!is.na(completion_date),
                   !is.na(comments_label_nchar)) %>%
@@ -29,7 +28,7 @@ if(TRANSLATE){
   dates_to_trans <- df$completion_date %>% unique() %>% sort()
   
   ## Remove last day, as may not be complete
-  dates_to_trans <- dates_to_trans[-length(dates_to_trans)]
+  #dates_to_trans <- dates_to_trans[-length(dates_to_trans)]
   
   for(date_i in dates_to_trans){
     

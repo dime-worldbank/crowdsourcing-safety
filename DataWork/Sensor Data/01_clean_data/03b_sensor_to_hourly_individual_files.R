@@ -68,6 +68,103 @@ for(raw_sensor_filepath_i in raw_sensor_files){
         dplyr::mutate(datetime_eat = floor_date(datetime_eat, unit = "hour"),
                       hour = datetime_eat %>% hour())
       
+      ##### Time over speed
+      time_over_df_list <- lapply(seq(0, 160, by = 10), function(SPEED_THRESH){
+
+        if(max(sensor_df$speed) >= SPEED_THRESH){
+
+          #### Speed Events Dataframe
+          time_over_df_i <- sensor_df %>%
+            mutate(time_str = time_str %>% ymd_hms() %>% with_tz(tzone = "Africa/Nairobi")) %>%
+            arrange(time_str) %>%
+            mutate(over_t = speed >= SPEED_THRESH) %>%
+            mutate(event = cumsum(c(TRUE, abs(diff(over_t)) >= 1))) %>%
+            dplyr::mutate(event_lag = lag(event)) %>%
+            mutate(event_final = case_when(
+              speed >= SPEED_THRESH ~ event,
+              speed < SPEED_THRESH ~ event_lag
+            )) %>%
+            group_by(event_final) %>%
+            mutate(speed_max = max(speed)) %>%
+            ungroup() %>%
+            filter(speed_max >= SPEED_THRESH) %>%
+            group_by(event_final) %>%
+            dplyr::summarise(time = difftime(max(time_str), min(time_str), units = "secs"),
+                             time_str_min = min(time_str),
+                             time_str_max = max(time_str)) %>%
+            ungroup() %>%
+            dplyr::mutate(time_str_min_hr = time_str_min %>% floor_date(unit = "hour"),
+                          time_str_max_hr = time_str_max %>% floor_date(unit = "hour")) %>%
+            dplyr::mutate(time_str_hr_diff = difftime(time_str_max_hr, time_str_min_hr, unit = "hours") %>% as.numeric())
+          
+          #### Separate: Event within hour versus crosses hour
+          time_over_df_i_within_hr <- time_over_df_i %>%
+            dplyr::filter(time_str_min_hr == time_str_max_hr) %>%
+            dplyr::mutate(time_over_secs = time %>% as.numeric()) %>%
+            dplyr::select(time_str_min_hr, time_over_secs) %>%
+            dplyr::rename(datetime_eat = time_str_min_hr)
+          
+          time_over_df_i_across_hr <- time_over_df_i %>%
+            dplyr::filter(time_str_min_hr != time_str_max_hr)
+          
+          # Break up by hour / if crosses hour
+          if(nrow(time_over_df_i_across_hr) > 0){
+            time_over_df_i_across_hr_spread <- map_df(1:nrow(time_over_df_i_across_hr), function(i){
+              time_over_df_ii <- time_over_df_i_across_hr[i,]
+              
+              ## Make dataframe of all times
+              datetime_df <- seq(from = time_over_df_ii$time_str_min_hr,
+                                 to = time_over_df_ii$time_str_max_hr,
+                                 by = 60*60) %>%
+                as.data.frame() %>%
+                dplyr::rename(datetime_eat = ".") %>%
+                dplyr::mutate(time_over_secs = NA)
+              
+              ## Time over secs in first row
+              # Need to go to next hour as take floor before
+              datetime_df$time_over_secs[1] <-  difftime(datetime_df$datetime_eat[1] + 60*60,
+                                                        time_over_df_ii$time_str_min, 
+                                                        unit = "secs")
+              
+              ## Time over secs in last row
+              n_row <- nrow(datetime_df)
+              datetime_df$time_over_secs[n_row] <-  difftime(time_over_df_ii$time_str_max, datetime_df$datetime_eat[n_row], unit = "secs")
+              
+              ## Time over secs in middle rows (full seconds in hour)
+              datetime_df$time_over_secs[is.na(datetime_df$time_over_secs)] <- 60*60
+              
+              return(datetime_df)
+            })
+          } else{
+            time_over_df_i_across_hr_spread <- data.frame(NULL)
+          }
+          
+          #### Append and aggregate
+          time_over_all_df <- bind_rows(
+            time_over_df_i_within_hr,
+            time_over_df_i_across_hr_spread
+          ) %>%
+            group_by(datetime_eat) %>%
+            dplyr::summarise(time_over_secs = sum(time_over_secs)) %>%
+            ungroup()
+          
+          names(time_over_all_df) <- names(time_over_all_df) %>%
+            str_replace_all("time_over_sec", paste0("time_over_", SPEED_THRESH, "kph_sec"))
+
+        } else{
+          time_over_all_df <- NULL
+        }
+        
+        return(time_over_all_df)
+      }) 
+      time_over_df_list[sapply(time_over_df_list, is.null)] <- NULL
+      
+      time_over_df <- time_over_df_list %>%
+        reduce(full_join, by = "datetime_eat")
+      
+      time_over_df <- time_over_df %>%
+        mutate(across(starts_with("time_over"), ~replace(., is.na(.), 0)))
+
       #### Aggregate
       sensor_sum_df <- sensor_df %>%
         dplyr::filter(!is.na(datetime_eat),
@@ -105,6 +202,9 @@ for(raw_sensor_filepath_i in raw_sensor_files){
                          longitude = median(longitude, na.rm=T),
                          N_obs_speed = n()) %>%
         ungroup()
+      
+      sensor_sum_df <- sensor_sum_df %>%
+        left_join(time_over_df, by = "datetime_eat")
       
       #### Polyline
       sensor_latlon_df <- sensor_df %>%

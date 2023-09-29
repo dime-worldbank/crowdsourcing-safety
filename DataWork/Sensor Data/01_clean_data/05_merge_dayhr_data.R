@@ -31,20 +31,20 @@ st_insll_df <- st_insll_df %>%
                   str_replace_all(" ", ""))
 
 #### Rider feedback
-rider_feed_df <- readRDS(file.path(rider_feedback_dir, "FinalData", 
-                                   "rider_feedback.Rds"))
-
-## Vehicle level
-rider_feed_vehlevel_df <- rider_feed_df %>%
-  dplyr::filter(valid_psvnum %in% T,
-                !is.na(completion_date)) %>%
-  dplyr::mutate(feedback_date = invite_datetime %>% date()) %>%
-  group_by(regno_clean) %>%
-  dplyr::summarise(n_rider_feedback_total = n(),
-                   date_first_rider_feedback = min(feedback_date)) %>%
-  dplyr::mutate(regno_clean = regno_clean %>% 
-                  tolower() %>%
-                  str_replace_all(" ", ""))
+# rider_feed_df <- readRDS(file.path(rider_feedback_dir, "FinalData", 
+#                                    "rider_feedback.Rds"))
+# 
+# ## Vehicle level
+# rider_feed_vehlevel_df <- rider_feed_df %>%
+#   dplyr::filter(valid_psvnum %in% T,
+#                 !is.na(completion_date)) %>%
+#   dplyr::mutate(feedback_date = invite_datetime %>% date()) %>%
+#   group_by(regno_clean) %>%
+#   dplyr::summarise(n_rider_feedback_total = n(),
+#                    date_first_rider_feedback = min(feedback_date)) %>%
+#   dplyr::mutate(regno_clean = regno_clean %>% 
+#                   tolower() %>%
+#                   str_replace_all(" ", ""))
 
 # Individual dataset fixes -----------------------------------------------------
 # Ensure variable types are the same
@@ -139,12 +139,12 @@ sensor_df <- sensor_df %>%
 #                   str_replace_all(" ", ""))
 
 sensor_df <- sensor_df %>%
-  left_join(rider_feed_vehlevel_df, by = "regno_clean") %>%
+  #left_join(rider_feed_vehlevel_df, by = "regno_clean") %>%
   left_join(st_insll_df, by = "regno_clean") %>%
   left_join(veh_data_df, by = "regno_clean")
 
 sensor_sf <- sensor_sf %>%
-  left_join(rider_feed_vehlevel_df, by = "regno_clean") %>%
+  #left_join(rider_feed_vehlevel_df, by = "regno_clean") %>%
   left_join(st_insll_df, by = "regno_clean") %>%
   left_join(veh_data_df, by = "regno_clean")
 
