@@ -20,7 +20,7 @@ df <- df %>%
 ## Further clean
 df <- df %>%
   dplyr::mutate(sticker_install_date = submission_date %>% date()) %>%
-  dplyr::select(regno_clean, sticker_install_date, matatu_seats, n_stickers_installed,
+  dplyr::select(regno_clean, matatu_sacco, sticker_install_date, matatu_seats, n_stickers_installed,
                 driver_name, driver_phone_no) %>%
   dplyr::rename(n_matatu_seats_srvy = matatu_seats,
                 n_stickers_installed_srvy = n_stickers_installed,

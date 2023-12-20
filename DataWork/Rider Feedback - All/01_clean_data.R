@@ -189,9 +189,38 @@ fb_df <- fb_df %>%
     
   )
 
+# Make factors -----------------------------------------------------------------
+fb_df <- fb_df %>%
+  dplyr::mutate(q_occupancy = q_occupancy %>% 
+                  str_to_sentence() %>%
+                  factor(levels = c("Less people than seats",
+                                    "Same number of people as seats",
+                                    "More people than seats",
+                                    "More people than can fit"))) %>%
+  dplyr::mutate(q_covid_measures = q_covid_measures %>%
+                  str_to_sentence() %>%
+                  factor(levels = c("Yes, effective",
+                                    "Yes, but seemed limited",
+                                    "No"))) %>%
+  dplyr::mutate(q_speed_rating_v1 = q_speed_rating_v1 %>%
+                  str_to_sentence() %>%
+                  factor(levels = c("Too slow",
+                                    "Okay",
+                                    "Fast",
+                                    "Dangerously fast"))) %>%
+  dplyr::mutate(q_safety_rating = q_safety_rating %>%
+                  str_to_sentence() %>%
+                  factor(levels = c("Very safe",
+                                    "Safe",
+                                    "Not safe",
+                                    "Not very safe")))
+
+# Id ---------------------------------------------------------------------------
+fb_df$uid <- 1:nrow(fb_df)
+
 # Order ------------------------------------------------------------------------
 fb_df <- fb_df %>%
-  dplyr::select(pilot_number, phone_hash, regno, psv_num, datetime, date, response_method,
+  dplyr::select(uid, pilot_number, phone_hash, regno, psv_num, datetime, date, response_method,
                 #info_sacco, info_route, info_n_stickers, info_n_seats,
                 
                 q_safety_rating, q_safety_rating_num, q_safety_rating_asked,
@@ -216,10 +245,10 @@ fb_df <- fb_df %>%
 fb_pilot_df <- fb_pilot_df %>%
   dplyr::select(pilot_number, phone_hash, regno, psv_num, datetime, date, response_method,
                 
-                q_safety_rating, q_safety_rating_num, q_safety_rating_asked,
-                q_covid_measures, q_covid_measures_num, q_covid_measures_asked,
-                q_speed_rating_v1, q_speed_rating_v1_num, q_speed_rating_v1_asked,
-                q_occupancy, q_occupancy_num, q_occupancy_asked,
+                q_safety_rating, q_safety_rating_asked,
+                q_covid_measures, q_covid_measures_asked,
+                q_speed_rating_v1, q_speed_rating_v1_asked,
+                q_occupancy, q_occupancy_asked,
                 q_comment, q_comment_asked,
                 
                 #award_type, award_amount_posted, award_offer_end,
@@ -230,8 +259,8 @@ fb_recent_df <- fb_recent_df %>%
   dplyr::select(pilot_number, phone_hash, regno, psv_num, datetime, date, response_method,
                 #info_sacco, info_route, info_n_stickers, info_n_seats,
                 
-                q_safety_rating, q_safety_rating_num, q_safety_rating_asked,
-                q_speed_rating_v2, q_speed_rating_v2_num, q_speed_rating_v2_asked,
+                q_safety_rating, q_safety_rating_asked,
+                q_speed_rating_v2, q_speed_rating_v2_asked,
                 q_busfare, q_busfare_asked,
                 q_comment, q_comment_swahili, q_comment_asked,
                 

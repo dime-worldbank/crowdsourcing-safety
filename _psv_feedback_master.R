@@ -64,6 +64,10 @@ driver_message_dir         <- file.path(data_dir, "Send Messages to Drivers")
 matatu_data_dir            <- file.path(data_dir, "Matatu Data")
 ntsa_speed_dir             <- file.path(data_dir, "NTSA - Speed Data")
 
+ap_data_dir <- file.path(dropbox_dir, "Academic Paper/Data")
+
+brief_figures_dir <- file.path(dropbox_dir, "Policy Brief/figures")
+
 #### Encrypted Data
 data_pii_dir                   <- file.path(db_pii_dir, "Data")
 rider_feedback_pii_dir         <- file.path(data_pii_dir, "Rider Feedback")
@@ -111,9 +115,10 @@ library(raster)
 library(magick)
 library(janitor)
 library(qrcode)
+library(scales)
 
 # Functions --------------------------------------------------------------------
-source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))
+#source(file.path(github_dir, "DataWork", "Sensor Data", "01_clean_data", "_wialon_api_functions.R"))
 source(file.path(github_dir, "Functions", "load_sensortracing_raw.R"))
 source("https://raw.githubusercontent.com/ramarty/r_google_translate/main/r_google_translate.R")
 
