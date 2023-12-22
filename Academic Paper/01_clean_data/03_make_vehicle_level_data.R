@@ -46,7 +46,7 @@ fb_sum_df <- fb_df %>%
                    
                    q_safety_prop_unsafe = mean(unsafe, na.rm = T),
                    q_speed_rating_v2_fast = mean(fast, na.rm = T),
- 
+                   
                    across(c(q_safety_rating_num,
                             q_covid_measures_num,
                             q_speed_rating_v1_num,
@@ -65,18 +65,44 @@ set_na <- function(x, y){
   x
 }
 
+vars_for_base <- names(sensor_df) %>%
+  str_subset("time_over|N_valueg_abov")
+
+for(var in vars_for_base){
+  for(base in c("time_over_10kph_secs", "time_over_50kph_secs")){
+    
+    if(str_detect(var, "time_over"))     prefix <- "prop_"
+    if(str_detect(var, "N_valueg_abov")) prefix <- "rate_"
+    
+    base_short <- base %>% 
+      str_replace_all("time_over_", "") %>%
+      str_replace_all("_secs", "")
+    
+    var_short <- var %>% str_replace_all("_secs", "")
+    
+    sensor_df[[paste0(prefix, var_short, "_base_", base_short)]] <- set_na(sensor_df[[var]] / sensor_df[[base]], sensor_df[[base]])
+    
+    # N per hour (originally N per second)
+    if(str_detect(var, "N_valueg_abov")){
+      sensor_df[[paste0(prefix, var_short, "_base_", base_short)]] <-
+        sensor_df[[paste0(prefix, var_short, "_base_", base_short)]] * 60 * 60 
+    }
+    
+  }
+}
+
 sensor_sum_df <- sensor_df %>%
-  dplyr::mutate(prop_time_over_80kph_base_10kph = set_na(time_over_80kph_secs / time_over_10kph_secs, time_over_10kph_secs),
-                prop_time_over_80kph_base_50kph = set_na(time_over_80kph_secs / time_over_50kph_secs, time_over_50kph_secs),
-                
-                rate_N_valueg_above0_4_base_10kph = set_na(N_valueg_above0_4 / time_over_10kph_secs, time_over_10kph_secs),
-                rate_N_valueg_above0_4_base_50kph = set_na(N_valueg_above0_4 / time_over_50kph_secs, time_over_50kph_secs),
-                
-                rate_N_valueg_above0_5_base_10kph = set_na(N_valueg_above0_5 / time_over_10kph_secs, time_over_10kph_secs),
-                rate_N_valueg_above0_5_base_50kph = set_na(N_valueg_above0_5 / time_over_50kph_secs, time_over_50kph_secs),
-                
-                rate_N_valueg_above1_0_base_10kph = set_na(N_valueg_above1_0 / time_over_10kph_secs, time_over_10kph_secs),
-                rate_N_valueg_above1_0_base_50kph = set_na(N_valueg_above1_0 / time_over_50kph_secs, time_over_50kph_secs)) %>%
+  # dplyr::mutate(prop_time_over_80kph_base_10kph = set_na(time_over_80kph_secs / time_over_10kph_secs, time_over_10kph_secs),
+  #               prop_time_over_80kph_base_50kph = set_na(time_over_80kph_secs / time_over_50kph_secs, time_over_50kph_secs),
+  #               
+  #               rate_N_valueg_above0_4_base_10kph = set_na(N_valueg_above0_4 / time_over_10kph_secs, time_over_10kph_secs),
+  #               rate_N_valueg_above0_4_base_50kph = set_na(N_valueg_above0_4 / time_over_50kph_secs, time_over_50kph_secs),
+  #               
+  #               rate_N_valueg_above0_5_base_10kph = set_na(N_valueg_above0_5 / time_over_10kph_secs, time_over_10kph_secs),
+  #               rate_N_valueg_above0_5_base_50kph = set_na(N_valueg_above0_5 / time_over_50kph_secs, time_over_50kph_secs),
+  #               
+  #               rate_N_valueg_above1_0_base_10kph = set_na(N_valueg_above1_0 / time_over_10kph_secs, time_over_10kph_secs),
+  #               rate_N_valueg_above1_0_base_50kph = set_na(N_valueg_above1_0 / time_over_50kph_secs, time_over_50kph_secs)) %>%
   group_by(regno_clean) %>%
   dplyr::summarise(across(where(is.numeric), mean, na.rm = T)) %>%
   ungroup() %>%

@@ -1,5 +1,8 @@
 # Feedback Comments
 
+# TODO:
+# 1. Fix outliers, should exclude!
+
 library(tm)
 library(quanteda)
 
@@ -44,7 +47,7 @@ add_example <- function(word_df, fb_df){
     term_i <- word_df$term[i]
     out[[i]] <- tolower(fb_df$q_comment) %>% str_subset(tolower(term_i)) %>% head(1)
     
-    fb_df <- fb_df[tolower(fb_df$q_comment) != out[[i]],]
+    #fb_df <- fb_df[tolower(fb_df$q_comment) != out[[i]],]
   }
   
   out %>% unlist()
@@ -56,9 +59,16 @@ add_example <- function(word_df, fb_df){
   
 }
 
+add_figure_label <- function(word_df){
+  word_df %>%
+    mutate(percent = round(prop * 100,2),
+           percent = paste0(percent, "%"),
+           label = paste0(freq, " (", percent, ")")) 
+}
+
 #### Good
 fb_good_df <- fb_df %>%
-  dplyr::filter(sentiment_snmtr >= 0.3)
+  dplyr::filter(sentiment_snmtr >= 0.25)
 
 word_good_df <- fb_good_df %>%
   make_word_df() %>%
@@ -66,10 +76,11 @@ word_good_df <- fb_good_df %>%
   head(15)
 
 word_good_df$example <- add_example(word_good_df, fb_good_df)
+word_good_df$prop <- word_good_df$freq / nrow(fb_df)
 
 #### Bad
 fb_bad_df <- fb_df %>%
-  dplyr::filter(sentiment_snmtr <= -0.3)
+  dplyr::filter(sentiment_snmtr <= -0.25)
 
 word_bad_df <- fb_bad_df %>%
   make_word_df() %>%
@@ -77,135 +88,98 @@ word_bad_df <- fb_bad_df %>%
   head(15)
 
 word_bad_df$example <- add_example(word_bad_df, fb_bad_df)
+word_bad_df$prop <- word_bad_df$freq / nrow(fb_df)
+
+# Make figures -----------------------------------------------------------------
+p_good <- word_good_df %>%
+  add_figure_label() %>%
+  ggplot(aes(y = reorder(term, freq),
+             x = freq)) +
+  geom_col(fill = "forestgreen") +
+  geom_text(aes(label = label,
+                x = freq + 420),
+            size = 3) +
+  labs(y = NULL,
+       x = "Number of Positive Comments Word Appears In",
+       title = "A. Top Positive Words from Positive Comments") +
+  scale_x_continuous(limits = c(0, 3200)) +
+  theme_classic2() +
+  theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
+        axis.title.x = element_text(size = 9),
+        plot.title = element_text(face = "bold", size = 10))
+
+p_bad <- word_bad_df %>%
+  add_figure_label() %>%
+  ggplot(aes(y = reorder(term, freq),
+             x = freq)) +
+  geom_col(fill = "firebrick4") +
+  geom_text(aes(label = label,
+                x = freq + 45),
+            size = 3) +
+  labs(y = NULL,
+       x = "Number of Negative Comments Word Appears In",
+       title = "B. Top Negative Words from Negative Comments") +
+  scale_x_continuous(limits = c(0, 325)) +
+  theme_classic2() +
+  theme(axis.text.y = element_text(color = "black", face = "bold")) +
+  theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
+        axis.title.x = element_text(size = 9),
+        plot.title = element_text(face = "bold", size = 10))
+
+p <- ggarrange(p_good, p_bad, nrow = 1)
+
+ggsave(p, filename = file.path(figures_dir, "top_words.png"),
+       height = 2.75, width = 9)
 
 # Make table -------------------------------------------------------------------
+word_df <- word_bad_df
+make_tex <- function(word_df){
+  word_df %>%
+    dplyr::mutate(percent = round(prop*100,2),
+                  percent = paste0(percent, "\\%")) %>%
+    dplyr::mutate(tex = paste(term, freq, percent, example, sep = " & ") %>% paste0(" \\\\ \n"))
+}
 
+word_good_df <- make_tex(word_good_df)
+word_bad_df  <- make_tex(word_bad_df)
 
+sink(file.path(tables_dir, "good_word_example.tex"))
+cat("\\begin{tabular}{c|c|c|p{10cm}} ")
+cat("\\hline \n")
+cat("Word & N & Percent & Example Comment \\\\ \n")
+cat("\\hline \n")
+word_good_df$tex %>%
+  paste(collapse = " ") %>%
+  cat()
+cat("\\hline \n")
+cat("\\end{tabular}")
+sink()
 
-# 
-# 
-# 
-# fb_good_df <- fb_df %>%
-#   dplyr::filter(sentiment_snmtr >= 0.1) %>%
-#   make_word_df() %>%
-#   dplyr::filter(sentiment >= 0.5)
-# 
-# fb_bad_df <- fb_df %>%
-#   dplyr::filter(sentiment_snmtr <= -0.1) %>%
-#   make_word_df() %>%
-#   dplyr::filter(sentiment <= -0.5)
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# set.seed(42)
-# 
-# word_freq <- fb_df %>%
-#   dplyr::mutate(nchar_comment = nchar(q_comment)) %>%
-#   dplyr::filter(nchar_comment >= 10) %>%
-#   dplyr::pull(q_comment) %>%
-#   tolower() %>%
-#   tokens(remove_punct = T,
-#          remove_symbols = T,
-#          remove_numbers = T) %>%
-#   tokens_ngrams(n = 1) %>%
-#   unlist() %>%
-#   table() %>%
-#   as.data.frame() %>%
-#   dplyr::rename(word = ".",
-#                 freq = Freq) %>%
-#   dplyr::mutate(word = as.character(word)) %>%
-#   dplyr::filter(!(word %in% stopwords()),
-#                 freq >= 5) %>%
-#   dplyr::mutate(word_nchar = nchar(word)) %>%
-#   dplyr::filter(word_nchar >= 3) %>%
-#   arrange(-freq) %>%
-#   dplyr::mutate(prop = freq / sum(freq)) %>%
-#   dplyr::mutate(percent = round(prop,4)*100,
-#                 percent = paste0(percent, "%")) %>%
-#   dplyr::mutate(freq_per = paste0(freq, " (", percent, ")"))
-# 
-# word_freq$sentiment <- sentiment(word_freq$word)$sentiment
-# word_freq$word <- word_freq$word %>% tools::toTitleCase()
-# 
-# word_freq %>%
-#   dplyr::filter(sentiment >= 0.75) %>%
-#   head(20)
-# 
-# word_freq %>%
-#   dplyr::filter(sentiment <= -0.5) %>%
-#   head(20)
-# 
-# word_freq %>%
-#   dplyr::filter(sentiment >= 0.5) %>%
-#   head(20) %>%
-#   ggplot(aes(y = reorder(word, freq),
-#              x = freq)) +
-#   geom_col(fill = "forestgreen") +
-#   geom_text(aes(label = freq_per,
-#                 x = freq + 180)) +
-#   labs(y = NULL,
-#        x = "Number of Times Word Appears in Comments") +
-#   scale_x_continuous(limits = c(0, 1600)) +
-#   theme_classic2() +
-#   theme(axis.text.y = element_text(color = "black", face = "bold"))
-# 
-# word_freq %>%
-#   dplyr::filter(sentiment <= -0.5) %>%
-#   head(20) %>%
-#   ggplot(aes(y = reorder(word, freq),
-#              x = freq)) +
-#   geom_col(fill = "firebrick4") +
-#   geom_text(aes(label = freq_per,
-#                 x = freq + 4)) +
-#   labs(y = NULL,
-#        x = "Number of Times Word Appears in Comments") +
-#   #scale_x_continuous(limits = c(0, 1600)) +
-#   theme_classic2() +
-#   theme(axis.text.y = element_text(color = "black", face = "bold"))
-# 
-# fb_df$q_comment %>% str_subset("tired")
-# 
-# word_freq$ %>% table()
-# 
-# 
-# word_freq$color <- scales::rescale(word_freq$sentiment, to = c(-1, 1))
-# word_freq$color <- scales::col_numeric(c("red", "gray50", "green"), domain = c(-1,1))(word_freq$color)
-# 
-# word_freq_sum <- word_freq[1:150,]
-# wordcloud2(data = word_freq_sum,
-#            size = 0.15,
-#            shape = "circle",
-#            color = word_freq_sum$color,
-#            shuffle = F,
-#            ellipticity = 0.2)
-# 
-# # Example comments -------------------------------------------------------------
-# fb_sub_df <- fb_df %>%
-#   dplyr::mutate(nchar_comment = nchar(q_comment)) %>%
-#   dplyr::filter(nchar_comment >= 30) %>%
-#   dplyr::mutate(q_comment = q_comment %>%
-#                   str_replace_all("[:punct:]", " ") %>%
-#                   str_squish() %>%
-#                   tolower())
-# 
-# sent_df <- fb_sub_df$q_comment %>%
-#   get_sentences %>%
-#   sentiment()
-# fb_sub_df$sentiment_score <- sent_df$sentiment
-# 
-# fb_sub_df %>%
-#   pull(q_comment) %>%
-#   str_subset("hardwork")
-# 
-# fb_sub_df$q_comment %>% str_subset("work") %>% unique()
-# 
-# 
-# 
+sink(file.path(tables_dir, "bad_word_example.tex"))
+cat("\\begin{tabular}{c|c|c|p{10cm}} ")
+cat("\\hline \n")
+cat("Word & N & Percent & Example Comment \\\\ \n")
+cat("\\hline \n")
+word_bad_df$tex %>%
+  paste(collapse = " ") %>%
+  cat()
+cat("\\hline \n")
+cat("\\end{tabular}")
+sink()
+
+# Grab example comments  -------------------------------------------------------
+fb_good_df %>%
+  dplyr::filter(nchar(q_comment) >= 20) %>%
+  pull(q_comment) %>%
+  tolower() %>%
+  str_subset("speed") %>%
+  unique() %>%
+  head(50)
+
+fb_bad_df %>%
+  dplyr::filter(nchar(q_comment) >= 20) %>%
+  pull(q_comment) %>%
+  tolower() %>%
+  str_subset("speed") %>%
+  unique() %>%
+  head(40)
