@@ -75,6 +75,11 @@ cor_df <- veh_df %>%
                   as.numeric()) %>%
   mutate(label = paste0(round(cor_coef, 2), "", stars))
 
+veh_df %>%
+  ggplot() +
+  geom_point(aes(x = comment_driver_sntmt_code_neg,
+                 y = rate_N_valueg_above1_0_acceleration_base_10kph))
+
 cor_df %>%
   ggplot(aes(x = reorder(speed_var, speed),
              y = viol_var,
@@ -82,8 +87,10 @@ cor_df %>%
              label = label)) +
   geom_tile(color = "white") +
   geom_text() +
-  scale_fill_distiller(palette = "Spectral",
-                       direction = -1) +
+  scale_fill_gradient2(low = "dodgerblue",
+                       high = "darkorange",
+                       mid = "white",
+                       midpoint = 0) +
   labs(x = "Percent of time vehicle travels over speed",
        y = "N violations\nper hour",
        fill = "Correlation") +
