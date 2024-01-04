@@ -21,6 +21,7 @@ sensor_nonsum_df <- sensor_df %>%
                    speed_p85 = weighted.mean(x = speed_p85, w = N_obs_speed),
                    speed_p90 = weighted.mean(x = speed_p90, w = N_obs_speed),
                    speed_p95 = weighted.mean(x = speed_p95, w = N_obs_speed),
+                   speed_mean = weighted.mean(x = speed_mean, w = N_obs_speed),
                    speed_max = max(speed_max),
                    time_over_0kph_secs  = sum(time_over_0kph_secs),
                    time_over_10kph_secs = sum(time_over_10kph_secs),
@@ -168,11 +169,11 @@ sensor_agg_sf$group_id <- NULL
 
 #### Rename
 sensor_agg_df <- sensor_agg_df %>%
-  dplyr::select(-regno) %>%
+  dplyr::select(-reg_no) %>%
   dplyr::rename(regno = regno_clean)
 
 sensor_agg_sf <- sensor_agg_sf %>%
-  dplyr::select(-regno) %>%
+  dplyr::select(-reg_no) %>%
   dplyr::rename(regno = regno_clean)
 
 # Export -----------------------------------------------------------------------

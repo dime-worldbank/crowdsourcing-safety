@@ -38,5 +38,10 @@ library(tidytext)
 library(sentimentr)
 library(ggpubr)
 library(DescTools)
+library(forcats)
 #library(cleanNLP)
 #library(coreNLP)
+
+# Parameters -------------------------------------------------------------------
+DRIVING_WORDS <- "safe|drunk|accident|careless"
+COVID_WORDS <- "covid|pandemic|mask|social distance|sanitizer|sanitiser"

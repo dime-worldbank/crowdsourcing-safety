@@ -1,5 +1,14 @@
 # Move Data to Paper Data Directory
 
+sum_na <- function(x){
+  if(length(x) == length(x[is.na(x)])){
+    out <- NA
+  } else{
+    out <- sum(x, na.rm = T)
+  }
+  return(out)
+}
+
 # Load data --------------------------------------------------------------------
 #### GPS Sensor Data: Daily
 sensor_df <- readRDS(file.path(data_dir, "RawData", "sensor_day.Rds"))
@@ -47,6 +56,11 @@ fb_sum_df <- fb_df %>%
                    q_safety_prop_unsafe = mean(unsafe, na.rm = T),
                    q_speed_rating_v2_fast = mean(fast, na.rm = T),
                    
+                   comment_driver_sntmt_code_compl_sum = sum_na(comment_driver_sntmt_code_compl),
+                   comment_driver_sntmt_code_neg_sum = sum_na(comment_driver_sntmt_code_neg),
+                   
+                   sentiment_snmtr_driving = mean(sentiment_snmtr[q_comment %>% tolower() %>% str_detect(DRIVING_WORDS)],na.rm = T),
+                   
                    across(c(q_safety_rating_num,
                             q_covid_measures_num,
                             q_speed_rating_v1_num,
@@ -69,7 +83,7 @@ vars_for_base <- names(sensor_df) %>%
   str_subset("time_over|N_valueg_abov")
 
 for(var in vars_for_base){
-  for(base in c("time_over_10kph_secs", "time_over_50kph_secs")){
+  for(base in c("time_over_10kph_secs", "time_over_50kph_secs", "time_over_80kph_secs")){
     
     if(str_detect(var, "time_over"))     prefix <- "prop_"
     if(str_detect(var, "N_valueg_abov")) prefix <- "rate_"
@@ -103,10 +117,9 @@ sensor_sum_df <- sensor_df %>%
   #               
   #               rate_N_valueg_above1_0_base_10kph = set_na(N_valueg_above1_0 / time_over_10kph_secs, time_over_10kph_secs),
   #               rate_N_valueg_above1_0_base_50kph = set_na(N_valueg_above1_0 / time_over_50kph_secs, time_over_50kph_secs)) %>%
-  group_by(regno_clean) %>%
+group_by(regno) %>%
   dplyr::summarise(across(where(is.numeric), mean, na.rm = T)) %>%
-  ungroup() %>%
-  dplyr::rename(regno = regno_clean)
+  ungroup() 
 
 # Merge data -------------------------------------------------------------------
 award_info_df <- award_info_df %>%
