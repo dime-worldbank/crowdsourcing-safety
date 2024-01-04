@@ -1,7 +1,7 @@
 # Telematics Summary
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
 
 veh_df <- veh_df %>%
   dplyr::mutate(comment_driver_sntmt_code_prop_compl = 
@@ -9,8 +9,6 @@ veh_df <- veh_df %>%
 
 # Prep data --------------------------------------------------------------------
 veh_df <- veh_df %>%
-  dplyr::filter(!is.na(prop_time_over_80kph_base_10kph),
-                !is.na(q_safety_prop_unsafe)) %>%
   dplyr::select(
 
     prop_time_over_80kph_base_10kph,

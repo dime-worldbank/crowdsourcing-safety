@@ -1,7 +1,7 @@
 # Classify Feedback
 
 # Load data --------------------------------------------------------------------
-df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean.Rds"))
+df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_valid.Rds"))
 
 # Cleanup ----------------------------------------------------------------------
 df_sub <- df %>%

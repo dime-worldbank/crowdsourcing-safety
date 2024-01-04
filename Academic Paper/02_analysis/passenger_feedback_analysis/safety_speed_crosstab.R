@@ -3,10 +3,6 @@
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
 
-fb_df <- fb_df %>%
-  dplyr::filter(regno != "UNKNOWN",
-                ptn_cheating_fill %in% 0)
-
 # Prep data --------------------------------------------------------------------
 table(fb_df$q_safety_rating, fb_df$q_speed_rating_v2)
 

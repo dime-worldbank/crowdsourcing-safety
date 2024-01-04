@@ -1,5 +1,7 @@
 # Move Data to Paper Data Directory
 
+# TODO: Scramble regno, sacco, and other pii in sensible way
+
 # Load data --------------------------------------------------------------------
 #### GPS Sensor Data: Daily
 sensor_df <- readRDS(file.path(db_dir, "Data", "Sensor Data", "FinalData", "sensor_day.Rds"))
@@ -60,3 +62,30 @@ saveRDS(award_info_df,       file.path(data_dir, "RawData", "vehicle_award_info.
 write_parquet(award_info_df, file.path(data_dir, "RawData", "vehicle_award_info.parquet"))
 write_csv(award_info_df,     file.path(data_dir, "RawData", "vehicle_award_info.csv"))
 write_dta(award_info_df,     file.path(data_dir, "RawData", "vehicle_award_info.dta"))
+
+#### GPS Installation Survey
+gps_survey_df <- readRDS(file.path(db_dir, "Data", "Matatu Sensor Installation Survey", "FinalData", "psv_sensor_installation_clean.Rds"))
+
+gps_survey_df <- gps_survey_df %>%
+  clean_names() %>%
+  dplyr::select(matatu_regno, matatu_exp_freq, 
+                sacco, sacco_name_other,
+                matatu_other_route, driver_is_matatu_owner,
+                driver_age, driver_tenure, driver_route_tenure, driver_contract,
+                n_drivers_per_veh_q, matatu_seats, matatu_quality_q, matatu_paint_q,
+                matatu_wifi, matatu_amenities, matatu_other, route, stop_type) %>%
+  dplyr::rename(regno = matatu_regno) %>%
+  dplyr::mutate(regno = regno %>%
+                  str_squish() %>%
+                  str_replace_all(" ", "") %>%
+                  toupper() %>%
+                  str_replace_all('^(.{3})(.*)$',
+                                  '\\1 \\2')) %>%
+  dplyr::mutate(driver_tenure = driver_tenure %>% as.numeric()) %>%
+  rename_at(vars(-regno), ~ paste0('gpssrvy_', .))
+
+saveRDS(gps_survey_df,       file.path(data_dir, "RawData", "gps_install_survey.Rds"))
+write_parquet(gps_survey_df, file.path(data_dir, "RawData", "gps_install_survey.parquet"))
+write_csv(gps_survey_df,     file.path(data_dir, "RawData", "gps_install_survey.csv"))
+write_dta(gps_survey_df,     file.path(data_dir, "RawData", "gps_install_survey.dta"))
+

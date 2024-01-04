@@ -10,7 +10,7 @@ for(veh_subset in c("all", "stickers")){
     veh_df <- veh_df %>%
       dplyr::filter(!is.na(shortcode_on_sticker))
     
-  }
+  } 
   
   # Prep data --------------------------------------------------------------------
   veh_df <- veh_df %>%

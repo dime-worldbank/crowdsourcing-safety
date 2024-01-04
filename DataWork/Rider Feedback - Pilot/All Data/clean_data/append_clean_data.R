@@ -10,7 +10,7 @@ qr_data <- readRDS(file.path(dropbox_dir, "Data", "Rider Feedback - Pilot", "PSV
                              "qr_data.Rds"))
 
 ## Sticker Data
-sticker_df <- read_xlsx(file.path(dropbox_dir, "Data", "Matatu Data", 
+sticker_df <- read_xlsx(file.path(dropbox_dir, "Data", "Matatu Data - Pilot", 
                                   "Sticker Information", "psv_sticker_information.xlsx"))
 
 # 2. CLEAN INDIVIDUAL DATASETS =================================================
@@ -350,5 +350,5 @@ write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data
 
 
 
-
-
+data$matatu_number[data$reg_no %in% "UNKNOWN"] %>% table() %>% View()
+data$reg_no %>% table()

@@ -23,7 +23,7 @@ veh_df <- veh_df %>%
 # Cleanup ----------------------------------------------------------------------
 veh_df <- veh_df %>%
   dplyr::rename(regno = reg_no) %>%
-  dplyr::select(regno, sacco, route,
+  dplyr::select(regno, sacco, route, psv_num,
                 vehicle_type,
                 drvr_feedback_treat_id, drvr_feedback_treat,
                 drvr_feedback_treat_sticker, drvr_feedback_treat_feedback) %>%

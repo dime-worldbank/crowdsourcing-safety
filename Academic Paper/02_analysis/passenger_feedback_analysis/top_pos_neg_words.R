@@ -1,18 +1,7 @@
 # Feedback Comments
 
-# TODO:
-# 1. Fix outliers, should exclude!
-
-library(tm)
-library(quanteda)
-
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
-
-# fb_df <- fb_df %>%
-#   dplyr::filter(regno != "UNKNOWN",
-#                 ptn_cheating_fill %in% 0) %>%
-#   dplyr::filter(!is.na(sentiment_snmtr))
 
 fb_df <- fb_df %>%
   dplyr::filter(!is.na(sentiment_snmtr))

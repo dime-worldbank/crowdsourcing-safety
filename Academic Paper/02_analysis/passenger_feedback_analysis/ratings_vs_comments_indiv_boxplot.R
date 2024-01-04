@@ -3,14 +3,6 @@
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
 
-# fb_df <- fb_df %>%
-#   dplyr::filter(regno != "UNKNOWN",
-#                 ptn_cheating_fill %in% 0) %>%
-#   dplyr::filter(!is.na(sentiment_snmtr))
-
-# fb_df <- fb_df %>%
-#   dplyr::mutate(q_comment_nchar >= 20) 
-
 fb_df <- fb_df %>%
   dplyr::mutate(q_safety_rating_safe = (q_safety_rating == "Safe") | (q_safety_rating == "Very safe"),
                 q_safety_rating_unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe")) %>%
@@ -63,8 +55,7 @@ p_speed <- fb_stacked_df %>%
                      labels = c("-1 (Negative)", "0", "1 (Positive)")) +
   theme_classic2() +
   theme(axis.text = element_text(color = "black"),
-        plot.title = element_text(face = "bold", size = 10)) #+
-  #guides(fill = guide_legend(reverse = TRUE))
+        plot.title = element_text(face = "bold", size = 10)) 
 
 p <- ggarrange(p_safe, p_speed,
                common.legend = T,

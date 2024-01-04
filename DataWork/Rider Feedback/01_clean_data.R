@@ -10,6 +10,7 @@ st_insll_df <- readRDS(file.path(sticker_install_survey_dir, "FinalData",
 
 ## Matatu info
 psv_df <- readRDS(file.path(matatu_data_dir, "FinalData", "vehicle_info.Rds"))
+#psv_df <- readRDS(file.path(matatu_data_dir, "FinalData", "vehicle_info.Rds"))
 
 ## Data to Merge Into
 #valid_reg_df <- read_csv(file.path(data_dir, "Valid Reg Numbers", "valid_psv_nums.csv"))
@@ -105,21 +106,22 @@ df <- df %>%
 
 # Merge with other datasets ----------------------------------------------------
 psv_df <- psv_df %>%
-  dplyr::rename(regno_clean = reg_no) %>% 
+  dplyr::rename(regno_clean = regno) %>% 
   dplyr::select(psv_num, regno_clean,
                 drvr_feedback_treat_id, drvr_feedback_treat, 
                 drvr_feedback_treat_sticker, drvr_feedback_treat_feedback) %>%
   dplyr::mutate(valid_psvnum = T)
 
 st_insll_df <- st_insll_df %>%
-  dplyr::mutate(sticker_install_date = starttime %>% date()) %>%
-  dplyr::rename(matatu_route_stk_inst_srvy = matatu_route,
+  #dplyr::mutate(sticker_install_date = starttime %>% date()) %>%
+  dplyr::rename(#matatu_route_stk_inst_srvy = matatu_route,
                 matatu_sacco_stk_inst_srvy = matatu_sacco,
-                matatu_n_seats_stk_inst_srvy = matatu_seats) %>%
+                matatu_n_seats_stk_inst_srvy = n_matatu_seats_srvy) %>%
+  dplyr::rename(regno_clean = regno) %>%
   dplyr::select(c(regno_clean, sticker_install_date, 
-                  matatu_route_stk_inst_srvy, matatu_sacco_stk_inst_srvy,
+                  matatu_sacco_stk_inst_srvy,
                   matatu_n_seats_stk_inst_srvy,
-                  n_stickers_installed)) 
+                  n_stickers_installed_srvy)) 
 
 # First merge sticker installation data with PSV data. Use a left join, so only
 # consider PSVs where a sticker has actually been installed

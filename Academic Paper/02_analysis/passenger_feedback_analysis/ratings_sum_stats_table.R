@@ -3,10 +3,6 @@
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
 
-fb_clean_df <- fb_df %>%
-  dplyr::filter(regno != "UNKNOWN",
-                ptn_cheating_fill %in% 0)
-
 sum_var <- function(var, fb_df){
   fb_df$var <- fb_df[[var]]
   fb_df %>%
@@ -27,21 +23,21 @@ cat("\\hline \n")
 cat("Response & N & Percent \\\\ \n")
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textbf{Q1:} How safely is your matatu being driven?} \\\\ \n")
-sum_var("q_safety_rating", fb_clean_df) %>% cat()
+sum_var("q_safety_rating", fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textbf{Q2:} How fast does the matatu seem to be going?} \\\\ \n")
-sum_var("q_speed_rating_v2", fb_clean_df) %>% cat()
+sum_var("q_speed_rating_v2", fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textit{Only asked in 2020}} \\\\ \n")
 cat("\\multicolumn{3}{l}{\\textbf{Q3:} On the matatu, are there:} \\\\ \n")
-sum_var("q_occupancy",  fb_clean_df) %>% cat()
+sum_var("q_occupancy",  fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textit{Only asked in 2020}} \\\\ \n")
 cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q4:} Were measures taken to precent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
-sum_var("q_covid_measures",  fb_clean_df) %>% cat()
+sum_var("q_covid_measures",  fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\end{tabular}")

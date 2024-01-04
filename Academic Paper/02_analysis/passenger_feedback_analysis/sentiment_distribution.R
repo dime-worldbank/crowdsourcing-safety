@@ -3,11 +3,6 @@
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
 
-# fb_df <- fb_df %>%
-#   dplyr::filter(regno != "UNKNOWN",
-#                 ptn_cheating_fill %in% 0) %>%
-#   dplyr::filter(!is.na(sentiment_snmtr))
-
 # Prep data --------------------------------------------------------------------
 fb_stacked_df <- bind_rows(
   fb_df %>%
@@ -22,13 +17,7 @@ fb_stacked_df <- bind_rows(
     mutate(type = "COVID-19\nComments")
 ) %>%
   dplyr::filter(!is.na(sentiment_snmtr)) %>%
-  dplyr::filter(q_comment_nchar >= 10) #%>%
-  
-  # group_by(type) %>%
-  # dplyr::mutate(n = n()) %>%
-  # ungroup() %>%
-  # 
-  # dplyr::mutate(type = paste0(type, "\n[N = ", n, "]"))
+  dplyr::filter(q_comment_nchar >= 10) 
 
 # Figure -----------------------------------------------------------------------
 fb_stacked_df %>%

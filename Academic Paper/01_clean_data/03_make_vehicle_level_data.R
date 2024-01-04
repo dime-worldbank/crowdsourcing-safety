@@ -22,6 +22,9 @@ veh_data_df <- readRDS(file.path(data_dir, "RawData", "gps_vehicle_info.Rds"))
 #### Sticker Installation Survey
 st_insll_df <- readRDS(file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.Rds"))
 
+#### GPS Installation Survey
+gps_survey_df <- readRDS(file.path(data_dir, "RawData", "gps_install_survey.Rds"))
+
 #### Vehicle Award Info
 award_info_df <- readRDS(file.path(data_dir, "RawData", "vehicle_award_info.Rds"))
 
@@ -35,8 +38,7 @@ fb_df <- fb_df %>%
                                                          units = "days")))
 
 fb_sum_df <- fb_df %>%
-  dplyr::filter(regno != "UNKNOWN",
-                ptn_cheating_fill %in% 0) %>%
+  dplyr::filter(regno != "UNKNOWN") %>%
   dplyr::mutate(unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe"),
                 fast = q_speed_rating_v2 == "Very fast [80+]") %>%
   group_by(regno) %>%
@@ -127,7 +129,8 @@ award_info_df <- award_info_df %>%
 
 veh_df <- fb_sum_df %>%
   full_join(sensor_sum_df, by = "regno") %>%
-  full_join(award_info_df, by = "regno")
+  full_join(award_info_df, by = "regno") %>%
+  left_join(gps_survey_df, by = "regno")
 
 veh_df$n_feedback[is.na(veh_df$n_feedback) & !is.na(veh_df$award_type)] <- 0
 veh_df$n_feedback_1wk[is.na(veh_df$n_feedback_1wk) & !is.na(veh_df$award_type)] <- 0
@@ -139,6 +142,21 @@ veh_df$n_feedback_6wk[is.na(veh_df$n_feedback_6wk) & !is.na(veh_df$award_type)] 
 veh_df$n_feedback_7wk[is.na(veh_df$n_feedback_7wk) & !is.na(veh_df$award_type)] <- 0
 veh_df$n_feedback_8wk[is.na(veh_df$n_feedback_8wk) & !is.na(veh_df$award_type)] <- 0
 
+# Make subsets of datasets -----------------------------------------------------
+veh_stkr_sff_fdbck_df <- veh_df %>%
+  dplyr::filter(!is.na(shortcode_on_sticker)) %>%
+  dplyr::filter(n_feedback >= 10)
+
+veh_tele_stkr_sff_fdbck_df <- veh_stkr_sff_fdbck_df %>%
+  dplyr::filter(!is.na(speed_mean)) 
+
 # Export -----------------------------------------------------------------------
 saveRDS(veh_df,
         file.path(data_dir, "FinalData", "vehicle_level.Rds"))
+
+saveRDS(veh_stkr_sff_fdbck_df,
+        file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
+
+saveRDS(veh_tele_stkr_sff_fdbck_df,
+        file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
+

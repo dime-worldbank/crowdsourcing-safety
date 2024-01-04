@@ -1,10 +1,7 @@
 # Feedback vs Comments
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level.Rds"))
-
-veh_df <- veh_df %>%
-  dplyr::filter(n_feedback >= 10)
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
 
 # Figure -----------------------------------------------------------------------
 p_unsafe <- veh_df %>%
