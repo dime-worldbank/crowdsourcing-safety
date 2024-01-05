@@ -57,12 +57,12 @@ fb_clean_cheat_valid_df <- fb_clean_df %>%
 fb_clean_unknown_valid_df <- fb_clean_df %>%
   dplyr::filter(regno == "UNKNOWN",
                 !is.na(q_comment_nchar),
-                q_comment_nchar >= 30) %>%
+                q_comment_nchar >= 10) %>%
   distinct(q_comment, .keep_all = T)
 
 fb_clean_valid_df <- bind_rows(
-  fb_clean_cheat_valid_df,
-  fb_clean_unknown_valid_df
+  fb_clean_cheat_valid_df#,
+  #fb_clean_unknown_valid_df
 )
 
 # Export data ------------------------------------------------------------------

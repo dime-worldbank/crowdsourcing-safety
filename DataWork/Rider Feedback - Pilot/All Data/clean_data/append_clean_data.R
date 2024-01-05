@@ -118,8 +118,8 @@ leven_df <- lapply(1:nrow(data_regVALID_F), function(i){
 ## Add closest matatu number if within levenstein distance of 1
 data_regVALID_F <- bind_cols(data_regVALID_F, leven_df)
 data_regVALID_F$matatu_number_valid <- NA
-data_regVALID_F$matatu_number_valid[data_regVALID_F$matatu_number_closest_dist %in% 1] <- 
-  data_regVALID_F$matatu_number_closest[data_regVALID_F$matatu_number_closest_dist %in% 1]
+data_regVALID_F$matatu_number_valid[data_regVALID_F$matatu_number_closest_dist %in% 1:2] <- 
+  data_regVALID_F$matatu_number_closest[data_regVALID_F$matatu_number_closest_dist %in% 1:2]
 
 ## Append data back together
 sc_data <- bind_rows(data_regVALID_T,
@@ -343,12 +343,8 @@ var_label(data$completed_survey) <- "Answered all questions in survey"
 var_label(data$vehicle_id) <- "Vehicle ID" 
 
 # Export -----------------------------------------------------------------------
-saveRDS(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 
+saveRDS(data, file.path(dropbox_dir, "Data", "Rider Feedback - Pilot", "All Data", "FinalData", 
                         "rider_feedback.Rds"))
-write_dta(data, file.path(dropbox_file_path, "Data", "Rider Feedback", "All Data", "FinalData", 
+write_dta(data, file.path(dropbox_dir, "Data", "Rider Feedback - Pilot", "All Data", "FinalData", 
                           "rider_feedback.dta"))
 
-
-
-data$matatu_number[data$reg_no %in% "UNKNOWN"] %>% table() %>% View()
-data$reg_no %>% table()

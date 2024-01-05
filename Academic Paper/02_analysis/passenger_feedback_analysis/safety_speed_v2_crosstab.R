@@ -21,14 +21,14 @@ for(i in 1:5){
 
 cross_tab_df <- cross_tab_df %>%
   dplyr::mutate(tex = paste0(safe_var, " & ", 
-                            V1, " (", V1_p, ") & ",
-                            V2, " (", V2_p, ") & ",
-                            V3, " (", V3_p, ") & ",
-                            V4, " (", V4_p, ") & ",
-                            V5, " (", V5_p, ") \\\\ \n "))
+                             V1, " (", V1_p, ") & ",
+                             V2, " (", V2_p, ") & ",
+                             V3, " (", V3_p, ") & ",
+                             V4, " (", V4_p, ") & ",
+                             V5, " (", V5_p, ") \\\\ \n "))
 
 # Make table -------------------------------------------------------------------
-sink(file.path(tables_dir, "speed_safe_crosstab.tex"))
+sink(file.path(tables_dir, "safe_speed_v2_crosstab.tex"))
 cat("\\begin{tabular}{l c|c|c|c|c} ")
 cat("\\hline ")
 

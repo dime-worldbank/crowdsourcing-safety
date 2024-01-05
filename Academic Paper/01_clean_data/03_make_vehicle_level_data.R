@@ -39,8 +39,10 @@ fb_df <- fb_df %>%
 
 fb_sum_df <- fb_df %>%
   dplyr::filter(regno != "UNKNOWN") %>%
-  dplyr::mutate(unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe"),
-                fast = q_speed_rating_v2 == "Very fast [80+]") %>%
+  dplyr::mutate(q_safety_prop_unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe"),
+                q_speed_rating_v1_fast = (q_speed_rating_v1 == "Fast") | (q_speed_rating_v1 == "Dangerously fast"),
+                q_speed_rating_v1_dfast = (q_speed_rating_v1 == "Dangerously fast"),
+                q_speed_rating_v2_fast = q_speed_rating_v2 == "Very fast [80+]") %>%
   group_by(regno) %>%
   dplyr::summarise(n_feedback = n(),
                    n_feedback_1wk = sum(days_since_install <= 7*1),
@@ -55,9 +57,6 @@ fb_sum_df <- fb_df %>%
                    n_feedback_qr  = sum(response_method == "qr code"),
                    n_feedback_sms = sum(response_method == "shortcode"),
                    
-                   q_safety_prop_unsafe = mean(unsafe, na.rm = T),
-                   q_speed_rating_v2_fast = mean(fast, na.rm = T),
-                   
                    comment_driver_sntmt_code_compl_sum = sum_na(comment_driver_sntmt_code_compl),
                    comment_driver_sntmt_code_neg_sum = sum_na(comment_driver_sntmt_code_neg),
                    
@@ -68,6 +67,10 @@ fb_sum_df <- fb_df %>%
                             q_speed_rating_v1_num,
                             q_speed_rating_v2_num,
                             q_occupancy_num,
+                            q_safety_prop_unsafe,
+                            q_speed_rating_v1_fast,
+                            q_speed_rating_v1_dfast,
+                            q_speed_rating_v2_fast,
                             sentiment_snmtr,
                             comment_driver_sntmt_code_compl,
                             comment_driver_sntmt_code_neg), 

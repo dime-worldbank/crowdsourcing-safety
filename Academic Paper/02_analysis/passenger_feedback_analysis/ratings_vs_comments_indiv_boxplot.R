@@ -34,11 +34,32 @@ p_safe <- fb_stacked_df %>%
   scale_x_continuous(breaks = c(-1, 0, 1),
                      labels = c("-1 (Negative)", "0", "1 (Positive)")) +
   theme_classic2() +
-  theme(axis.text = element_text(color = "black"),
-        plot.title = element_text(face = "bold", size = 10)) #+
+  theme(axis.text = element_text(color = "black", size = 8),
+        axis.title = element_text(size = 9),
+        plot.title = element_text(face = "bold", size = 9)) #+
   #guides(fill = guide_legend(reverse = TRUE))
 
-p_speed <- fb_stacked_df %>%
+p_speed_v1 <- fb_stacked_df %>%
+  dplyr::filter(!is.na(q_speed_rating_v1)) %>%
+  dplyr::mutate(q_speed_rating_v1 = fct_rev(q_speed_rating_v1)) %>%
+  ggplot() +
+  geom_vline(xintercept = 0, color = "gray50") +
+  geom_boxplot(aes(x = sentiment_snmtr,
+                   y = q_speed_rating_v1,
+                   fill = type)) +
+  labs(x = "Sentiment",
+       y = NULL,
+       title = "B. Distribution of sentiment by how\nfast passengers rate matatu driving",
+       fill = NULL) +
+  scale_fill_manual(values = c("dodgerblue", "darkorange")) +
+  scale_x_continuous(breaks = c(-1, 0, 1),
+                     labels = c("-1 (Negative)", "0", "1 (Positive)")) +
+  theme_classic2() +
+  theme(axis.text = element_text(color = "black", size = 8),
+        axis.title = element_text(size = 9),
+        plot.title = element_text(face = "bold", size = 9)) 
+
+p_speed_v2 <- fb_stacked_df %>%
   dplyr::filter(!is.na(q_speed_rating_v2)) %>%
   dplyr::mutate(q_speed_rating_v2 = fct_rev(q_speed_rating_v2)) %>%
   ggplot() +
@@ -54,15 +75,17 @@ p_speed <- fb_stacked_df %>%
   scale_x_continuous(breaks = c(-1, 0, 1),
                      labels = c("-1 (Negative)", "0", "1 (Positive)")) +
   theme_classic2() +
-  theme(axis.text = element_text(color = "black"),
-        plot.title = element_text(face = "bold", size = 10)) 
+  theme(axis.text = element_text(color = "black", size = 8),
+        axis.title = element_text(size = 9),
+        plot.title = element_text(face = "bold", size = 9)) 
 
-p <- ggarrange(p_safe, p_speed,
+p <- ggarrange(p_safe, p_speed_v1, p_speed_v2,
                common.legend = T,
+               nrow = 1,
                legend = "top")
 
 ggsave(p, filename = file.path(figures_dir, "feedback_ratings_v_sentiment.png"),
-       height = 3, width = 8)
+       height = 3, width = 10)
 
 # Sentiment vs Manual Coded ----------------------------------------------------
 p <- fb_df %>%

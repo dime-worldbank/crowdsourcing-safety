@@ -26,17 +26,23 @@ cat("\\multicolumn{3}{l}{\\textbf{Q1:} How safely is your matatu being driven?} 
 sum_var("q_safety_rating", fb_df) %>% cat()
 
 cat("\\hline \n")
-cat("\\multicolumn{3}{l}{\\textbf{Q2:} How fast does the matatu seem to be going?} \\\\ \n")
+cat("\\multicolumn{3}{l}{\\textit{Initial version of speed question}} \\\\ \n")
+cat("\\multicolumn{3}{l}{\\textbf{Q2:} How would you describe your matatu driver's speed?} \\\\ \n")
+sum_var("q_speed_rating_v1", fb_df) %>% cat()
+
+cat("\\hline \n")
+cat("\\multicolumn{3}{l}{\\textit{Updated version of speed question}} \\\\ \n")
+cat("\\multicolumn{3}{l}{\\textbf{Q3:} How fast does the matatu seem to be going?} \\\\ \n")
 sum_var("q_speed_rating_v2", fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textit{Only asked in 2020}} \\\\ \n")
-cat("\\multicolumn{3}{l}{\\textbf{Q3:} On the matatu, are there:} \\\\ \n")
+cat("\\multicolumn{3}{l}{\\textbf{Q4:} On the matatu, are there:} \\\\ \n")
 sum_var("q_occupancy",  fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textit{Only asked in 2020}} \\\\ \n")
-cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q4:} Were measures taken to precent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
+cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q5:} Were measures taken to precent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
 sum_var("q_covid_measures",  fb_df) %>% cat()
 
 cat("\\hline \n")

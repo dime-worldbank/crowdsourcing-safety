@@ -36,15 +36,9 @@ add_example <- function(word_df, fb_df){
     term_i <- word_df$term[i]
     out[[i]] <- tolower(fb_df$q_comment) %>% str_subset(tolower(term_i)) %>% head(1)
     
-    #fb_df <- fb_df[tolower(fb_df$q_comment) != out[[i]],]
   }
   
   out %>% unlist()
-  
-  # lapply(word_df$term, function(term_i){
-  #   tolower(fb_df$q_comment) %>% str_subset(tolower(term_i)) %>% head(1)
-  # }) %>%
-  #   unlist()
   
 }
 
@@ -57,27 +51,27 @@ add_figure_label <- function(word_df){
 
 #### Good
 fb_good_df <- fb_df %>%
-  dplyr::filter(sentiment_snmtr >= 0.25)
+  dplyr::filter(sentiment_snmtr > 0)
 
 word_good_df <- fb_good_df %>%
   make_word_df() %>%
-  dplyr::filter(sentiment >= 0.5) %>%
+  dplyr::filter(sentiment > 0) %>%
   head(15)
 
 word_good_df$example <- add_example(word_good_df, fb_good_df)
-word_good_df$prop <- word_good_df$freq / nrow(fb_df)
+word_good_df$prop <- word_good_df$freq / nrow(fb_good_df)
 
 #### Bad
 fb_bad_df <- fb_df %>%
-  dplyr::filter(sentiment_snmtr <= -0.25)
+  dplyr::filter(sentiment_snmtr < 0)
 
 word_bad_df <- fb_bad_df %>%
   make_word_df() %>%
-  dplyr::filter(sentiment <= -0.5) %>%
+  dplyr::filter(sentiment < 0) %>%
   head(15)
 
 word_bad_df$example <- add_example(word_bad_df, fb_bad_df)
-word_bad_df$prop <- word_bad_df$freq / nrow(fb_df)
+word_bad_df$prop <- word_bad_df$freq / nrow(fb_bad_df)
 
 # Make figures -----------------------------------------------------------------
 p_good <- word_good_df %>%
@@ -86,12 +80,12 @@ p_good <- word_good_df %>%
              x = freq)) +
   geom_col(fill = "forestgreen") +
   geom_text(aes(label = label,
-                x = freq + 420),
+                x = freq + 65),
             size = 3) +
   labs(y = NULL,
-       x = "Number of Positive Comments Word Appears In",
+       x = "Number (Percent) of Positive Comments Word Appears In",
        title = "A. Top Positive Words from Positive Comments") +
-  scale_x_continuous(limits = c(0, 3200)) +
+  scale_x_continuous(limits = c(0, 560)) +
   theme_classic2() +
   theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
         axis.title.x = element_text(size = 9),
@@ -103,12 +97,12 @@ p_bad <- word_bad_df %>%
              x = freq)) +
   geom_col(fill = "firebrick4") +
   geom_text(aes(label = label,
-                x = freq + 45),
+                x = freq + 5),
             size = 3) +
   labs(y = NULL,
-       x = "Number of Negative Comments Word Appears In",
+       x = "Number (Percent) of Negative Comments Word Appears In",
        title = "B. Top Negative Words from Negative Comments") +
-  scale_x_continuous(limits = c(0, 325)) +
+  scale_x_continuous(limits = c(0, 48)) +
   theme_classic2() +
   theme(axis.text.y = element_text(color = "black", face = "bold")) +
   theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
