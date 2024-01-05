@@ -146,20 +146,36 @@ veh_df$n_feedback_7wk[is.na(veh_df$n_feedback_7wk) & !is.na(veh_df$award_type)] 
 veh_df$n_feedback_8wk[is.na(veh_df$n_feedback_8wk) & !is.na(veh_df$award_type)] <- 0
 
 # Make subsets of datasets -----------------------------------------------------
-veh_stkr_sff_fdbck_df <- veh_df %>%
+veh_all_df <- veh_df
+
+veh_sticker_df <- veh_df %>%
+  dplyr::filter(!is.na(shortcode_on_sticker))
+
+veh_sticker_fdback_df <- veh_df %>%
   dplyr::filter(!is.na(shortcode_on_sticker)) %>%
   dplyr::filter(n_feedback >= 10)
 
-veh_tele_stkr_sff_fdbck_df <- veh_stkr_sff_fdbck_df %>%
-  dplyr::filter(!is.na(speed_mean)) 
+veh_tele_sticker_df <- veh_df %>%
+  dplyr::filter(!is.na(speed_mean)) %>%
+  dplyr::filter(!is.na(shortcode_on_sticker))
+
+veh_tele_sticker_fdback_df <- veh_tele_sticker_df %>%
+  dplyr::filter(n_feedback >= 10)
 
 # Export -----------------------------------------------------------------------
 saveRDS(veh_df,
-        file.path(data_dir, "FinalData", "vehicle_level.Rds"))
+        file.path(data_dir, "FinalData", "vehicle_level_all202.Rds"))
 
-saveRDS(veh_stkr_sff_fdbck_df,
+saveRDS(veh_sticker_df,
         file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
 
-saveRDS(veh_tele_stkr_sff_fdbck_df,
+saveRDS(veh_sticker_fdback_df,
+        file.path(data_dir, "FinalData", "vehicle_level_stickers_suff_feedback.Rds"))
+
+saveRDS(veh_tele_sticker_df,
         file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
+
+saveRDS(veh_tele_sticker_fdback_df,
+        file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_suff_feedback.Rds"))
+
 

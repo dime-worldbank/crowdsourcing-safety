@@ -1,7 +1,7 @@
 # Feedback vs Comments
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_suff_feedback.Rds"))
 
 # Figure -----------------------------------------------------------------------
 p_unsafe <- veh_df %>%

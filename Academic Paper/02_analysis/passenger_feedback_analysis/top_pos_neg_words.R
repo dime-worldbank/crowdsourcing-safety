@@ -85,7 +85,7 @@ p_good <- word_good_df %>%
   labs(y = NULL,
        x = "Number (Percent) of Positive Comments Word Appears In",
        title = "A. Top Positive Words from Positive Comments") +
-  scale_x_continuous(limits = c(0, 560)) +
+  scale_x_continuous(limits = c(0, 570)) +
   theme_classic2() +
   theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
         axis.title.x = element_text(size = 9),
@@ -97,12 +97,12 @@ p_bad <- word_bad_df %>%
              x = freq)) +
   geom_col(fill = "firebrick4") +
   geom_text(aes(label = label,
-                x = freq + 5),
+                x = freq + 5.5),
             size = 3) +
   labs(y = NULL,
        x = "Number (Percent) of Negative Comments Word Appears In",
        title = "B. Top Negative Words from Negative Comments") +
-  scale_x_continuous(limits = c(0, 48)) +
+  scale_x_continuous(limits = c(0, 53)) +
   theme_classic2() +
   theme(axis.text.y = element_text(color = "black", face = "bold")) +
   theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),

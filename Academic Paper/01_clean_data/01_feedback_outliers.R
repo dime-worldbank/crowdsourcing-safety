@@ -6,7 +6,7 @@ fb_df <- readRDS(file.path(data_dir, "RawData", "passenger_feedback.Rds"))
 # Remove duplicates ------------------------------------------------------------
 fb_df <- fb_df %>%
   dplyr::mutate(q_comment_nchar = nchar(q_comment)) %>%
-  arrange(-q_comment_nchar) %>%
+  arrange(date) %>%
   distinct(phone_hash, regno, .keep_all = T)
 
 fb_df %>%

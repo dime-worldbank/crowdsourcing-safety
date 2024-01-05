@@ -42,7 +42,7 @@ sum_var("q_occupancy",  fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textit{Only asked in 2020}} \\\\ \n")
-cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q5:} Were measures taken to precent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
+cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q5:} Were measures taken to prevent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
 sum_var("q_covid_measures",  fb_df) %>% cat()
 
 cat("\\hline \n")

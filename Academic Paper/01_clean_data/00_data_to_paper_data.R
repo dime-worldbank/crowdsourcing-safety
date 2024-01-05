@@ -16,6 +16,18 @@ fb_df <- readRDS(file.path(db_dir, "Data", "Rider Feedback - All", "FinalData",
                            "Rider Feedback - All",
                            "rider_feedback.Rds"))
 
+fb_df <- fb_df %>%
+  # PSV Number not entered
+  dplyr::filter(!(is.na(psv_num) & regno == "UNKNOWN")) %>%
+  
+  # One question needs to be answered
+  dplyr::filter((!is.na(q_safety_rating) | 
+                   !is.na(q_speed_rating_v1) |
+                   !is.na(q_speed_rating_v2) |
+                   !is.na(q_covid_measures) |
+                   !is.na(q_occupancy) |
+                   !is.na(q_comment)))
+
 saveRDS(fb_df,       file.path(data_dir, "RawData", "passenger_feedback.Rds"))
 write_parquet(fb_df, file.path(data_dir, "RawData", "passenger_feedback.parquet"))
 write_csv(fb_df,     file.path(data_dir, "RawData", "passenger_feedback.csv"))

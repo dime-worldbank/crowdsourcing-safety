@@ -1,7 +1,7 @@
 # Passenger Feedback vs GPS Data
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_suff_feedback.Rds"))
 
 p_safe <- veh_df %>%
   dplyr::filter(!is.na(prop_time_over_80kph_base_10kph),

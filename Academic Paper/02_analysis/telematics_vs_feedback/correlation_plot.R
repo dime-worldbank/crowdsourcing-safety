@@ -1,7 +1,7 @@
 # Telematics Summary
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_suff_feedback.Rds"))
 
 veh_df <- veh_df %>%
   dplyr::mutate(comment_driver_sntmt_code_prop_compl = 

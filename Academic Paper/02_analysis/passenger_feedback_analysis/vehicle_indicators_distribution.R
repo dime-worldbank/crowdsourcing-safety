@@ -3,7 +3,7 @@
 COL_TEXT_SIZE <- 3
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_suff_feedback.Rds"))
 
 custom_theme <- theme_classic2() +
   theme(plot.title = element_text(size = 8, face = "bold"),

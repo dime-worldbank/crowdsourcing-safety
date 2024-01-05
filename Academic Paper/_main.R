@@ -44,6 +44,7 @@ library(forcats)
 library(tm)
 library(quanteda)
 library(scales)
+library(haven)
 #library(cleanNLP)
 #library(coreNLP)
 

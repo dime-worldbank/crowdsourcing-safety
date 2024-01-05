@@ -3,7 +3,7 @@
 for(veh_subset in c("all", "stickers")){
   
   # Load data --------------------------------------------------------------------
-  veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level.Rds"))
+  veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
   
   if(veh_subset == "stickers"){
     
