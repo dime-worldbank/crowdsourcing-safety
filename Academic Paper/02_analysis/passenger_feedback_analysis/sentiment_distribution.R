@@ -6,7 +6,8 @@ fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_clas
 # Prep data --------------------------------------------------------------------
 fb_stacked_df <- bind_rows(
   fb_df %>%
-    mutate(type = "All Comments"),
+    dplyr::filter(str_detect(q_comment, DRIVING_WORDS) | str_detect(q_comment, COVID_WORDS)) %>%
+    mutate(type = "Other\nComments"),
   
   fb_df %>%
     dplyr::filter(q_comment %>% str_detect(DRIVING_WORDS)) %>%
@@ -14,7 +15,8 @@ fb_stacked_df <- bind_rows(
   
   fb_df %>%
     dplyr::filter(q_comment %>% str_detect(COVID_WORDS)) %>%
-    mutate(type = "COVID-19\nComments")
+    mutate(type = "COVID-19\nComments",
+           sentiment_snmtr = sentiment_snmtr_covid)
 ) %>%
   dplyr::filter(!is.na(sentiment_snmtr)) %>%
   dplyr::filter(q_comment_nchar >= 10) 

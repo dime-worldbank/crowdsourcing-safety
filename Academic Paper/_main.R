@@ -1,6 +1,6 @@
 # Crowdsourcing Safety Paper
 
-RUN_CODE <- T
+RUN_CODE <- F
 
 # Filepaths --------------------------------------------------------------------
 
@@ -45,6 +45,10 @@ library(tm)
 library(quanteda)
 library(scales)
 library(haven)
+library(fixest)
+library(purrr)
+library(tibble)
+library(did)
 #library(cleanNLP)
 #library(coreNLP)
 
@@ -89,4 +93,3 @@ if(RUN_CODE){
   source(file.path(git_tele_vs_feed_dir, "scatter_plots.R"))
   
 }
-

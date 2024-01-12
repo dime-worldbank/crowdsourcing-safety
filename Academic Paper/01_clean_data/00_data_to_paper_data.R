@@ -47,9 +47,6 @@ write_dta(veh_data_df,     file.path(data_dir, "RawData", "gps_vehicle_info.dta"
 st_insll_df <- readRDS(file.path(db_dir, "Data", "Sticker Installation Survey", "FinalData", 
                                  "sticker_install_survey.Rds"))
 
-st_insll_df <- st_insll_df %>%
-  dplyr::rename()
-
 saveRDS(st_insll_df,       file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.Rds"))
 write_parquet(st_insll_df, file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.parquet"))
 write_csv(st_insll_df,     file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.csv"))
@@ -85,7 +82,8 @@ gps_survey_df <- gps_survey_df %>%
                 matatu_other_route, driver_is_matatu_owner,
                 driver_age, driver_tenure, driver_route_tenure, driver_contract,
                 n_drivers_per_veh_q, matatu_seats, matatu_quality_q, matatu_paint_q,
-                matatu_wifi, matatu_amenities, matatu_other, route, stop_type) %>%
+                matatu_wifi, matatu_amenities, matatu_other, route, stop_type,
+                starttime, submissiondate) %>%
   dplyr::rename(regno = matatu_regno) %>%
   dplyr::mutate(regno = regno %>%
                   str_squish() %>%

@@ -36,7 +36,7 @@ p_safe <- veh_stack_df %>%
            color = "black",
            fill = "dodgerblue") +
   geom_text(aes(x = value,
-                y = n + 1,
+                y = n + 1.5,
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(limits = c(1, 4.1),
@@ -45,7 +45,7 @@ p_safe <- veh_stack_df %>%
                                 "2 Not safe",
                                 "3 Safe",
                                 "4 Very safe")) +
-  #scale_y_continuous(limits = c(0, 13)) +
+  scale_y_continuous(limits = c(0, 15)) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "A. Vehicle average of: 'How safely is your matatu\nbeing driven?'") +
@@ -60,7 +60,7 @@ p_speed_1 <- veh_stack_df %>%
            color = "black",
            fill = "dodgerblue") +
   geom_text(aes(x = value,
-                y = n + 1,
+                y = n + 2,
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(limits = c(1, 4.2),
@@ -69,6 +69,7 @@ p_speed_1 <- veh_stack_df %>%
                                 "Okay",
                                 "Fast",
                                 "Dangerously\nfast")) +
+  scale_y_continuous(limits = c(0, 21)) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "B. Vehicle average of: 'How would you\ndescribe your matatu driver's speed?") +
@@ -83,7 +84,7 @@ p_speed_2 <- veh_stack_df %>%
            color = "black",
            fill = "dodgerblue") +
   geom_text(aes(x = value,
-                y = n + 0.6,
+                y = n + 0.9,
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(limits = c(1, 5.2),
@@ -93,7 +94,7 @@ p_speed_2 <- veh_stack_df %>%
                                 "Average\n[30-50]",
                                 "Fast\n[50-80]",
                                 "Very fast\n[80+]")) +
-  scale_y_continuous(limits = c(0, 7)) +
+  scale_y_continuous(limits = c(0, 9)) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "C. Vehicle average of 'How fast does the matatu\nseem to be going?'") +
@@ -122,11 +123,12 @@ p_prop_safe <- veh_stack_df %>%
            color = "black",
            fill = "dodgerblue") +
   geom_text(aes(x = value,
-                y = n + 1,
+                y = n + 1.75,
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(labels = scales::percent_format(scale = 100),
                      limits = c(-0.01, 0.3)) +
+  scale_y_continuous(limits = c(0, 21)) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "D. Percent of passengers that rate driving as\n'Unsafe' or 'Very unsafe'") +
@@ -141,11 +143,12 @@ p_prop_speed_v1 <- veh_stack_df %>%
            color = "black",
            fill = "dodgerblue") +
   geom_text(aes(x = value,
-                y = n + 1,
+                y = n + 1.75,
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(labels = scales::percent_format(scale = 100),
                      limits = c(-0.01, 0.3)) +
+  scale_y_continuous(limits = c(0, 21)) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "E. Percent of passengers that rate driving as\n'Fast' or 'Dangerously fast'") +
@@ -160,7 +163,7 @@ p_prop_speed_v2 <- veh_stack_df %>%
            color = "black",
            fill = "dodgerblue") +
   geom_text(aes(x = value,
-                y = n + 1,
+                y = n + 0.8,
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(labels = scales::percent_format(scale = 100),

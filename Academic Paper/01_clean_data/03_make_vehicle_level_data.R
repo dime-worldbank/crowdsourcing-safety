@@ -72,6 +72,7 @@ fb_sum_df <- fb_df %>%
                             q_speed_rating_v1_dfast,
                             q_speed_rating_v2_fast,
                             sentiment_snmtr,
+                            sentiment_snmtr_covid,
                             comment_driver_sntmt_code_compl,
                             comment_driver_sntmt_code_neg), 
                           mean,
@@ -109,6 +110,9 @@ for(var in vars_for_base){
     
   }
 }
+
+sensor_df <- sensor_df %>%
+  filter(distance_minmax_latlon_daily_km >= 50) 
 
 sensor_sum_df <- sensor_df %>%
   # dplyr::mutate(prop_time_over_80kph_base_10kph = set_na(time_over_80kph_secs / time_over_10kph_secs, time_over_10kph_secs),
@@ -177,5 +181,11 @@ saveRDS(veh_tele_sticker_df,
 
 saveRDS(veh_tele_sticker_fdback_df,
         file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_suff_feedback.Rds"))
+
+saveRDS(veh_df,
+        file.path(data_dir, "FinalData", "vehicle_level_all202.Rds"))
+
+saveRDS(sensor_df,
+        file.path(data_dir, "FinalData", "sensor_day_days_when_traveled.Rds"))
 
 
