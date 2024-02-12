@@ -88,30 +88,57 @@ for(var in vars_for_base){
   }
 }
 
-# Subset -----------------------------------------------------------------------
+# Subset and stats -------------------------------------------------------------
+veh_data_df %>%
+  pull(drvr_feedback_treat_sticker) %>%
+  table()
+
+### Original vehicles
 sensor_df <- sensor_df %>%
-  dplyr::filter(date >= ymd("2022-08-01"), # 2022-08-01
-                date <= ymd("2023-01-16")) %>% # 2023-01-16
-  dplyr::filter(distance_minmax_latlon_daily_km >= 50) %>%
   dplyr::filter(!is.na(drvr_feedback_treat_sticker))
 
 sensor_all_df <- sensor_df
 
-## Must have observation every week
+sensor_df %>%
+  distinct(regno, .keep_all = T) %>%
+  pull(drvr_feedback_treat_sticker) %>%
+  table()
+
+### Vehicles with data
 sensor_df <- sensor_df %>%
-  mutate(date_week = date %>% floor_date(unit = "week")) %>%
-  group_by(regno, date_week) %>%
-  dplyr::mutate(n_obs_regno_week = n()) %>%
-  ungroup()
+  dplyr::filter(date >= ymd("2022-08-01"), # 2022-08-01
+                date <= ymd("2023-01-14")) %>% # 2023-01-16
+  dplyr::filter(distance_minmax_latlon_daily_km >= 50) 
 
-regno_few_obs <- sensor_df %>%
-  dplyr::filter(date_week > min(date_week),
-                date_week < max(date_week)) %>%
-  filter(n_obs_regno_week <= 2) %>%
-  pull(regno) %>%
-  unique()
+sensor_df %>%
+  distinct(regno, .keep_all = T) %>%
+  pull(drvr_feedback_treat_sticker) %>%
+  table()
 
-sensor_df <- sensor_df[!(sensor_df$regno %in% regno_few_obs),]
+sensor_df %>%
+  distinct(regno, .keep_all = T) %>%
+  filter(drvr_feedback_treat_sticker == 1) %>%
+  pull(sticker_install_date) %>%
+  is.na() %>%
+  table()
+#
+
+## Must have observation every week
+# sensor_df <- sensor_df %>%
+#   mutate(date_week = date %>% floor_date(unit = "month")) %>%
+#   group_by(regno, date_week) %>%
+#   dplyr::mutate(n_obs_regno_week = n()) %>%
+#   ungroup()
+# #
+# regno_few_obs <- sensor_df %>%
+#   dplyr::filter(date_week > min(date_week),
+#                date_week < max(date_week)) %>%
+#   #dplyr::filter(date_week < max(date_week)) %>%
+#   filter(n_obs_regno_week <= 6) %>%
+#   pull(regno) %>%
+#   unique()
+# 
+# sensor_df <- sensor_df[!(sensor_df$regno %in% regno_few_obs),]
 
 # Make variables for did -------------------------------------------------------
 sensor_df <- sensor_df %>%

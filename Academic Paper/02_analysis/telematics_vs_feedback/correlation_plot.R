@@ -3,10 +3,6 @@
 # Load data --------------------------------------------------------------------
 veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_suff_feedback.Rds"))
 
-veh_df <- veh_df %>%
-  dplyr::mutate(comment_driver_sntmt_code_prop_compl = 
-                  comment_driver_sntmt_code_compl_sum / (comment_driver_sntmt_code_compl_sum + comment_driver_sntmt_code_neg_sum))
-
 # Prep data --------------------------------------------------------------------
 veh_df <- veh_df %>%
   dplyr::select(
@@ -27,21 +23,21 @@ veh_df <- veh_df %>%
     rate_N_valueg_above0_5_brake_base_10kph,
     rate_N_valueg_above0_5_turn_base_10kph,
     
-    rate_N_valueg_above1_0_base_10kph,
-    rate_N_valueg_above1_0_acceleration_base_10kph,
-    rate_N_valueg_above1_0_brake_base_10kph,
-    rate_N_valueg_above1_0_turn_base_10kph,
+    # rate_N_valueg_above1_0_base_10kph,
+    # rate_N_valueg_above1_0_acceleration_base_10kph,
+    # rate_N_valueg_above1_0_brake_base_10kph,
+    # rate_N_valueg_above1_0_turn_base_10kph,
     
     q_safety_prop_unsafe,
     q_safety_rating_num,
-    q_speed_rating_v2_fast,
+    q_speed_rating_v2_vfast,
     q_speed_rating_v2_num,
     sentiment_snmtr,
-    comment_driver_sntmt_code_compl,
-    comment_driver_sntmt_code_neg,
-    #comment_driver_sntmt_code_prop_compl
-  ) %>%
-  dplyr::mutate(across(where(is.numeric), ~Winsorize(., probs = c(0, 0.9), na.rm = T))) 
+    #comment_driver_sntmt_code_compl,
+    #comment_driver_sntmt_code_neg,
+    comment_driver_sntmt_code_compl_prop_complneg
+  ) #%>%
+  #dplyr::mutate(across(where(is.numeric), ~Winsorize(., probs = c(0, 0.9), na.rm = T))) 
 
 cor_pvalue <- function(x,y){
   cor.test(x,y)$p.value
@@ -112,11 +108,12 @@ cor_df <- veh_df %>%
   dplyr::mutate(feedback_var_clean = case_when(
     feedback_var == "q_safety_rating_num" ~ "Safe\nRating",
     feedback_var == "q_speed_rating_v2_num" ~ "Speed\nRating",
-    feedback_var == "sentiment_snmtr" ~ "Sentiment\nOf Comment",
+    feedback_var == "sentiment_snmtr" ~ "Comment\nPolarity",
     feedback_var == "comment_driver_sntmt_code_compl" ~ "Positive Comment\n[Manual Code]",
     feedback_var == "comment_driver_sntmt_code_neg" ~ "Negative Comment\n[Manual Code]",
+    feedback_var == "comment_driver_sntmt_code_compl_prop_complneg" ~ "Driving Sentiment\n[Manual Code]",
     feedback_var == "q_safety_prop_unsafe" ~ "Percent\nRate Unsafe",
-    feedback_var == "q_speed_rating_v2_fast" ~ "Percent\nRate Fast",
+    feedback_var == "q_speed_rating_v2_vfast" ~ "Percent Rate\nVery Fast",
     TRUE ~ feedback_var
   )) %>%
   dplyr::mutate(feedback_sort = case_when(
@@ -126,7 +123,7 @@ cor_df <- veh_df %>%
     feedback_var == "q_safety_rating_num" ~ 4,
     feedback_var == "q_safety_prop_unsafe" ~ 5,
     feedback_var == "q_speed_rating_v2_num" ~ 6,
-    feedback_var == "q_speed_rating_v2_fast" ~ 7,
+    feedback_var == "q_speed_rating_v2_vfast" ~ 7,
     TRUE ~ 0
   )) %>%
   mutate(label = paste0(round(cor_coef, 2), "", stars))
@@ -142,7 +139,7 @@ cor_df %>%
   geom_text() +
   geom_hline(yintercept = 4.5, color = "black") +
   geom_hline(yintercept = 9.5, color = "black") +
-  geom_hline(yintercept = 13.5, color = "black") +
+  #geom_hline(yintercept = 13.5, color = "black") +
   scale_fill_gradient2(low = "dodgerblue",
                        high = "darkorange",
                        mid = "white",

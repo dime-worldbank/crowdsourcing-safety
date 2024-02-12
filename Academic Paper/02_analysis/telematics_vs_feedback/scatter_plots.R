@@ -48,3 +48,28 @@ p <- ggarrange(p_safe, p_speed, nrow = 1)
 
 ggsave(p, filename = file.path(figures_dir, "telematics_vs_feedback_scatter.png"),
        height = 2.5, width = 10.1)
+
+
+
+
+
+
+veh_df %>%
+  dplyr::filter(!is.na(prop_time_over_90kph_base_10kph),
+                !is.na(q_safety_rating_num)) %>%
+  ggplot(aes(x = q_safety_rating_num,
+             y = prop_time_over_90kph_base_10kph)) +
+  geom_smooth(method='lm', 
+              formula= y~x, 
+              se=F,
+              color = "orange") +
+  geom_point(size = 2) +
+  labs(x = "Average Safety Rating (Higher = Safer)",
+       y = "Percent of\ntime vehicle\ntraveling\nabove 90 km/h",
+       title = "A. Percent of time traveling above 90 km/h vs passenger safety rating") +
+  scale_y_continuous(labels = percent_format(scale = 100)) +
+  theme_classic2() +
+  theme(plot.title = element_text(size = 8.2, face = "bold"),
+        axis.title.y = element_text(angle = 0, vjust = 0.5, size = 7),
+        axis.title.x = element_text(size = 7),
+        plot.caption = element_text(size = 6))

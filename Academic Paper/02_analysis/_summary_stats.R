@@ -11,6 +11,11 @@ veh_df        <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_sticker
 veh_stc_df    <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
 veh_stc_tl_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
 
+
+table(veh_df$n_feedback >= 101)
+4+41+20+4+8
+8/77
+
 # N Passenger Feedback ---------------------------------------------------------
 ## Raw
 nrow(fb_raw_df)

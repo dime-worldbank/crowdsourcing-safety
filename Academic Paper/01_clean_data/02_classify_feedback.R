@@ -1,5 +1,7 @@
 # Classify Feedback
 
+set.seed(142)
+
 # Load data --------------------------------------------------------------------
 df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_valid.Rds"))
 
@@ -23,6 +25,8 @@ df_sub$sentiment_snmtr <- df_sub$q_comment %>%
   get_sentences() %>%
   sentiment() %>%
   pull(sentiment)
+df_sub$sentiment_snmtr[df_sub$sentiment_snmtr >= 1] <- 1
+df_sub$sentiment_snmtr[df_sub$sentiment_snmtr <= -1] <- -1
 
 df_sub$sentiment_snmtr_covid <- df_sub$q_comment_covid %>%
   get_sentences() %>%
@@ -35,6 +39,19 @@ df_sub <- df_sub %>%
 
 df <- df %>%
   left_join(df_sub, by = "uid")
+
+# Add text version of code -----------------------------------------------------
+df <- df %>%
+  mutate(comment_driver_sntmt_code_str = case_when(
+    comment_driver_sntmt_code == 1 ~ "Positive",
+    comment_driver_sntmt_code == 2 ~ "Negative",
+    comment_driver_sntmt_code == 3 ~ "Neutral",
+    comment_driver_sntmt_code == 4 ~ "Unclear"
+  ) %>%
+    factor(levels = c("Positive",
+                      "Negative",
+                      "Neutral",
+                      "Unclear")))
 
 # Export -----------------------------------------------------------------------
 saveRDS(df, file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))

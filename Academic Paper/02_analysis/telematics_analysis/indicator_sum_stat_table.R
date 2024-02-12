@@ -31,12 +31,12 @@ for(veh_subset in c("all", "stickers")){
       rate_N_valueg_above0_5_base_10kph,
       rate_N_valueg_above0_5_acceleration_base_10kph,
       rate_N_valueg_above0_5_brake_base_10kph,
-      rate_N_valueg_above0_5_turn_base_10kph,
+      rate_N_valueg_above0_5_turn_base_10kph#,
       
-      rate_N_valueg_above1_0_base_10kph,
-      rate_N_valueg_above1_0_acceleration_base_10kph,
-      rate_N_valueg_above1_0_brake_base_10kph,
-      rate_N_valueg_above1_0_turn_base_10kph
+      # rate_N_valueg_above1_0_base_10kph,
+      # rate_N_valueg_above1_0_acceleration_base_10kph,
+      # rate_N_valueg_above1_0_brake_base_10kph,
+      # rate_N_valueg_above1_0_turn_base_10kph
     ) %>%
     pivot_longer(cols = -regno) %>%
     filter(!is.na(value)) %>%

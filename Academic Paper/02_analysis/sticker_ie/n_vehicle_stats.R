@@ -19,6 +19,7 @@ st_insll_df <- readRDS(file.path(data_dir, "RawData", "gps_vehicle_sticker_insta
 
 # Stats ------------------------------------------------------------------------
 
+
 sensor_ie_any_df %>%
   pull(regno) %>%
   unique() %>%

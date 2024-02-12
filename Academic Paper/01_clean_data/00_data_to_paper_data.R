@@ -28,6 +28,18 @@ fb_df <- fb_df %>%
                    !is.na(q_occupancy) |
                    !is.na(q_comment)))
 
+## Merge in additional classifications
+comments_df <- readRDS(file.path(db_dir, "Data", "Rider Feedback", "FinalData", "comments_coded_all.Rds"))
+
+fb_df <- fb_df %>%
+  dplyr::select(-c(comment_driver_sntmt_relev, comment_driver_sntmt_code,
+                   comment_driver_sntmt_code_compl, comment_driver_sntmt_code_neg,
+                   comment_driver_sntmt_code_neut, comment_driver_sntmt_code_uncl)) %>%
+  left_join(comments_df, by = "uid")
+
+## Manual comment fix
+fb_df$comment_driver_sntmt_relev[fb_df$uid == 35026] <- 0
+
 saveRDS(fb_df,       file.path(data_dir, "RawData", "passenger_feedback.Rds"))
 write_parquet(fb_df, file.path(data_dir, "RawData", "passenger_feedback.parquet"))
 write_csv(fb_df,     file.path(data_dir, "RawData", "passenger_feedback.csv"))

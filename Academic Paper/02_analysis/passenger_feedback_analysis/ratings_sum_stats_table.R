@@ -3,6 +3,24 @@
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
 
+# Prep comments ----------------------------------------------------------------
+fb_df <- fb_df %>%
+  mutate(sentiment_snmtr_class = case_when(
+    sentiment_snmtr < -0.67 ~ "-0.67 to -1",
+    sentiment_snmtr < -0.33 ~ "-0.33 to -0.67",
+    sentiment_snmtr < 0 ~ "0 to -0.33",
+    sentiment_snmtr < 0.33 ~ "0 to 0.33",
+    sentiment_snmtr < 0.67 ~ "0.33 to 0.67",
+    sentiment_snmtr <= 1 ~ "0.67 to 1",
+  ) %>%
+    factor(levels = c("-0.67 to -1", 
+                      "-0.33 to -0.67",
+                      "0 to -0.33",
+                      "0 to 0.33",
+                      "0.33 to 0.67",
+                      "0.67 to 1")))
+
+# Make table -------------------------------------------------------------------
 sum_var <- function(var, fb_df){
   fb_df$var <- fb_df[[var]]
   fb_df %>%
@@ -11,10 +29,12 @@ sum_var <- function(var, fb_df){
     dplyr::summarise(n = n()) %>%
     ungroup() %>%
     dplyr::mutate(prop = n / sum(n)) %>%
-    dplyr::mutate(tex = paste0("~~~", var, " & ", n, " & ", round(prop*100, 0), "\\% \\\\ \n" )) %>%
+    dplyr::mutate(tex = paste0("~~~", var, " & ", n, " & ", round(prop*100, 1), "\\% \\\\ \n" )) %>%
     pull(tex) %>%
     paste(collapse = " ")
 }
+
+
 
 sink(file.path(tables_dir, "feedback_level_sum_stat.tex"))
 
@@ -44,6 +64,14 @@ cat("\\hline \n")
 cat("\\multicolumn{3}{l}{\\textit{Only asked in 2020}} \\\\ \n")
 cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q5:} Were measures taken to prevent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
 sum_var("q_covid_measures",  fb_df) %>% cat()
+
+cat("\\hline \n")
+cat("\\multicolumn{3}{p{8cm}}{\\textbf{Comment:} Polarity (-1 = most negative, 1 = most positive)} \\\\ \n")
+sum_var("sentiment_snmtr_class",  fb_df) %>% cat()
+
+cat("\\hline \n")
+cat("\\multicolumn{3}{p{8cm}}{\\textbf{Comment:} Manually coded sentiment of driving} \\\\ \n")
+sum_var("comment_driver_sntmt_code_str",  fb_df) %>% cat()
 
 cat("\\hline \n")
 cat("\\end{tabular}")

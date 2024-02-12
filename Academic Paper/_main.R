@@ -65,6 +65,7 @@ if(RUN_CODE){
   source(file.path(git_clean_data_dir, "01_feedback_outliers.R"))
   source(file.path(git_clean_data_dir, "02_classify_feedback.R"))
   source(file.path(git_clean_data_dir, "03_make_vehicle_level_data.R"))
+  source(file.path(git_clean_data_dir, "04_make_sticker_ie_data.R"))
   
   # Passenger feedback analysis ------------------------------------------------
   git_feedback_dir <- file.path(git_dir, "02_analysis", "passenger_feedback_analysis")
@@ -91,5 +92,14 @@ if(RUN_CODE){
   
   source(file.path(git_tele_vs_feed_dir, "correlation_plot.R"))
   source(file.path(git_tele_vs_feed_dir, "scatter_plots.R"))
+  
+  # Sticker IE -----------------------------------------------------------------
+  git_sticker_ie_dir <- file.path(git_dir, "02_analysis", "sticker_ie")
+  
+  source(file.path(git_sticker_ie_dir, "01_balance_table.R"))
+  source(file.path(git_sticker_ie_dir, "02_impact_binary_indicator.R"))
+  source(file.path(git_sticker_ie_dir, "03_time_coefs_all_vars.R"))
+  #source(file.path(git_sticker_ie_dir, "04_twfe_iv_change_date.R"))
+  #source(file.path(git_sticker_ie_dir, "04_twfe_iv_rand_date.R"))
   
 }
