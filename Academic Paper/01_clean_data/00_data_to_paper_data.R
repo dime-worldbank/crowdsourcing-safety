@@ -40,6 +40,10 @@ fb_df <- fb_df %>%
 ## Manual comment fix
 fb_df$comment_driver_sntmt_relev[fb_df$uid == 35026] <- 0
 
+## Remove feedback where regno is unknown
+fb_df <- fb_df %>%
+  dplyr::filter(regno != "UNKNOWN")
+
 saveRDS(fb_df,       file.path(data_dir, "RawData", "passenger_feedback.Rds"))
 write_parquet(fb_df, file.path(data_dir, "RawData", "passenger_feedback.parquet"))
 write_csv(fb_df,     file.path(data_dir, "RawData", "passenger_feedback.csv"))

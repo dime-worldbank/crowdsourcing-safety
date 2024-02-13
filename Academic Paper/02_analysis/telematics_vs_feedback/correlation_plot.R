@@ -28,7 +28,7 @@ veh_df <- veh_df %>%
     # rate_N_valueg_above1_0_brake_base_10kph,
     # rate_N_valueg_above1_0_turn_base_10kph,
     
-    q_safety_prop_unsafe,
+    q_safety_prop_safe,
     q_safety_rating_num,
     q_speed_rating_v2_vfast,
     q_speed_rating_v2_num,
@@ -106,24 +106,24 @@ cor_df <- veh_df %>%
   arrange(telematics_var_type, telematics_sort, telematics_var) %>%
   dplyr::mutate(telematics_sort = 1:n()) %>%
   dplyr::mutate(feedback_var_clean = case_when(
-    feedback_var == "q_safety_rating_num" ~ "Safe\nRating",
-    feedback_var == "q_speed_rating_v2_num" ~ "Speed\nRating",
+    feedback_var == "q_safety_rating_num" ~ "Average Safe\nRating",
+    feedback_var == "q_speed_rating_v2_num" ~ "Average Speed\nRating",
     feedback_var == "sentiment_snmtr" ~ "Comment\nPolarity",
     feedback_var == "comment_driver_sntmt_code_compl" ~ "Positive Comment\n[Manual Code]",
     feedback_var == "comment_driver_sntmt_code_neg" ~ "Negative Comment\n[Manual Code]",
-    feedback_var == "comment_driver_sntmt_code_compl_prop_complneg" ~ "Driving Sentiment\n[Manual Code]",
+    feedback_var == "comment_driver_sntmt_code_compl_prop_complneg" ~ "Sentiment of\nCurrent Trip Driving\n[Manual Code]",
     feedback_var == "q_safety_prop_unsafe" ~ "Percent\nRate Unsafe",
+    feedback_var == "q_safety_prop_safe" ~ "Percent\nRate Safe",
     feedback_var == "q_speed_rating_v2_vfast" ~ "Percent Rate\nVery Fast",
     TRUE ~ feedback_var
   )) %>%
   dplyr::mutate(feedback_sort = case_when(
-    feedback_var == "sentiment_snmtr" ~ 1,
-    feedback_var == "comment_driver_sntmt_code_compl" ~ 2,
-    feedback_var == "comment_driver_sntmt_code_neg" ~ 3,
-    feedback_var == "q_safety_rating_num" ~ 4,
-    feedback_var == "q_safety_prop_unsafe" ~ 5,
-    feedback_var == "q_speed_rating_v2_num" ~ 6,
-    feedback_var == "q_speed_rating_v2_vfast" ~ 7,
+    feedback_var == "q_safety_rating_num" ~ 1,
+    feedback_var == "q_safety_prop_safe" ~ 2,
+    feedback_var == "q_speed_rating_v2_num" ~ 3,
+    feedback_var == "q_speed_rating_v2_vfast" ~ 4,
+    feedback_var == "sentiment_snmtr" ~ 5,
+    feedback_var == "comment_driver_sntmt_code_compl_prop_complneg" ~ 6,
     TRUE ~ 0
   )) %>%
   mutate(label = paste0(round(cor_coef, 2), "", stars))
@@ -153,7 +153,7 @@ cor_df %>%
         axis.title.y = element_text(angle = 0, vjust = 0.5))
 
 ggsave(filename = file.path(figures_dir, "telematics_feedback_cor.png"),
-       height = 6, width = 12)
+       height = 6, width = 11)
 
 
 

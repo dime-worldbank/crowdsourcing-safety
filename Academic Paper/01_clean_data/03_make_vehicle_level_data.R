@@ -40,6 +40,7 @@ fb_df <- fb_df %>%
 fb_sum_df <- fb_df %>%
   dplyr::filter(regno != "UNKNOWN") %>%
   dplyr::mutate(q_safety_prop_unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe"),
+                q_safety_prop_safe   = (q_safety_rating == "Safe") | (q_safety_rating == "Very safe"),
                 q_speed_rating_v1_fast = (q_speed_rating_v1 == "Fast") | (q_speed_rating_v1 == "Dangerously fast"),
                 q_speed_rating_v1_dfast = (q_speed_rating_v1 == "Dangerously fast"),
                 q_speed_rating_v2_vfast = q_speed_rating_v2 == "Very fast [80+]") %>%
@@ -69,6 +70,7 @@ fb_sum_df <- fb_df %>%
                             q_speed_rating_v1_num,
                             q_speed_rating_v2_num,
                             q_occupancy_num,
+                            q_safety_prop_safe,
                             q_safety_prop_unsafe,
                             q_speed_rating_v1_fast,
                             q_speed_rating_v1_dfast,

@@ -20,6 +20,22 @@ fb_df <- fb_df %>%
                       "0.33 to 0.67",
                       "0.67 to 1")))
 
+fb_df <- fb_df %>%
+  mutate(comment_driver_sntmt_code_str = comment_driver_sntmt_code_str %>%
+           as.character()) %>%
+  mutate(comment_driver_sntmt_code_str = case_when(
+    comment_driver_sntmt_code_str %in% c("Neutral", "Unclear") ~ "Neutral or not relevant",
+    TRUE ~ comment_driver_sntmt_code_str
+  )) %>%
+  mutate(comment_driver_sntmt_code_str = case_when(
+    comment_driver_sntmt_relev %in% 0 ~ "Neutral or not relevant",
+    TRUE ~ comment_driver_sntmt_code_str
+  )) %>%
+  mutate(comment_driver_sntmt_code_str = comment_driver_sntmt_code_str %>%
+           factor(levels = c("Positive",
+                             "Negative",
+                             "Neutral or not relevant")))
+
 # Make table -------------------------------------------------------------------
 sum_var <- function(var, fb_df){
   fb_df$var <- fb_df[[var]]

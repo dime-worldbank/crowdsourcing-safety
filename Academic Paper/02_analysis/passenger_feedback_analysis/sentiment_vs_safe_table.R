@@ -4,6 +4,12 @@
 fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
 
 # Table ------------------------------------------------------------------------
+fb_df <- fb_df %>%
+  dplyr::filter(comment_driver_sntmt_code_str %in% c("Positive", "Negative")) %>%
+  mutate(comment_driver_sntmt_code_str = comment_driver_sntmt_code_str %>%
+           as.character() %>%
+           factor(levels = c("Positive", "Negative")))
+
 #### Prep data
 table(fb_df$comment_driver_sntmt_code_str, fb_df$q_safety_rating) 
 
@@ -11,7 +17,7 @@ cross_tab_df <- table(fb_df$comment_driver_sntmt_code_str, fb_df$q_safety_rating
   as.matrix.data.frame() %>% 
   as.data.frame()
 
-cross_tab_df$comment_var <- c("Positive", "Negative", "Neutral", "Unclear")
+cross_tab_df$comment_var <- c("Positive", "Negative")
 
 for(i in 1:4){
   cross_tab_df[[paste0("V",i,"_p")]] <- 
