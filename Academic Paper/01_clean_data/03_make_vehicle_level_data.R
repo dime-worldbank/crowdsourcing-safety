@@ -43,7 +43,15 @@ fb_sum_df <- fb_df %>%
                 q_safety_prop_safe   = (q_safety_rating == "Safe") | (q_safety_rating == "Very safe"),
                 q_speed_rating_v1_fast = (q_speed_rating_v1 == "Fast") | (q_speed_rating_v1 == "Dangerously fast"),
                 q_speed_rating_v1_dfast = (q_speed_rating_v1 == "Dangerously fast"),
-                q_speed_rating_v2_vfast = q_speed_rating_v2 == "Very fast [80+]") %>%
+                q_speed_rating_v2_vfast = q_speed_rating_v2 == "Very fast [80+]",
+                
+                sentiment_snmtr_prop_un0_1 = as.numeric(sentiment_snmtr < -0.1),
+                
+                comment_driver_sntmt_code_avg = case_when(
+                  comment_driver_sntmt_code == 1 ~ 1,
+                  comment_driver_sntmt_code == 2 ~ -1
+                )) %>%
+  
   group_by(regno) %>%
   dplyr::summarise(n_feedback = n(),
                    n_feedback_1wk = sum(days_since_install <= 7*1),
@@ -61,7 +69,8 @@ fb_sum_df <- fb_df %>%
                    comment_driver_sntmt_code_compl_sum = sum_na(comment_driver_sntmt_code_compl),
                    comment_driver_sntmt_code_neg_sum = sum_na(comment_driver_sntmt_code_neg),
                    
-                   comment_driver_sntmt_code_compl_prop_complneg = comment_driver_sntmt_code_compl_sum / (comment_driver_sntmt_code_compl_sum + comment_driver_sntmt_code_neg_sum),
+                   comment_driver_sntmt_code_compl_prop_compl = comment_driver_sntmt_code_compl_sum / (comment_driver_sntmt_code_compl_sum + comment_driver_sntmt_code_neg_sum),
+                   comment_driver_sntmt_code_compl_prop_neg   = comment_driver_sntmt_code_neg_sum / (comment_driver_sntmt_code_compl_sum + comment_driver_sntmt_code_neg_sum),
                    
                    sentiment_snmtr_driving = mean(sentiment_snmtr[q_comment %>% tolower() %>% str_detect(DRIVING_WORDS)],na.rm = T),
                    
@@ -78,7 +87,9 @@ fb_sum_df <- fb_df %>%
                             sentiment_snmtr,
                             sentiment_snmtr_covid,
                             comment_driver_sntmt_code_compl,
-                            comment_driver_sntmt_code_neg), 
+                            comment_driver_sntmt_code_neg,
+                            sentiment_snmtr_prop_un0_1,
+                            comment_driver_sntmt_code_avg), 
                           mean,
                           na.rm=T)) %>%
   ungroup()
