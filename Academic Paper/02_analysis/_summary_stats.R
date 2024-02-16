@@ -3,8 +3,7 @@
 # Load data --------------------------------------------------------------------
 #### Passenger feedback
 fb_raw_df <- readRDS(file.path(data_dir, "RawData", "passenger_feedback.Rds"))
-fb_all_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean.Rds"))
-fb_df     <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
+fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid.Rds"))
 
 #### Vehicle level data
 veh_df        <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
@@ -16,7 +15,18 @@ veh_stc_tl_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_sticker
 nrow(fb_raw_df)
 
 ## Remove duplicates
-nrow(fb_raw_df)
+fb_raw_df %>%
+  distinct(phone_hash, regno, .keep_all = T) %>%
+  nrow()
+
+## Remove potential cheating
+nrow(fb_df)
+
+## Method
+fb_df$response_method %>% table()
+
+
+# ----> TODO, by response method ??
 
 ## Duplicate phone numbers
 dup_phone <- fb_raw_df %>%

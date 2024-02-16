@@ -3,7 +3,7 @@
 # Load data --------------------------------------------------------------------
 sensor_df   <- readRDS(file.path(data_dir, "RawData", "sensor_day.Rds"))
 st_insll_df <- readRDS(file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.Rds"))
-feedback_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
+feedback_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
 
 # Telematics consistency -------------------------------------------------------
 st_insll_df <- st_insll_df %>%

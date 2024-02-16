@@ -1,7 +1,7 @@
 # Feedback Comments
 
 # Load data --------------------------------------------------------------------
-fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
+fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
 
 fb_df <- fb_df %>%
   dplyr::filter(!is.na(sentiment_snmtr))

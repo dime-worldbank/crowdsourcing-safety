@@ -3,7 +3,7 @@
 set.seed(142)
 
 # Load data --------------------------------------------------------------------
-df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_valid.Rds"))
+df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid.Rds"))
 
 # Cleanup ----------------------------------------------------------------------
 df_sub <- df %>%
@@ -54,7 +54,7 @@ df <- df %>%
                       "Unclear")))
 
 # Export -----------------------------------------------------------------------
-saveRDS(df, file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
+saveRDS(df, file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
 
 
 

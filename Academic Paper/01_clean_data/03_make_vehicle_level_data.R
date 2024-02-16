@@ -14,7 +14,7 @@ sum_na <- function(x){
 sensor_df <- readRDS(file.path(data_dir, "RawData", "sensor_day.Rds"))
 
 #### Passenger Feedback
-fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_clean_class.Rds"))
+fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
 
 #### Vehicle information
 veh_data_df <- readRDS(file.path(data_dir, "RawData", "gps_vehicle_info.Rds"))

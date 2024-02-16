@@ -105,7 +105,7 @@ p_level <- ggarrange(p_safe, p_speed_1, p_speed_2, ncol = 1)
 # Percent plots ----------------------------------------------------------------
 veh_stack_df <- veh_df %>%
   dplyr::select(regno, 
-                q_safety_prop_unsafe, q_speed_rating_v1_fast, q_speed_rating_v1_dfast, q_speed_rating_v2_fast) %>%
+                q_safety_prop_unsafe, q_speed_rating_v1_fast, q_speed_rating_v1_dfast, q_speed_rating_v2_vfast) %>%
   pivot_longer(cols = -regno) %>%
   dplyr::filter(!is.na(value)) %>%
   dplyr::mutate(value = round(value * 50) / 50) %>%
@@ -127,7 +127,7 @@ p_prop_safe <- veh_stack_df %>%
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(labels = scales::percent_format(scale = 100),
-                     limits = c(-0.01, 0.3)) +
+                     limits = c(-0.01, 0.22)) +
   scale_y_continuous(limits = c(0, 21)) +
   labs(x = NULL,
        y = "N Vehicles",
@@ -147,7 +147,7 @@ p_prop_speed_v1 <- veh_stack_df %>%
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(labels = scales::percent_format(scale = 100),
-                     limits = c(-0.01, 0.3)) +
+                     limits = c(-0.01, 0.22)) +
   scale_y_continuous(limits = c(0, 21)) +
   labs(x = NULL,
        y = "N Vehicles",
@@ -155,7 +155,7 @@ p_prop_speed_v1 <- veh_stack_df %>%
   custom_theme
 
 p_prop_speed_v2 <- veh_stack_df %>%
-  dplyr::filter(name == "q_speed_rating_v2_fast") %>%
+  dplyr::filter(name == "q_speed_rating_v2_vfast") %>%
   ggplot() +
   geom_col(aes(x = value,
                y = n),
@@ -167,7 +167,7 @@ p_prop_speed_v2 <- veh_stack_df %>%
                 label = n),
             size = COL_TEXT_SIZE) +
   scale_x_continuous(labels = scales::percent_format(scale = 100),
-                     limits = c(-0.01, 0.3)) +
+                     limits = c(-0.01, 0.22)) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "F. Percent of passengers that rate driving as\n'Very fast [80 km/h +]'") +
