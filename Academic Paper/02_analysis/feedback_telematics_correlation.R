@@ -33,9 +33,10 @@ veh_df <- veh_df %>%
     q_speed_rating_v2_vfast,
     q_speed_rating_v2_num,
     sentiment_snmtr,
+    sentiment_snmtr_prop_un0_1,
     #comment_driver_sntmt_code_compl,
     #comment_driver_sntmt_code_neg,
-    comment_driver_sntmt_code_compl_prop_complneg
+    comment_driver_sntmt_code_avg
   ) #%>%
   #dplyr::mutate(across(where(is.numeric), ~Winsorize(., probs = c(0, 0.9), na.rm = T))) 
 
@@ -108,10 +109,11 @@ cor_df <- veh_df %>%
   dplyr::mutate(feedback_var_clean = case_when(
     feedback_var == "q_safety_rating_num" ~ "Average Safe\nRating",
     feedback_var == "q_speed_rating_v2_num" ~ "Average Speed\nRating",
-    feedback_var == "sentiment_snmtr" ~ "Comment\nPolarity",
+    feedback_var == "sentiment_snmtr" ~ "Comment Sentiment\nAverage",
+    feedback_var == "sentiment_snmtr_prop_un0_1" ~ "Comment Sentiment\n% Negative",
     feedback_var == "comment_driver_sntmt_code_compl" ~ "Positive Comment\n[Manual Code]",
     feedback_var == "comment_driver_sntmt_code_neg" ~ "Negative Comment\n[Manual Code]",
-    feedback_var == "comment_driver_sntmt_code_compl_prop_complneg" ~ "Sentiment of\nCurrent Trip Driving\n[Manual Code]",
+    feedback_var == "comment_driver_sntmt_code_avg" ~ "Sentiment of\nCurrent Trip Driving\n[Manual Code]",
     feedback_var == "q_safety_prop_unsafe" ~ "Percent\nRate Unsafe",
     feedback_var == "q_safety_prop_safe" ~ "Percent\nRate Safe",
     feedback_var == "q_speed_rating_v2_vfast" ~ "Percent Rate\nVery Fast",
@@ -123,7 +125,8 @@ cor_df <- veh_df %>%
     feedback_var == "q_speed_rating_v2_num" ~ 3,
     feedback_var == "q_speed_rating_v2_vfast" ~ 4,
     feedback_var == "sentiment_snmtr" ~ 5,
-    feedback_var == "comment_driver_sntmt_code_compl_prop_complneg" ~ 6,
+    feedback_var == "sentiment_snmtr_prop_un0_1" ~ 6,
+    feedback_var == "comment_driver_sntmt_code_avg" ~ 7,
     TRUE ~ 0
   )) %>%
   mutate(label = paste0(round(cor_coef, 2), "", stars))
@@ -153,7 +156,7 @@ cor_df %>%
         axis.title.y = element_text(angle = 0, vjust = 0.5))
 
 ggsave(filename = file.path(figures_dir, "telematics_feedback_cor.png"),
-       height = 6, width = 11)
+       height = 6, width = 13)
 
 
 

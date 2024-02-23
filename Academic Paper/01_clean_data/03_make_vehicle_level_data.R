@@ -152,7 +152,8 @@ award_info_df <- award_info_df %>%
 veh_df <- fb_sum_df %>%
   full_join(sensor_sum_df, by = "regno") %>%
   full_join(award_info_df, by = "regno") %>%
-  left_join(gps_survey_df, by = "regno")
+  left_join(gps_survey_df, by = "regno") %>%
+  left_join(veh_data_df, by = "regno")
 
 veh_df$n_feedback[is.na(veh_df$n_feedback) & !is.na(veh_df$award_type)] <- 0
 veh_df$n_feedback_1wk[is.na(veh_df$n_feedback_1wk) & !is.na(veh_df$award_type)] <- 0

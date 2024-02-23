@@ -96,7 +96,7 @@ nbo_sf <- nbo_sf[nbo_sf$NAME_1 %in% "Nairobi",]
 
 #### Grab speeds
 speed_df <- map_df(seq.Date(from = ymd("2022-06-01"),
-                            to = ymd("2022-06-07"),
+                            to = ymd("2022-06-14"),
                             by = 1), 
                    function(date_i){
                      file.path(data_dir, "Sensor Data", "RawData", "sensor_tracing_individual_data",

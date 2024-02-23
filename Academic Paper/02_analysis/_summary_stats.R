@@ -69,7 +69,13 @@ fb_all_df %>%
 
 #### Response method
 
+# Surveys: Identify vehicles vs cant -------------------------------------------
+fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
+fb_wunknown_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_wunknown.Rds"))
 
+nrow(fb_df)
+nrow(fb_wunknown_df)
+nrow(fb_wunknown_df) - nrow(fb_df)
 # N Vehicles -------------------------------------------------------------------
 ## Total vehicles
 nrow(veh_df)

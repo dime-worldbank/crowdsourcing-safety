@@ -2,9 +2,64 @@
 
 # TODO: Scramble regno, sacco, and other pii in sensible way
 
+set.seed(42)
+
+# Hide Regno Info --------------------------------------------------------------
+#### Load data
+sensor_df     <- readRDS(file.path(db_dir, "Data", "Sensor Data", "FinalData", "sensor_day.Rds"))
+fb_df         <- readRDS(file.path(db_dir, "Data", "Rider Feedback - All", "FinalData",
+                           "Rider Feedback - All",
+                           "rider_feedback.Rds"))
+comments_df   <- readRDS(file.path(db_dir, "Data", "Rider Feedback", "FinalData", "comments_coded_all.Rds"))
+veh_data_df   <- readRDS(file.path(db_dir, "Data", "Matatu Data", "FinalData", "vehicle_info.Rds"))
+st_insll_df   <- readRDS(file.path(db_dir, "Data", "Sticker Installation Survey", "FinalData", 
+                                 "sticker_install_survey.Rds"))
+award_info_df <- read_xlsx(file.path(db_dir, "Data", "Matatu Data - Pilot", "Sticker Information", "vehicles_with_stickers.xlsx"))
+gps_survey_df <- readRDS(file.path(db_dir, "Data", "Matatu Sensor Installation Survey", "FinalData", "psv_sensor_installation_clean.Rds"))
+
+#### Cleanup Reg No
+award_info_df <- award_info_df %>%
+  clean_names() %>%
+  dplyr::rename(regno = reg_no) %>%
+  dplyr::mutate(regno = regno %>%
+                  str_squish() %>%
+                  str_replace_all(" ", "") %>%
+                  toupper() %>%
+                  str_replace_all('^(.{3})(.*)$',
+                                  '\\1 \\2'))
+
+gps_survey_df <- gps_survey_df %>%
+  clean_names() %>%
+  dplyr::rename(regno = matatu_regno) %>%
+  dplyr::mutate(regno = regno %>%
+                  str_squish() %>%
+                  str_replace_all(" ", "") %>%
+                  toupper() %>%
+                  str_replace_all('^(.{3})(.*)$',
+                                  '\\1 \\2')) 
+
+#### Regno
+regno_df <- c(sensor_df$regno,
+           fb_df$regno,
+           veh_data_df$regno,
+           st_insll_df$regno,
+           award_info_df$regno, 
+           gps_survey_df$regno) %>%
+  unique() %>%
+  as.data.frame() %>%
+  dplyr::rename(regno = ".") %>%
+  arrange(regno) %>%
+  mutate(regno_num = sample(x = 100:999, size = n())) %>%
+  mutate(regno_num = paste0("Vehicle ID: ", regno_num))
+
 # Load data --------------------------------------------------------------------
 #### GPS Sensor Data: Daily
 sensor_df <- readRDS(file.path(db_dir, "Data", "Sensor Data", "FinalData", "sensor_day.Rds"))
+
+sensor_df <- sensor_df %>%
+  left_join(regno_df, by = "regno") %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_num)
 
 saveRDS(sensor_df,       file.path(data_dir, "RawData", "sensor_day.Rds"))
 write_parquet(sensor_df, file.path(data_dir, "RawData", "sensor_day.parquet"))
@@ -41,16 +96,36 @@ fb_df <- fb_df %>%
 fb_df$comment_driver_sntmt_relev[fb_df$uid == 35026] <- 0
 
 ## Remove feedback where regno is unknown
+fb_full_df <- fb_df %>%
+  mutate(regno_unknown = as.numeric(regno == "UNKNOWN"))
+
 fb_df <- fb_df %>%
   dplyr::filter(regno != "UNKNOWN")
+
+## Replace Regno
+fb_df <- fb_df %>%
+  left_join(regno_df, by = "regno") %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_num)
 
 saveRDS(fb_df,       file.path(data_dir, "RawData", "passenger_feedback.Rds"))
 write_parquet(fb_df, file.path(data_dir, "RawData", "passenger_feedback.parquet"))
 write_csv(fb_df,     file.path(data_dir, "RawData", "passenger_feedback.csv"))
 write_dta(fb_df,     file.path(data_dir, "RawData", "passenger_feedback.dta"))
 
+saveRDS(fb_full_df,       file.path(data_dir, "RawData", "passenger_feedback_wunknown.Rds"))
+write_parquet(fb_full_df, file.path(data_dir, "RawData", "passenger_feedback_wunknown.parquet"))
+write_csv(fb_full_df,     file.path(data_dir, "RawData", "passenger_feedback_wunknown.csv"))
+write_dta(fb_full_df,     file.path(data_dir, "RawData", "passenger_feedback_wunknown.dta"))
+
 #### Vehicle information
 veh_data_df <- readRDS(file.path(db_dir, "Data", "Matatu Data", "FinalData", "vehicle_info.Rds"))
+
+## Replace Regno
+veh_data_df <- veh_data_df %>%
+  left_join(regno_df, by = "regno") %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_num)
 
 saveRDS(veh_data_df,       file.path(data_dir, "RawData", "gps_vehicle_info.Rds"))
 write_parquet(veh_data_df, file.path(data_dir, "RawData", "gps_vehicle_info.parquet"))
@@ -62,6 +137,12 @@ write_dta(veh_data_df,     file.path(data_dir, "RawData", "gps_vehicle_info.dta"
 # (during pilot 5)
 st_insll_df <- readRDS(file.path(db_dir, "Data", "Sticker Installation Survey", "FinalData", 
                                  "sticker_install_survey.Rds"))
+
+## Replace Regno
+st_insll_df <- st_insll_df %>%
+  left_join(regno_df, by = "regno") %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_num)
 
 saveRDS(st_insll_df,       file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.Rds"))
 write_parquet(st_insll_df, file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.parquet"))
@@ -82,6 +163,12 @@ award_info_df <- award_info_df %>%
                   toupper() %>%
                   str_replace_all('^(.{3})(.*)$',
                                   '\\1 \\2'))
+
+## Replace Regno
+award_info_df <- award_info_df %>%
+  left_join(regno_df, by = "regno") %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_num)
 
 saveRDS(award_info_df,       file.path(data_dir, "RawData", "vehicle_award_info.Rds"))
 write_parquet(award_info_df, file.path(data_dir, "RawData", "vehicle_award_info.parquet"))
@@ -109,6 +196,12 @@ gps_survey_df <- gps_survey_df %>%
                                   '\\1 \\2')) %>%
   dplyr::mutate(driver_tenure = driver_tenure %>% as.numeric()) %>%
   rename_at(vars(-regno), ~ paste0('gpssrvy_', .))
+
+## Replace Regno
+gps_survey_df <- gps_survey_df %>%
+  left_join(regno_df, by = "regno") %>%
+  dplyr::select(-regno) %>%
+  dplyr::rename(regno = regno_num)
 
 saveRDS(gps_survey_df,       file.path(data_dir, "RawData", "gps_install_survey.Rds"))
 write_parquet(gps_survey_df, file.path(data_dir, "RawData", "gps_install_survey.parquet"))
