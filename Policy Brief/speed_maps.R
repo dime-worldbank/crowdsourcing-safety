@@ -4,6 +4,21 @@ library(geodata)
 library(h3jsr)
 library(h3)
 
+get_parent_chunks <- function(vec,res,chunk_size){
+  starts <- seq(from=1,to=length(vec),by=chunk_size)
+  
+  get_parent_i <- function(start, vec, res,chunk_size){
+    end <- min(start + chunk_size - 1, length(vec))
+    out_i <- get_parent(vec[start:end],res=res)
+    print(paste0(start / length(vec)))
+    return(out_i)
+  }
+  
+  out_all <- map(starts, get_parent_i, vec, res, chunk_size) %>% unlist()
+  
+  return(out_all)
+}
+
 # Load data --------------------------------------------------------------------
 veh_df    <- readRDS(file.path(ap_data_dir, "FinalData", "vehicle_level_all202.Rds"))
 sensor_df <- readRDS(file.path(ap_data_dir, "RawData", "sensor_day.Rds"))
@@ -15,7 +30,7 @@ nbo_sf <- gadm(country = "KEN", level=1, path = tempdir()) |> st_as_sf()
 nbo_sf <- nbo_sf[nbo_sf$NAME_1 %in% "Nairobi",]
 
 #### Grab speeds
-if(F){
+if(T){
   speed_sf <- map_df(seq.Date(from = ymd("2022-01-01"),
                               to = ymd("2022-12-31"),
                               by = 1),
@@ -46,7 +61,8 @@ if(F){
                          group_by(h3) %>%
                          dplyr::summarise(speed = mean(speed),
                                           longitude = median(X),
-                                          latitude = median(Y)) %>%
+                                          latitude = median(Y),
+                                          n_obs = n()) %>%
                          ungroup() %>%
                          dplyr::mutate(id = 1:n())
                        
@@ -56,34 +72,39 @@ if(F){
                        
                      })
   
+  speed_sf$h3_large <- get_parent_chunks(speed_sf$h3, res = 8, chunk_size = 120000) 
   saveRDS(speed_sf, file.path(dropbox_dir, "Policy Brief", "temp_data", "speeds_h3.Rds"))
 } else{
   speed_sf <- readRDS(file.path(dropbox_dir, "Policy Brief", "temp_data", "speeds_h3.Rds"))
 }
-
-speed_sf$h3_large <- get_parent(speed_sf$h3, res = 8)
 
 # Kenya ------------------------------------------------------------------------
 speed_h3_df <- speed_sf %>%
   group_by(h3_large) %>%
   dplyr::summarise(speed = mean(speed), 
                    latitude = median(latitude), 
-                   longitude = median(longitude)) %>%
+                   longitude = median(longitude),
+                   n_obs = sum(n_obs)) %>%
   ungroup() %>%
   dplyr::rename(id = h3_large)
+
+speed_h3_df <- speed_h3_df %>%
+  dplyr::filter(n_obs >= 10)
+
+## Remove if few observations
 
 speed_h3_sf <- st_as_sf(speed_h3_df, coords = c("longitude", "latitude"),
                         crs = 4326) %>%
   st_intersection(roi_sf) 
 speed_h3_df <- speed_h3_df[speed_h3_df$id %in% speed_h3_sf$id,]
 
-
 # Nairobi ----------------------------------------------------------------------
 speed_h3_nbo_df <- speed_sf %>%
   group_by(h3) %>%
   dplyr::summarise(speed = mean(speed), 
                    latitude = median(latitude), 
-                   longitude = median(longitude)) %>%
+                   longitude = median(longitude),
+                   n_obs = sum(n_obs)) %>%
   ungroup() %>%
   dplyr::rename(id = h3)
 
@@ -95,7 +116,7 @@ speed_h3_nbo_df <- speed_h3_nbo_df[speed_h3_nbo_df$id %in% speed_h3_nbo_sf$id,]
 # Map --------------------------------------------------------------------------
 #### Speed limit
 speed_h3_df$speed_adj <- speed_h3_df$speed
-speed_h3_df$speed_adj[speed_h3_df$speed_adj >= 150] <- 150
+speed_h3_df$speed_adj[speed_h3_df$speed_adj >= 120] <- 120
 
 cities_df <- bind_rows(
   data.frame(name = "Nairobi", lat = -1.286389, lon = 36.817222),
@@ -108,10 +129,10 @@ cities_df <- bind_rows(
   data.frame(name = "Narok", lat = -1.083333, lon = 35.866667)
 )
 
-source("https://raw.githubusercontent.com/ramarty/fast-functions/master/R/functions_in_chunks.R")
+#source("https://raw.githubusercontent.com/ramarty/fast-functions/master/R/functions_in_chunks.R")
 speed_h3_sf <- h3_to_geo_boundary_sf(speed_h3_df$id)
 speed_h3_sf <- bind_cols(speed_h3_sf, speed_h3_df)
-speed_h3_buff_sf <- st_buffer_chunks(speed_h3_sf, dist = 150, chunk_size = 100)
+#speed_h3_buff_sf <- st_buffer_chunks(speed_h3_sf, dist = 150, chunk_size = 100)
 
 #### Map, Kenya
 p <- ggplot() +
@@ -130,54 +151,54 @@ p <- ggplot() +
   # geom_point(aes(x = longitude, y = latitude,
   #                color = speed_adj),
   #            size = 0.3) +
-  geom_point(data = cities_df,
-             aes(x = lon,
-                 y = lat),
-             size = 0.5) +
-  geom_text(data = cities_df,
-            aes(x = lon,
-                y = lat,
-                label = name),
-            size = 3,
-            color = c("white","white","white","white","black","white","black","white"),
-            nudge_x = c(-0.4, 0,    0.6,  0.4, 0.65,-0.35,-0.3,-0.3),
-            nudge_y = c(-0.2, 0.2, 0,    0,   0,   0.15,-0.15,-0.12)) +
+  # geom_point(data = cities_df,
+  #            aes(x = lon,
+  #                y = lat),
+  #            size = 0.5) +
+  # geom_text(data = cities_df,
+  #           aes(x = lon,
+  #               y = lat,
+  #               label = name),
+  #           size = 3,
+  #           color = c("white","white","white","white","black","white","black","white"),
+  #           nudge_x = c(-0.4, 0,    0.6,  0.4, 0.65,-0.35,-0.3,-0.3),
+  #           nudge_y = c(-0.2, 0.2, 0,    0,   0,   0.15,-0.15,-0.12)) +
   scale_color_distiller(palette = "Spectral",
-                        limits = c(0, 150),
-                        breaks = c(0, 30, 60, 90, 120, 150),
-                        labels = c("0", "30", "60", "90", "120", ">150")) +
+                        limits = c(0, 120),
+                        breaks = c(0, 30, 60, 90, 120),
+                        labels = c("0", "30", "60", "90", ">120")) +
   scale_fill_distiller(palette = "Spectral",
-                        limits = c(0, 150),
-                        breaks = c(0, 30, 60, 90, 120, 150),
-                        labels = c("0", "30", "60", "90", "120", ">150")) +
+                        limits = c(0, 120),
+                        breaks = c(0, 30, 60, 90, 120),
+                        labels = c("0", "30", "60", "90", ">120")) +
   labs(color = "Speed\n(km/h)",
        fill = "Speed\n(km/h)") + 
   theme_void()
 
 ggsave(p,
        filename = file.path(brief_figures_dir, "speed_map.png"),
-       height = 5, width = 5)
+       height = 5, width = 5, dpi = 1000)
 
 # Map Nairobi ------------------------------------------------------------------
 
-#### Speed limit
-speed_h3_nbo_sf$speed_adj <- speed_h3_nbo_sf$speed
-speed_h3_nbo_sf$speed_adj[speed_h3_nbo_sf$speed_adj >= 150] <- 150
-
-source("https://raw.githubusercontent.com/ramarty/fast-functions/master/R/functions_in_chunks.R")
+#source("https://raw.githubusercontent.com/ramarty/fast-functions/master/R/functions_in_chunks.R")
 speed_h3_nbo_sf <- h3_to_geo_boundary_sf(speed_h3_nbo_df$id)
 speed_h3_nbo_sf <- bind_cols(speed_h3_nbo_sf, speed_h3_nbo_df)
-speed_h3_nbo_buff_sf <- st_buffer_chunks(speed_h3_nbo_sf, dist = 20, chunk_size = 100)
+#speed_h3_nbo_buff_sf <- st_buffer_chunks(speed_h3_nbo_sf, dist = 20, chunk_size = 100)
+
+#### Speed limit
+speed_h3_nbo_sf$speed_adj <- speed_h3_nbo_sf$speed
+speed_h3_nbo_sf$speed_adj[speed_h3_nbo_sf$speed_adj >= 120] <- 120
 
 #### Map, Kenya
 p <- ggplot() +
   geom_sf(data = nbo_sf,
           color = "black",
           fill = "gray30") +
-  geom_sf(data = speed_h3_nbo_buff_sf,
-          fill = "black",
-          color = "black") +
-  geom_sf(data = speed_h3_nbo_sf,
+  # geom_sf(data = speed_h3_nbo_buff_sf,
+  #         fill = "black",
+  #         color = "black") +
+  geom_sf(data = speed_h3_nbo_sf[speed_h3_nbo_sf$n_obs >= 5,],
           aes(fill = speed_adj,
               color = speed_adj)) +
   # geom_point(aes(x = longitude, y = latitude),
@@ -187,13 +208,13 @@ p <- ggplot() +
   #                color = speed_adj),
   #            size = 0.3) +
   scale_color_distiller(palette = "Spectral",
-                        limits = c(0, 150),
-                        breaks = c(0, 30, 60, 90, 120, 150),
-                        labels = c("0", "30", "60", "90", "120", ">150")) +
+                        limits = c(0, 120),
+                        breaks = c(0, 30, 60, 90, 120),
+                        labels = c("0", "30", "60", "90", ">120")) +
   scale_fill_distiller(palette = "Spectral",
-                       limits = c(0, 150),
-                       breaks = c(0, 30, 60, 90, 120, 150),
-                       labels = c("0", "30", "60", "90", "120", ">150")) +
+                       limits = c(0, 120),
+                       breaks = c(0, 30, 60, 90, 120),
+                       labels = c("0", "30", "60", "90", ">120")) +
   labs(color = "Speed\n(km/h)",
        fill = "Speed\n(km/h)") + 
   theme_void()

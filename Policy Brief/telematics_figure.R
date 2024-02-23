@@ -60,14 +60,14 @@ sensor_week_df <- sensor_df %>%
                 n_weeks = sum(!is.na(speed_rank))) %>%
   ungroup() %>%
   
-  dplyr::filter(n_weeks >= 24,
+  dplyr::filter(n_weeks >= 35,
                 harsh_rank != Inf) %>%
   
   mutate(speed_rank = speed_rank %>% as.factor() %>% as.numeric(),
          harsh_rank = harsh_rank %>% as.factor() %>% as.numeric())
 
 p_speed <- sensor_week_df %>%
-  dplyr::filter( (speed_rank >= 146) | (speed_rank <= 4)) %>%
+  dplyr::filter( (speed_rank >= 142) ) %>% # (speed_rank >= 146) | (speed_rank <= 4)
   dplyr::mutate(regno = reorder(regno, -speed_rank)) %>%
   ggplot() +
   geom_col(aes(x = date_week,
@@ -75,7 +75,7 @@ p_speed <- sensor_week_df %>%
            fill = "firebrick4") +
   labs(x = NULL,
        y = "Percent",
-       title = "B. Percent of time driving over 100 km/h, vehicles with highest and lowest proportions") +
+       title = "B. Percent of time driving over 100 km/h, vehicles with highest proportions") +
   scale_y_continuous(limits = c(0, 0.65), labels = scales::percent) +
   scale_x_date(date_breaks = "6 months", date_labels = "%b") + 
   theme_classic2() +
@@ -90,7 +90,7 @@ p_speed <- sensor_week_df %>%
              nrow = 1) 
 
 p_harsh <- sensor_week_df %>%
-  dplyr::filter( (harsh_rank >= 146) | (harsh_rank <= 4)) %>%
+  dplyr::filter( (harsh_rank >= 142) ) %>% # (harsh_rank >= 146) | (harsh_rank <= 4)
   dplyr::mutate(regno = reorder(regno, -harsh_rank)) %>%
   ggplot() +
   geom_col(aes(x = date_week,
@@ -98,7 +98,7 @@ p_harsh <- sensor_week_df %>%
            fill = "firebrick4") +
   labs(x = NULL,
        y = "Rate",
-       title = "C. Number of harsh violation events per hour, vehicles with highest and lowest rates") +
+       title = "C. Number of harsh violation events per hour, vehicles with highest rates") +
   scale_y_continuous(limits = c(0, 0.21)) +
   scale_x_date(date_breaks = "6 months", date_labels = "%b") + 
   theme_classic2() +
@@ -113,10 +113,14 @@ p_harsh <- sensor_week_df %>%
              nrow = 1) 
 
 # Correlation ------------------------------------------------------------------
-
 veh_cor_df <- veh_df %>%
   dplyr::mutate(prop_time_over_100kph_base_10kph = Winsorize(prop_time_over_100kph_base_10kph, probs = c(0, 0.99), na.rm = T),
+                prop_time_over_90kph_base_10kph = Winsorize(prop_time_over_90kph_base_10kph, probs = c(0, 0.99), na.rm = T),
                 prop_time_over_80kph_base_10kph = Winsorize(prop_time_over_80kph_base_10kph, probs = c(0, 0.99), na.rm = T),
+                
+                prop_time_over_100kph_base_80kph = Winsorize(prop_time_over_100kph_base_80kph, probs = c(0, 0.99), na.rm = T),
+                prop_time_over_90kph_base_80kph = Winsorize(prop_time_over_90kph_base_80kph, probs = c(0, 0.99), na.rm = T),
+                
                 rate_N_valueg_above0_5_base_10kph = Winsorize(rate_N_valueg_above0_5_base_10kph, probs = c(0, 0.99), na.rm = T),
                 rate_N_valueg_above0_5_acceleration_base_10kph = Winsorize(rate_N_valueg_above0_5_acceleration_base_10kph, probs = c(0, 0.99), na.rm = T),
                 rate_N_valueg_above0_5_brake_base_10kph = Winsorize(rate_N_valueg_above0_5_brake_base_10kph, probs = c(0, 0.99), na.rm = T),
@@ -126,30 +130,54 @@ cor_theme <- theme(plot.title = element_text(face = "bold", size = 10),
                    axis.title = element_text(size = 10))
 
 p_cor_1 <- veh_cor_df %>%
-   ggplot(aes(x = prop_time_over_80kph_base_10kph,
-             y = rate_N_valueg_above0_5_turn_base_10kph)) +
+  ggplot(aes(x = prop_time_over_80kph_base_10kph,
+             y = rate_N_valueg_above0_5_base_10kph)) +
   geom_point() +
   geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
-  stat_cor(method = "pearson", label.x = 0.4, color = "black") +
+  stat_cor(method = "pearson", label.x = 0.2, color = "black") +
   theme_classic2() +
   cor_theme +
   labs(x = "Proportion of time travel over 80 km/h",
        y = "Harsh violations, N per hour",
-       title = "D. Speeding vs harsh violations")
+       title = "D. Speeding over 80 km/h vs\nharsh violations")
 
 p_cor_2 <- veh_cor_df %>%
+  ggplot(aes(x = prop_time_over_90kph_base_10kph,
+             y = rate_N_valueg_above0_5_base_10kph)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
+  stat_cor(method = "pearson", label.x = 0.1, color = "black") +
+  theme_classic2() +
+  cor_theme +
+  labs(x = "Proportion of time travel over 90 km/h",
+       y = "Harsh violations, N per hour",
+       title = "E. Speeding over 90 km/h vs\nharsh violations")
+
+p_cor_3 <- veh_cor_df %>%
+   ggplot(aes(x = prop_time_over_100kph_base_10kph,
+              y = rate_N_valueg_above0_5_base_10kph)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
+  stat_cor(method = "pearson", label.x = 0.1, color = "black") +
+  theme_classic2() +
+  cor_theme +
+  labs(x = "Proportion of time travel over 100 km/h",
+       y = "Harsh violations, N per hour",
+       title = "F. Speeding over 100 km/h vs\nharsh violations")
+
+p_cor_4 <- veh_cor_df %>%
   ggplot(aes(x = rate_N_valueg_above0_5_acceleration_base_10kph,
              y = rate_N_valueg_above0_5_brake_base_10kph)) +
   geom_point() +
   geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
-  stat_cor(method = "pearson", label.x = 0, color = "black") +
+  stat_cor(method = "pearson", label.y = 0.75, color = "black") +
   theme_classic2() +
   cor_theme +
   labs(x = "Harsh acceleration, N per hour",
        y = "Harsh braking, N per hour",
-       title = "E. Harsh acceleration vs harsh braking")
+       title = "G. Harsh acceleration vs\nharsh braking")
 
-p_cor_3 <- veh_cor_df %>%
+p_cor_5 <- veh_cor_df %>%
   ggplot(aes(x = rate_N_valueg_above0_5_acceleration_base_10kph,
              y = rate_N_valueg_above0_5_turn_base_10kph)) +
   geom_point() +
@@ -159,9 +187,9 @@ p_cor_3 <- veh_cor_df %>%
   cor_theme +
   labs(x = "Harsh acceleration, N per hour",
        y = "Harsh turning, N per hour",
-       title = "F. Harsh acceleration vs harsh turning")
+       title = "H. Harsh acceleration vs\nharsh turning")
 
-p_cor_4 <- veh_cor_df %>%
+p_cor_6 <- veh_cor_df %>%
   ggplot(aes(x = rate_N_valueg_above0_5_brake_base_10kph,
              y = rate_N_valueg_above0_5_turn_base_10kph)) +
   geom_point() +
@@ -171,11 +199,11 @@ p_cor_4 <- veh_cor_df %>%
   cor_theme +
   labs(x = "Harsh braking, N per hour",
        y = "Harsh turning, N per hour",
-       title = "G. Harsh braking vs harsh turning")
+       title = "I. Harsh braking vs\nharsh turning")
 
 # Arrange/export ---------------------------------------------------------------
-p_cor_12 <- ggarrange(p_cor_1, p_cor_2, nrow = 1)
-p_cor_34 <- ggarrange(p_cor_3, p_cor_4, nrow = 1)
+p_cor_12 <- ggarrange(p_cor_1, p_cor_2, p_cor_3, nrow = 1)
+p_cor_34 <- ggarrange(p_cor_4, p_cor_5, p_cor_6, nrow = 1)
 
 p <- ggarrange(p_dist,
                p_speed,
@@ -185,5 +213,5 @@ p <- ggarrange(p_dist,
                ncol = 1)
 
 ggsave(p, filename = file.path(brief_figures_dir, "telematics_info.png"),
-       height = 11, width = 8)
+       height = 11, width = 8.5)
 
