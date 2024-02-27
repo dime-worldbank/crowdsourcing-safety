@@ -12,34 +12,45 @@ p_dist <- veh_df %>%
   dplyr::select(regno,
                 prop_time_over_80kph_base_10kph,
                 prop_time_over_100kph_base_10kph,
-                prop_time_over_120kph_base_10kph,
+                prop_time_over_90kph_base_80kph,
+                prop_time_over_100kph_base_80kph,
                 rate_N_valueg_above0_5_base_10kph) %>%
   pivot_longer(cols = -regno) %>%
   mutate(name_clean = case_when(
-    name == "prop_time_over_80kph_base_10kph" ~ "Proportion of time\ntraveling over 80 km/h",
-    name == "prop_time_over_100kph_base_10kph" ~ "Proportion of time\ntraveling over 100 km/h",
-    name == "prop_time_over_120kph_base_10kph" ~ "Proportion of time\ntraveling over 120 km/h",
+    name == "prop_time_over_80kph_base_10kph" ~ "Proportion of time\ntraveling over\n80 km/h",
+    name == "prop_time_over_100kph_base_10kph" ~ "Proportion of time\ntraveling over\n100 km/h",
+    #name == "prop_time_over_120kph_base_10kph" ~ "Proportion of time\ntraveling over 120 km/h",
+    name == "prop_time_over_90kph_base_80kph" ~ "Proportion of time\ntraveling over\n90 km/h relative to\ntime over 80 km/h",
+    name == "prop_time_over_100kph_base_80kph" ~ "Proportion of time\ntraveling over\n100 km/h relative to\ntime over 80 km/h",
     name == "rate_N_valueg_above0_5_base_10kph" ~ "N harsh driving\nviolations per hour"
   ) %>%
-    factor(levels = c("Proportion of time\ntraveling over 80 km/h",
-                      "Proportion of time\ntraveling over 100 km/h",
-                      "Proportion of time\ntraveling over 120 km/h",
+    factor(levels = c("Proportion of time\ntraveling over\n80 km/h",
+                      "Proportion of time\ntraveling over\n100 km/h",
+                     # "Proportion of time\ntraveling over\n120 km/h",
+                      "Proportion of time\ntraveling over\n90 km/h relative to\ntime over 80 km/h",
+                      "Proportion of time\ntraveling over\n100 km/h relative to\ntime over 80 km/h",
                       "N harsh driving\nviolations per hour"))) %>%
   
   ggplot() +
-  geom_histogram(aes(x = value),
-                 color = "black",
-                 fill = "darkorange") +
+  geom_histogram(aes(x = value,
+                     fill = name_clean),
+                 color = "black") +
   facet_wrap(~name_clean,
              scales = "free",
              nrow = 1) +
   labs(x = NULL,
        y = "N Vehicles",
        title = "A. Distribution of select telematics indicators") +
+  scale_fill_manual(values = c("darkorange",
+                                "darkorange",
+                                "gold1",
+                                "gold1",
+                                "coral1")) +
   theme_classic2() +
   theme(strip.background = element_blank(),
         strip.text = element_text(face = "bold"),
-        plot.title = element_text(face = "bold", size = 10))
+        plot.title = element_text(face = "bold", size = 10),
+        legend.position = "none") 
 
 # Consistency ------------------------------------------------------------------
 sensor_week_df <- sensor_df %>%
@@ -141,31 +152,31 @@ p_cor_1 <- veh_cor_df %>%
        y = "Harsh violations, N per hour",
        title = "D. Speeding over 80 km/h vs\nharsh violations")
 
+# p_cor_2 <- veh_cor_df %>%
+#   ggplot(aes(x = prop_time_over_90kph_base_10kph,
+#              y = rate_N_valueg_above0_5_base_10kph)) +
+#   geom_point() +
+#   geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
+#   stat_cor(method = "pearson", label.x = 0.1, color = "black") +
+#   theme_classic2() +
+#   cor_theme +
+#   labs(x = "Proportion of time travel over 90 km/h",
+#        y = "Harsh violations, N per hour",
+#        title = "E. Speeding over 90 km/h vs\nharsh violations")
+# 
+# p_cor_3 <- veh_cor_df %>%
+#    ggplot(aes(x = prop_time_over_100kph_base_10kph,
+#               y = rate_N_valueg_above0_5_base_10kph)) +
+#   geom_point() +
+#   geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
+#   stat_cor(method = "pearson", label.x = 0.1, color = "black") +
+#   theme_classic2() +
+#   cor_theme +
+#   labs(x = "Proportion of time travel over 100 km/h",
+#        y = "Harsh violations, N per hour",
+#        title = "F. Speeding over 100 km/h vs\nharsh violations")
+
 p_cor_2 <- veh_cor_df %>%
-  ggplot(aes(x = prop_time_over_90kph_base_10kph,
-             y = rate_N_valueg_above0_5_base_10kph)) +
-  geom_point() +
-  geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
-  stat_cor(method = "pearson", label.x = 0.1, color = "black") +
-  theme_classic2() +
-  cor_theme +
-  labs(x = "Proportion of time travel over 90 km/h",
-       y = "Harsh violations, N per hour",
-       title = "E. Speeding over 90 km/h vs\nharsh violations")
-
-p_cor_3 <- veh_cor_df %>%
-   ggplot(aes(x = prop_time_over_100kph_base_10kph,
-              y = rate_N_valueg_above0_5_base_10kph)) +
-  geom_point() +
-  geom_smooth(method='lm', formula= y~x, se = F, color = "orange") +
-  stat_cor(method = "pearson", label.x = 0.1, color = "black") +
-  theme_classic2() +
-  cor_theme +
-  labs(x = "Proportion of time travel over 100 km/h",
-       y = "Harsh violations, N per hour",
-       title = "F. Speeding over 100 km/h vs\nharsh violations")
-
-p_cor_4 <- veh_cor_df %>%
   ggplot(aes(x = rate_N_valueg_above0_5_acceleration_base_10kph,
              y = rate_N_valueg_above0_5_brake_base_10kph)) +
   geom_point() +
@@ -175,9 +186,9 @@ p_cor_4 <- veh_cor_df %>%
   cor_theme +
   labs(x = "Harsh acceleration, N per hour",
        y = "Harsh braking, N per hour",
-       title = "G. Harsh acceleration vs\nharsh braking")
+       title = "E. Harsh acceleration vs\nharsh braking")
 
-p_cor_5 <- veh_cor_df %>%
+p_cor_3 <- veh_cor_df %>%
   ggplot(aes(x = rate_N_valueg_above0_5_acceleration_base_10kph,
              y = rate_N_valueg_above0_5_turn_base_10kph)) +
   geom_point() +
@@ -187,9 +198,9 @@ p_cor_5 <- veh_cor_df %>%
   cor_theme +
   labs(x = "Harsh acceleration, N per hour",
        y = "Harsh turning, N per hour",
-       title = "H. Harsh acceleration vs\nharsh turning")
+       title = "F. Harsh acceleration vs\nharsh turning")
 
-p_cor_6 <- veh_cor_df %>%
+p_cor_4 <- veh_cor_df %>%
   ggplot(aes(x = rate_N_valueg_above0_5_brake_base_10kph,
              y = rate_N_valueg_above0_5_turn_base_10kph)) +
   geom_point() +
@@ -199,11 +210,11 @@ p_cor_6 <- veh_cor_df %>%
   cor_theme +
   labs(x = "Harsh braking, N per hour",
        y = "Harsh turning, N per hour",
-       title = "I. Harsh braking vs\nharsh turning")
+       title = "G. Harsh braking vs\nharsh turning")
 
 # Arrange/export ---------------------------------------------------------------
-p_cor_12 <- ggarrange(p_cor_1, p_cor_2, p_cor_3, nrow = 1)
-p_cor_34 <- ggarrange(p_cor_4, p_cor_5, p_cor_6, nrow = 1)
+p_cor_12 <- ggarrange(p_cor_1, p_cor_2, nrow = 1)
+p_cor_34 <- ggarrange(p_cor_3, p_cor_4, nrow = 1)
 
 p <- ggarrange(p_dist,
                p_speed,
@@ -213,5 +224,5 @@ p <- ggarrange(p_dist,
                ncol = 1)
 
 ggsave(p, filename = file.path(brief_figures_dir, "telematics_info.png"),
-       height = 11, width = 8.5)
+       height = 11, width = 8.5) # 8.5
 

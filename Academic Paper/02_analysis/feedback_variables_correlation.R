@@ -10,7 +10,7 @@ cor_value <- function(x,y){
 
 # Load data --------------------------------------------------------------------
 veh_df <- readRDS(file.path(data_dir, "FinalData", 
-                            "vehicle_level_stickers_suff_feedback.Rds"))
+                            "vehicle_level_stickers_suff_feedback_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 
 # Prep data --------------------------------------------------------------------

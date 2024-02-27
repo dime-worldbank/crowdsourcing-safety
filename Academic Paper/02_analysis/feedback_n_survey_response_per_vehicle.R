@@ -1,6 +1,6 @@
 # N Responses per Vehicle
 
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 sum_df <- veh_df %>%
   dplyr::filter(!is.na(shortcode_on_sticker)) %>%

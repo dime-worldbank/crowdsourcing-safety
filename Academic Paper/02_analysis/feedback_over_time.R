@@ -1,7 +1,7 @@
 # N feedback over time
 
 # Load data --------------------------------------------------------------------
-fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
+fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 veh_df <- fb_df %>%
   group_by(regno) %>%

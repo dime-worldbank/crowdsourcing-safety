@@ -3,12 +3,12 @@
 # Load data --------------------------------------------------------------------
 #### Passenger feedback
 fb_raw_df <- readRDS(file.path(data_dir, "RawData", "passenger_feedback.Rds"))
-fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid.Rds"))
+fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 #### Vehicle level data
-veh_df        <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
-veh_stc_df    <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
-veh_stc_tl_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics.Rds"))
+veh_df        <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
+veh_stc_df    <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
+veh_stc_tl_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 # N Passenger Feedback ---------------------------------------------------------
 ## Raw
@@ -27,6 +27,7 @@ fb_df$response_method %>% table()
 
 
 # ----> TODO, by response method ??
+fb_df$response_method %>% table()
 
 ## Duplicate phone numbers
 dup_phone <- fb_raw_df %>%

@@ -2,70 +2,74 @@
 
 # Load data --------------------------------------------------------------------
 for(type in c("main", "wunknown")){
-  
-  if(type == "main"){
-    fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
+  for(comment_filter in c(TRUE, FALSE)){
+    for(distinct_pass in c(TRUE, FALSE)){
+      
+      fb_df <- readRDS(file.path(data_dir, "FinalData", 
+                                 paste0("passenger_feedback_valid_class_",
+                                        type,
+                                        "_cmntfilter",comment_filter,
+                                        "_dstnctpass",distinct_pass,".Rds")))
+      
+      # Table ------------------------------------------------------------------------
+      fb_df <- fb_df %>%
+        dplyr::filter(comment_driver_sntmt_code_str %in% c("Positive", "Negative")) %>%
+        mutate(comment_driver_sntmt_code_str = comment_driver_sntmt_code_str %>%
+                 as.character() %>%
+                 factor(levels = c("Positive", "Negative")))
+      
+      #### Prep data
+      table(fb_df$comment_driver_sntmt_code_str, fb_df$q_safety_rating) 
+      
+      cross_tab_df <- table(fb_df$comment_driver_sntmt_code_str, fb_df$q_safety_rating) %>%
+        as.matrix.data.frame() %>% 
+        as.data.frame()
+      
+      cross_tab_df$comment_var <- c("Positive", "Negative")
+      
+      for(i in 1:4){
+        cross_tab_df[[paste0("V",i,"_p")]] <- 
+          round(cross_tab_df[[paste0("V",i)]] / 
+                  sum(cross_tab_df[[paste0("V",i)]]) * 100) %>% 
+          paste0("\\%")
+      }
+      
+      cross_tab_df <- cross_tab_df %>%
+        dplyr::mutate(tex = paste0(comment_var, " & ", 
+                                   V1, " (", V1_p, ") & ",
+                                   V2, " (", V2_p, ") & ",
+                                   V3, " (", V3_p, ") & ",
+                                   V4, " (", V4_p, ") \\\\ \n "))
+      
+      #### Make table
+      file_name <- paste0("safety_comment_crosstab_",
+                          type,
+                          "_cmntfilter", comment_filter,
+                          "_dstnctpass", distinct_pass, ".tex")
+      
+      sink(file.path(tables_dir, file_name))
+      cat("\\begin{tabular}{l c|c|c|c|c} ")
+      cat("\\hline ")
+      
+      cat(" & ")
+      fb_df$q_safety_rating %>% 
+        unique() %>% 
+        sort() %>% 
+        paste(collapse = " & ") %>%
+        paste("\\\\ \n") %>%
+        cat()
+      cat("\\hline ")
+      
+      cross_tab_df$tex %>%
+        paste(collapse = " ") %>%
+        cat()
+      
+      cat("\\hline ")
+      cat("\\end{tabular}")
+      sink()
+      
+    }
   }
-  
-  if(type == "wunknown"){
-    fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_wunknown.Rds"))
-  }
-  
-  # Table ------------------------------------------------------------------------
-  fb_df <- fb_df %>%
-    dplyr::filter(comment_driver_sntmt_code_str %in% c("Positive", "Negative")) %>%
-    mutate(comment_driver_sntmt_code_str = comment_driver_sntmt_code_str %>%
-             as.character() %>%
-             factor(levels = c("Positive", "Negative")))
-  
-  #### Prep data
-  table(fb_df$comment_driver_sntmt_code_str, fb_df$q_safety_rating) 
-  
-  cross_tab_df <- table(fb_df$comment_driver_sntmt_code_str, fb_df$q_safety_rating) %>%
-    as.matrix.data.frame() %>% 
-    as.data.frame()
-  
-  cross_tab_df$comment_var <- c("Positive", "Negative")
-  
-  for(i in 1:4){
-    cross_tab_df[[paste0("V",i,"_p")]] <- 
-      round(cross_tab_df[[paste0("V",i)]] / 
-              sum(cross_tab_df[[paste0("V",i)]]) * 100) %>% 
-      paste0("\\%")
-  }
-  
-  cross_tab_df <- cross_tab_df %>%
-    dplyr::mutate(tex = paste0(comment_var, " & ", 
-                               V1, " (", V1_p, ") & ",
-                               V2, " (", V2_p, ") & ",
-                               V3, " (", V3_p, ") & ",
-                               V4, " (", V4_p, ") \\\\ \n "))
-  
-  #### Make table
-  if(type == "main")     file_name <- "safety_comment_crosstab.tex"
-  if(type == "wunknown") file_name <- "safety_comment_crosstab_wunknown.tex"
-  
-  sink(file.path(tables_dir, file_name))
-  cat("\\begin{tabular}{l c|c|c|c|c} ")
-  cat("\\hline ")
-  
-  cat(" & ")
-  fb_df$q_safety_rating %>% 
-    unique() %>% 
-    sort() %>% 
-    paste(collapse = " & ") %>%
-    paste("\\\\ \n") %>%
-    cat()
-  cat("\\hline ")
-  
-  cross_tab_df$tex %>%
-    paste(collapse = " ") %>%
-    cat()
-  
-  cat("\\hline ")
-  cat("\\end{tabular}")
-  sink()
-  
 }
 
 # Example comments -------------------------------------------------------------

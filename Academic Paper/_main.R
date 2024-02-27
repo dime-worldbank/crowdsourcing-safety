@@ -1,7 +1,7 @@
 # Crowdsourcing Safety Paper
 
-DELETE_OUTPUTS <- T
-RUN_CODE <- T
+DELETE_OUTPUTS <- F
+RUN_CODE <- F
 
 # Filepaths --------------------------------------------------------------------
 
@@ -53,6 +53,7 @@ library(tidyr)
 library(stringr)
 library(lubridate)
 library(ggplot2)
+library(gt)
 library(sf)
 library(readxl)
 library(janitor)
@@ -104,8 +105,12 @@ if(RUN_CODE){
   source(file.path(git_analysis_dir, "feedback_telematics_correlation.R"))
   source(file.path(git_analysis_dir, "feedback_top_pos_neg_words.R"))
   source(file.path(git_analysis_dir, "feedback_variables_correlation.R"))
+  source(file.path(git_analysis_dir, "feedback_versions_sample_sizes.R"))
   source(file.path(git_analysis_dir, "telematics_distribution.R"))
+  source(file.path(git_analysis_dir, "telematics_indicators_unsafe_feedback.R"))
   source(file.path(git_analysis_dir, "telematics_sum_stat.R"))
   source(file.path(git_analysis_dir, "telematics_variables_correlation.R"))
-  
 }
+
+
+

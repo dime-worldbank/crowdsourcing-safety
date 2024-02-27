@@ -68,11 +68,11 @@ p3 <- veh_df %>%
   theme_custom
 
 
-p <- ggarrange(p1, p2, p3, ncol = 1)
+p <- ggarrange(p1, p2, nrow = 1)
 
 ggsave(p,
        filename = file.path(brief_figures_dir, "speed80kph_vs_safety.png"),
-       height = 6, width = 4)
+       height = 2.5, width = 7)
 
 
 

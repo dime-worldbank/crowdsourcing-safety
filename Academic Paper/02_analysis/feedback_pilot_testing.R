@@ -1,7 +1,7 @@
 # Analyse Pilots
 
 # Load data --------------------------------------------------------------------
-veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 # Prep data --------------------------------------------------------------------
 # veh_clean_df <- veh_df %>%
