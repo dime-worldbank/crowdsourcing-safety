@@ -25,11 +25,19 @@ nrow(fb_df)
 ## Method
 fb_df$response_method %>% table()
 
+# N feedback per vehicle -------------------------------------------------------
+## All vehicles
+table(veh_stc_df$n_feedback == 0)
+veh_stc_df$n_feedback %>% summary()
 
-# ----> TODO, by response method ??
-fb_df$response_method %>% table()
+## Without QR codes
+veh_stc_noqr_df <- veh_stc_df %>%
+  dplyr::filter(shortcode_on_sticker == "yes")
 
-## Duplicate phone numbers
+table(veh_stc_noqr_df$n_feedback == 0)
+veh_stc_noqr_df$n_feedback %>% summary()
+
+# Duplicate phone numbers ------------------------------------------------------
 dup_phone <- fb_raw_df %>%
   group_by(phone_hash) %>%
   dplyr::summarise(n_responses = n()) %>%
@@ -51,13 +59,15 @@ dup_phone %>%
 ## Removing duplicates
 nrow(fb_all_df)
 
+# Unknown reg numbers ----------------------------------------------------------
 ## Known reg number
-fb_all_df %>%
+table(fb_raw_df$regno == "UNKNOWN")
+fb_raw_df %>%
   dplyr::filter(regno != "UNKNOWN") %>%
   nrow()
 
 ## Potential cheating
-fb_all_df %>%
+fb_raw_df %>%
   dplyr::filter(regno != "UNKNOWN") %>%
   pull(ptn_cheating) %>%
   table()
