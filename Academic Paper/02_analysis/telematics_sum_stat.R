@@ -4,12 +4,10 @@ for(veh_subset in c("all", "stickers")){
   
   # Load data --------------------------------------------------------------------
   veh_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
+  sensor_df <- readRDS(file.path(data_dir, "RawData", "sensor_day.Rds"))
   
   if(veh_subset == "stickers"){
-    
-    veh_df <- veh_df %>%
-      dplyr::filter(!is.na(shortcode_on_sticker))
-    
+    sensor_df <- sensor_df[sensor_df$regno %in% veh_df$regno,]
   }
   
   # Prep data --------------------------------------------------------------------
@@ -27,7 +25,7 @@ for(veh_subset in c("all", "stickers")){
       prop_time_over_100kph_base_80kph,
       prop_time_over_110kph_base_80kph,
       prop_time_over_120kph_base_80kph,
-
+      
       rate_N_valueg_above0_5_base_10kph,
       rate_N_valueg_above0_5_acceleration_base_10kph,
       rate_N_valueg_above0_5_brake_base_10kph,
@@ -55,27 +53,27 @@ for(veh_subset in c("all", "stickers")){
     ungroup() %>%
     dplyr::mutate(across(where(is.numeric), ~round(.,2))) %>%
     mutate(speed_viol = case_when(
-             name %>% str_detect("kph_base_10kph") ~ "speed_base10",
-             name %>% str_detect("kph_base_80kph") ~ "speed_base80",
-             TRUE ~ "violation"
-           ),
-           speed_name = name %>%
-             str_replace_all("prop_time_over_", "") %>%
-             str_replace_all("kph_base_10kph", " km/h") %>%
-             str_replace_all("kph_base_80kph", " km/h"),
-           viol_name = name %>%
-             str_replace_all("rate_N_valueg_above", "") %>%
-             str_replace_all("0_5_base", "0_5_Any Type") %>%
-             str_replace_all("1_0_base", "1_0_Any Type") %>%
-             str_replace_all("_base_10kph", "") %>%
-             str_replace_all("10kph", "") %>%
-             str_replace_all("0_5", "$>$0.5g") %>%
-             str_replace_all("1_0", "$>$1g") %>%
-             str_replace_all("_", " ") %>%
-             str_squish() %>%
-             str_replace_all("acceleration", "Forward") %>%
-             str_replace_all("brake", "Backward") %>%
-             str_replace_all("turn", "Lateral")
+      name %>% str_detect("kph_base_10kph") ~ "speed_base10",
+      name %>% str_detect("kph_base_80kph") ~ "speed_base80",
+      TRUE ~ "violation"
+    ),
+    speed_name = name %>%
+      str_replace_all("prop_time_over_", "") %>%
+      str_replace_all("kph_base_10kph", " km/h") %>%
+      str_replace_all("kph_base_80kph", " km/h"),
+    viol_name = name %>%
+      str_replace_all("rate_N_valueg_above", "") %>%
+      str_replace_all("0_5_base", "0_5_Any Type") %>%
+      str_replace_all("1_0_base", "1_0_Any Type") %>%
+      str_replace_all("_base_10kph", "") %>%
+      str_replace_all("10kph", "") %>%
+      str_replace_all("0_5", "$>$0.5g") %>%
+      str_replace_all("1_0", "$>$1g") %>%
+      str_replace_all("_", " ") %>%
+      str_squish() %>%
+      str_replace_all("acceleration", "Forward") %>%
+      str_replace_all("brake", "Backward") %>%
+      str_replace_all("turn", "Lateral")
     ) %>%
     mutate(name_full = case_when(
       speed_viol == "speed_base10" ~ speed_name,
@@ -109,7 +107,7 @@ for(veh_subset in c("all", "stickers")){
   cat("\\begin{tabular}{lllllll} ")
   cat("\\hline ")
   cat("Variable & Min & 25th Perc. & Mean & Median & 75th Perc. & Max \\\\ \n")
-
+  
   cat("\\hline ")
   cat("\\multicolumn{7}{l}{\\textbf{Percent of time vehicle travels over speed}} \\\\ \n")
   speed_base10_df$tex %>% 

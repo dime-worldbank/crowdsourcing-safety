@@ -95,12 +95,12 @@ for(type in c("main", "wunknown")){
       cat("\\multicolumn{3}{p{8cm}}{\\textbf{Q5:} Were measures taken to prevent the spread of COVID-19? E.g. Limiting passengers or providing sanitiser / wipes?} \\\\ \n")
       sum_var("q_covid_measures",  fb_df) %>% cat()
       
-      cat("\\hline \n")
-      cat("\\multicolumn{3}{p{8cm}}{\\textbf{Comment:} Polarity (-1 = most negative, 1 = most positive)} \\\\ \n")
-      sum_var("sentiment_snmtr_class",  fb_df) %>% cat()
+      # cat("\\hline \n")
+      # cat("\\multicolumn{3}{p{8cm}}{\\textbf{Comment:} Polarity (-1 = most negative, 1 = most positive)} \\\\ \n")
+      # sum_var("sentiment_snmtr_class",  fb_df) %>% cat()
       
       cat("\\hline \n")
-      cat("\\multicolumn{3}{p{8cm}}{\\textbf{Comment:} Manually coded sentiment of driving} \\\\ \n")
+      cat("\\multicolumn{3}{p{8cm}}{\\textbf{Comment:} Sentiment of driving related comments} \\\\ \n")
       sum_var("comment_driver_sntmt_code_str",  fb_df) %>% cat()
       
       cat("\\hline \n")

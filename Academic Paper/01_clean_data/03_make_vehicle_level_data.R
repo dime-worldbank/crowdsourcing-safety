@@ -48,12 +48,28 @@ for(comment_filter in c(TRUE, FALSE)){
       dplyr::mutate(days_since_install = as.numeric(difftime(date, sticker_install_date,
                                                              units = "days")))
     
+    #### Alt speed variable
+    fb_df$q_speed_rating_v1_num %>% table()
+    fb_df$q_speed_rating_v2 %>% unique()
+    
+    fb_df <- fb_df %>%
+      dplyr::mutate(q_speed_rating_alt_num = q_speed_rating_v1_num,
+                    q_speed_rating_alt_num = case_when(
+                      q_speed_rating_v2_num == 1 ~ 1,
+                      q_speed_rating_v2_num == 2 ~ 2,
+                      q_speed_rating_v2_num == 3 ~ 2,
+                      q_speed_rating_v2_num == 4 ~ 3,
+                      q_speed_rating_v2_num == 5 ~ 4,
+                      TRUE ~ q_speed_rating_alt_num
+                    )) 
+    
     fb_sum_df <- fb_df %>%
       dplyr::filter(regno != "UNKNOWN") %>%
       dplyr::mutate(q_safety_prop_unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe"),
                     q_safety_prop_safe   = (q_safety_rating == "Safe") | (q_safety_rating == "Very safe"),
                     q_speed_rating_v1_fast = (q_speed_rating_v1 == "Fast") | (q_speed_rating_v1 == "Dangerously fast"),
                     q_speed_rating_v1_dfast = (q_speed_rating_v1 == "Dangerously fast"),
+                    q_speed_rating_alt_dfast = (q_speed_rating_alt_num == 4),
                     q_speed_rating_v2_vfast = q_speed_rating_v2 == "Very fast [80+]",
                     
                     sentiment_snmtr_prop_un0_1 = as.numeric(sentiment_snmtr < -0.1),
@@ -88,6 +104,7 @@ for(comment_filter in c(TRUE, FALSE)){
                        across(c(q_safety_rating_num,
                                 q_covid_measures_num,
                                 q_speed_rating_v1_num,
+                                q_speed_rating_alt_num,
                                 q_speed_rating_v2_num,
                                 q_occupancy_num,
                                 q_safety_prop_safe,
@@ -95,6 +112,7 @@ for(comment_filter in c(TRUE, FALSE)){
                                 q_speed_rating_v1_fast,
                                 q_speed_rating_v1_dfast,
                                 q_speed_rating_v2_vfast,
+                                q_speed_rating_alt_dfast,
                                 sentiment_snmtr,
                                 sentiment_snmtr_covid,
                                 comment_driver_sntmt_code_compl,
