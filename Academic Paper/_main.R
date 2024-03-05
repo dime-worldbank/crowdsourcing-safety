@@ -97,6 +97,7 @@ if(RUN_CODE){
   source(file.path(git_analysis_dir, "feedback_n_survey_response_per_vehicle.R"))
   source(file.path(git_analysis_dir, "feedback_over_time.R"))
   source(file.path(git_analysis_dir, "feedback_pilot_testing.R"))
+  source(file.path(git_analysis_dir, "feedback_predict_driving_sentiment.R"))
   source(file.path(git_analysis_dir, "feedback_safety_speed_v1_crosstab.R"))
   source(file.path(git_analysis_dir, "feedback_safety_speed_v2_crosstab.R"))
   source(file.path(git_analysis_dir, "feedback_sentiment_vs_safety.R"))
@@ -108,6 +109,7 @@ if(RUN_CODE){
   source(file.path(git_analysis_dir, "feedback_versions_sample_sizes.R"))
   source(file.path(git_analysis_dir, "telematics_distribution.R"))
   source(file.path(git_analysis_dir, "telematics_indicators_unsafe_feedback.R"))
+  source(file.path(git_analysis_dir, "telematics_sticker_regression.R"))
   source(file.path(git_analysis_dir, "telematics_sum_stat.R"))
   source(file.path(git_analysis_dir, "telematics_variables_correlation.R"))
 }

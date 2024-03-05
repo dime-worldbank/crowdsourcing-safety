@@ -26,8 +26,8 @@ veh_df <- veh_df %>%
     q_speed_rating_v2_num,
     q_speed_rating_v2_vfast,
     
-    sentiment_snmtr, 
-    sentiment_snmtr_prop_un0_1,
+    #sentiment_snmtr, 
+    #sentiment_snmtr_prop_un0_1,
     
     comment_driver_sntmt_code_avg
   ) 
@@ -61,24 +61,24 @@ cor_df <- long_df %>%
   dplyr::mutate(name1_clean = case_when(
     name1 == "q_safety_rating_num" ~ "Average Safe\nRating",
     name1 == "q_safety_prop_safe" ~ "Percent\nRate Safe",
-    name1 == "q_speed_rating_v1_num" ~ "Average Safe\nRating (V1)",
+    name1 == "q_speed_rating_v1_num" ~ "Average Speed\nRating (V1)",
     name1 == "q_speed_rating_v1_dfast" ~ "Percent Rate\nDangerously Fast",
-    name1 == "q_speed_rating_v2_num" ~ "Average Safe\nRating (V2)",
+    name1 == "q_speed_rating_v2_num" ~ "Average Speed\nRating (V2)",
     name1 == "q_speed_rating_v2_vfast" ~ "Percent Rate\nVery Fast (80+)",
     name1 == "sentiment_snmtr" ~ "Comment\nSentiment\nAverage",
     name1 == "sentiment_snmtr_prop_un0_1" ~ "Comment\nSentiment\n% Negative",
-    name1 == "comment_driver_sntmt_code_avg" ~ "Sentiment of\nCurrent Trip Driving\n[Manual Code]",
+    name1 == "comment_driver_sntmt_code_avg" ~ "Sentiment of\nDriving Related\nComments",
   )) %>%
   dplyr::mutate(name2_clean = case_when(
     name2 == "q_safety_rating_num" ~ "Average Safe\nRating",
     name2 == "q_safety_prop_safe" ~ "Percent\nRate Safe",
-    name2 == "q_speed_rating_v1_num" ~ "Average Safe\nRating (V1)",
+    name2 == "q_speed_rating_v1_num" ~ "Average Speed\nRating (V1)",
     name2 == "q_speed_rating_v1_dfast" ~ "Percent Rate\nDangerously Fast",
-    name2 == "q_speed_rating_v2_num" ~ "Average Safe\nRating (V2)",
+    name2 == "q_speed_rating_v2_num" ~ "Average Speed\nRating (V2)",
     name2 == "q_speed_rating_v2_vfast" ~ "Percent Rate\nVery Fast (80+)",
     name2 == "sentiment_snmtr" ~ "Comment\nSentiment\nAverage",
     name2 == "sentiment_snmtr_prop_un0_1" ~ "Comment\nSentiment\n% Negative",
-    name2 == "comment_driver_sntmt_code_avg" ~ "Sentiment of\nCurrent Trip Driving\n[Manual Code]",
+    name2 == "comment_driver_sntmt_code_avg" ~ "Sentiment of\nDriving Related\nComments",
   )) %>%
   dplyr::mutate(name1_sort = case_when(
     name1 == "q_safety_rating_num" ~ 1,
@@ -120,7 +120,7 @@ cor_df %>%
              label = label)) +
   geom_tile(color = "white") +
   geom_text() +
-  geom_abline(intercept = 10, slope = -1, linewidth = 0.5, color = "gray50") +
+  geom_abline(intercept = 8, slope = -1, linewidth = 0.5, color = "gray50") +
   scale_fill_gradient2(low = "dodgerblue",
                        high = "darkorange",
                        mid = "white",

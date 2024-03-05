@@ -14,14 +14,17 @@ sensor_df <- sensor_df %>%
   filter(!is.na(sticker_install_date))
 
 sensor_week_df <- sensor_df %>%
+  dplyr::filter(distance_minmax_latlon_daily_km >= 50) %>%
   mutate(date_week = date %>% floor_date(unit = "week"),
          time_over_100kph_secs = time_over_80kph_secs / time_over_10kph_secs,
+         N_valueg_above0_5     = N_valueg_above0_5 / time_over_10kph_secs,
          year = date_week %>% year) %>%
   filter(year == 2022) %>%
   group_by(regno, date_week) %>%
-  summarise(across(c(time_over_100kph_secs,
+  dplyr::summarise(across(c(time_over_100kph_secs,
                      N_valueg_above0_5), mean, na.rm = TRUE)) %>%
-  ungroup()
+  ungroup() %>%
+  dplyr::mutate(N_valueg_above0_5 = Winsorize(N_valueg_above0_5, probs = c(0, 0.99), na.rm = T))
 
 p_speed <- sensor_week_df %>%
   ggplot() +
@@ -49,8 +52,8 @@ p_harsh <- sensor_week_df %>%
                y = N_valueg_above0_5),
            fill = "firebrick4") +
   labs(x = NULL,
-       y = "N",
-       title = "B. Number of Harsh Driving Violations") +
+       y = "N violations / hour",
+       title = "B. Number of Harsh Driving Violations per Hour") +
   scale_x_date(date_breaks = "6 months", date_labels = "%b") + 
   theme_classic2() +
   theme(axis.title.y = element_text(size = 10),
@@ -74,7 +77,7 @@ ggsave(p,
 
 # Feedback consistency: safety -------------------------------------------------
 feedback_sum_df <- feedback_df %>%
-  mutate(date_week = floor_date(date, unit = "week")) %>%
+  dplyr::mutate(date_week = floor_date(date, unit = "week")) %>%
   dplyr::filter(!is.na(q_safety_rating_num)) %>%
   group_by(regno, date_week) %>%
   dplyr::summarise(n_response = n(),
@@ -88,7 +91,7 @@ feedback_sum_df <- feedback_df %>%
   
   filter(n_response >= 5) %>%
   group_by(regno) %>%
-  mutate(n_veh_weeks = n(),
+  dplyr::mutate(n_veh_weeks = n(),
          n_response_mean = mean(n_response)) %>%
   ungroup() %>%
   
@@ -151,13 +154,13 @@ feedback_sum_df <- feedback_df %>%
   
   filter(n_response >= 5) %>%
   group_by(regno) %>%
-  mutate(n_veh_weeks = n(),
+  dplyr::mutate(n_veh_weeks = n(),
          n_response_mean = mean(n_response)) %>%
   ungroup() %>%
   
   filter(n_veh_weeks >= 3) %>%
   
-  mutate(regno = paste0(regno, "\nAvg. Weekly N: ", 
+  dplyr::mutate(regno = paste0(regno, "\nAvg. Weekly N: ", 
                         round(n_response_mean, 0)))
 
 feedback_sum_stack_prop_df <- feedback_sum_df %>%

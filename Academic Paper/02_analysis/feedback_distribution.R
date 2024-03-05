@@ -237,7 +237,7 @@ p_prop_speed_alt <- veh_stack_df %>%
   scale_y_continuous(limits = c(0, 29)) +
   labs(x = NULL,
        y = "N Vehicles",
-       title = "D. Percent of passengers that rate driving as\n'Dangerously fast'") +
+       title = "D. Percent of passengers that rate driving as\n'Dangerously fast' or 'Very Fast [80 km/h +]'") +
   custom_theme
 
 # p_prop_speed_v1 <- veh_stack_df %>%

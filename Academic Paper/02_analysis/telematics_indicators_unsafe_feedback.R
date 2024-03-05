@@ -128,20 +128,20 @@ p <- rank_df %>%
              q_safety_prop_unsafe_table = "Percent Rate Unsafe",
              q_speed_rating_v2_vfast_table = "Percent Rate Very Fast",
              comment_driver_sntmt_code_avg_table = "Driving Sentiment",
-             prop_time_over_80kph_base_10kph_table = "Prop time > 80km/h",
-             prop_time_over_100kph_base_10kph_table = "Prop time > 100km/h",
+             prop_time_over_80kph_base_10kph_table = "Percent time > 80km/h",
+             prop_time_over_100kph_base_10kph_table = "Percent time > 100km/h",
              rate_N_valueg_above0_5_base_10kph_table = "Harsh driving rate") %>%
   tab_source_note(html('<pre><span style="background-color: #a50026;"
                        >        </span> = Lowest Rank (Most Unsafe)\n<span style="background-color: #ffffbf;"
                        >        </span> = Medium Rank\n<span style="background-color: #313695;"
                        >        </span> = Highest Rank (Most Safe)</pre>')) %>% 
   tab_spanner(
-    label = "Passenger Feedback",
+    label = "Passenger Feedback: Value (Ranking)",
     columns = vars(q_safety_prop_unsafe_table,
                    q_speed_rating_v2_vfast_table,
                    comment_driver_sntmt_code_avg_table)) %>% 
   tab_spanner(
-    label = "Telematics",
+    label = "Telematics: Value (Ranking)",
     columns = vars(prop_time_over_80kph_base_10kph_table,
                    prop_time_over_100kph_base_10kph_table,
                    rate_N_valueg_above0_5_base_10kph_table))

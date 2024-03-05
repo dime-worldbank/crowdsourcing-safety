@@ -35,7 +35,6 @@ add_example <- function(word_df, fb_df){
   for(i in 1:nrow(word_df)){
     term_i <- word_df$term[i]
     out[[i]] <- tolower(fb_df$q_comment) %>% str_subset(tolower(term_i)) %>% head(1)
-    
   }
   
   out %>% unlist()
@@ -51,7 +50,7 @@ add_figure_label <- function(word_df){
 
 #### Good
 fb_good_df <- fb_df %>%
-  dplyr::filter(sentiment_snmtr > 0)
+  dplyr::filter(sentiment_snmtr > 0) 
 
 word_good_df <- fb_good_df %>%
   make_word_df() %>%
@@ -80,12 +79,12 @@ p_good <- word_good_df %>%
              x = freq)) +
   geom_col(fill = "forestgreen") +
   geom_text(aes(label = label,
-                x = freq + 65),
+                x = freq + 70),
             size = 3) +
   labs(y = NULL,
-       x = "Number (Percent) of Positive Comments Word Appears In",
-       title = "A. Top Positive Words from Positive Comments") +
-  scale_x_continuous(limits = c(0, 570)) +
+       x = "Frequency (percent) of occurrence of the word in positive comments",
+       title = "A. Top positive words from positive comments") +
+  scale_x_continuous(limits = c(0, 590)) +
   theme_classic2() +
   theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
         axis.title.x = element_text(size = 9),
@@ -97,12 +96,12 @@ p_bad <- word_bad_df %>%
              x = freq)) +
   geom_col(fill = "firebrick4") +
   geom_text(aes(label = label,
-                x = freq + 5.5),
+                x = freq + 6.5),
             size = 3) +
   labs(y = NULL,
-       x = "Number (Percent) of Negative Comments Word Appears In",
-       title = "B. Top Negative Words from Negative Comments") +
-  scale_x_continuous(limits = c(0, 53)) +
+       x = "Frequency (percent) of occurrence of the word in negative comments",
+       title = "B. Top negative words from negative comments") +
+  scale_x_continuous(limits = c(0, 60)) +
   theme_classic2() +
   theme(axis.text.y = element_text(color = "black", face = "bold")) +
   theme(axis.text.y = element_text(color = "black", face = "bold", size = 9),
@@ -112,7 +111,7 @@ p_bad <- word_bad_df %>%
 p <- ggarrange(p_good, p_bad, nrow = 1)
 
 ggsave(p, filename = file.path(figures_dir, "top_words.png"),
-       height = 2.75, width = 9)
+       height = 2.75, width = 9.5)
 
 # Make table -------------------------------------------------------------------
 word_df <- word_bad_df

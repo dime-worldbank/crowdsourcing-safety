@@ -10,34 +10,10 @@ veh_df        <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_sticker
 veh_stc_df    <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 veh_stc_tl_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
-# N Passenger Feedback ---------------------------------------------------------
+# N Observations ---------------------------------------------------------------
 ## Raw
 nrow(fb_raw_df)
 
-## Remove duplicates
-fb_raw_df %>%
-  distinct(phone_hash, regno, .keep_all = T) %>%
-  nrow()
-
-## Remove potential cheating
-nrow(fb_df)
-
-## Method
-fb_df$response_method %>% table()
-
-# N feedback per vehicle -------------------------------------------------------
-## All vehicles
-table(veh_stc_df$n_feedback == 0)
-veh_stc_df$n_feedback %>% summary()
-
-## Without QR codes
-veh_stc_noqr_df <- veh_stc_df %>%
-  dplyr::filter(shortcode_on_sticker == "yes")
-
-table(veh_stc_noqr_df$n_feedback == 0)
-veh_stc_noqr_df$n_feedback %>% summary()
-
-# Duplicate phone numbers ------------------------------------------------------
 dup_phone <- fb_raw_df %>%
   group_by(phone_hash) %>%
   dplyr::summarise(n_responses = n()) %>%
@@ -53,40 +29,96 @@ dup_phone <- fb_raw_df %>%
   mutate(prop_passengers_cumsum = cumsum(prop_passengers))
 
 dup_phone %>%
+  dplyr::filter(n_responses == 1) %>%
+  pull(prop_passengers)
+
+dup_phone %>%
+  dplyr::filter(n_responses %in% 1:5) %>%
+  pull(prop_passengers) %>%
+  sum()
+
+dup_phone$n_responses %>% max()
+
+dup_phone %>%
+  dplyr::filter(n_responses %in% 10:50) %>%
+  pull(n_passengers) %>%
+  sum()
+
+dup_phone %>%
+  pull(n_passengers) %>%
+  sum()
+
+178/6251
+
+dup_phone %>%
   dplyr::filter(n_responses >= 20) %>%
   dplyr::summarise(n = sum(n_passengers))
 
 ## Removing duplicates
 nrow(fb_all_df)
 
-# Unknown reg numbers ----------------------------------------------------------
-## Known reg number
-table(fb_raw_df$regno == "UNKNOWN")
+## Remove duplicates
 fb_raw_df %>%
-  dplyr::filter(regno != "UNKNOWN") %>%
+  distinct(phone_hash, regno, .keep_all = T) %>%
   nrow()
 
-## Potential cheating
-fb_raw_df %>%
-  dplyr::filter(regno != "UNKNOWN") %>%
-  pull(ptn_cheating) %>%
-  table()
-
-## Potential cheating, fill
-fb_all_df %>%
-  dplyr::filter(regno != "UNKNOWN") %>%
-  pull(ptn_cheating_fill) %>%
-  table()
-
-#### Response method
-
-# Surveys: Identify vehicles vs cant -------------------------------------------
-fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
-fb_wunknown_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_wunknown.Rds"))
-
+## Cheating
 nrow(fb_df)
-nrow(fb_wunknown_df)
-nrow(fb_wunknown_df) - nrow(fb_df)
+
+6386 - 4595
+
+## Response method
+fb_df$response_method %>% table()
+
+# N feedback per vehicle -------------------------------------------------------
+## All vehicles
+table(veh_stc_df$n_feedback == 0)
+veh_stc_df$n_feedback %>% summary()
+
+## Without QR codes
+veh_stc_noqr_df <- veh_stc_df %>%
+  dplyr::filter(shortcode_on_sticker == "yes")
+
+table(veh_stc_noqr_df$n_feedback == 0)
+veh_stc_noqr_df$n_feedback %>% summary()
+
+# QR responses on vehicles with just QR ----------------------------------------
+df_tmp <- veh_df %>%
+  group_by(shortcode_on_sticker) %>%
+  dplyr::summarise(n_feedback = sum(n_feedback),
+                   n_feedback_qr = sum(n_feedback_qr),
+                   n_feedback_sms = sum(n_feedback_sms)) %>%
+  ungroup()
+
+df_tmp
+
+df_tmp$n_feedback[df_tmp$shortcode_on_sticker %in% "no"] / sum(df_tmp$n_feedback)
+
+# N comments just a number -----------------------------------------------------
+
+fb_comment_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
+
+fb_comment_df <- fb_comment_df %>%
+  dplyr::filter(!is.na(q_comment)) %>%
+  dplyr::mutate(q_comment_clean = q_comment %>%
+                  str_replace_all("[:digit:]", ""),
+                q_comment_clean_nchar = nchar(q_comment_clean))
+
+# 5% just a number.
+mean(fb_comment_df$q_comment_clean_nchar == 0)
+
+mean(fb_comment_df$q_comment_nchar <= 2)
+
+
+
+
+
+
+
+
+
+
+
 # N Vehicles -------------------------------------------------------------------
 ## Total vehicles
 nrow(veh_df)

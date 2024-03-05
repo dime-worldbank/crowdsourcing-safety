@@ -34,12 +34,12 @@ for(veh_subset in c("all", "stickers")){
           rate_N_valueg_above0_5_base_10kph,
           rate_N_valueg_above0_5_acceleration_base_10kph,
           rate_N_valueg_above0_5_brake_base_10kph,
-          rate_N_valueg_above0_5_turn_base_10kph,
+          rate_N_valueg_above0_5_turn_base_10kph#,
           
-          rate_N_valueg_above1_0_base_10kph,
-          rate_N_valueg_above1_0_acceleration_base_10kph,
-          rate_N_valueg_above1_0_brake_base_10kph,
-          rate_N_valueg_above1_0_turn_base_10kph
+          # rate_N_valueg_above1_0_base_10kph,
+          # rate_N_valueg_above1_0_acceleration_base_10kph,
+          # rate_N_valueg_above1_0_brake_base_10kph,
+          # rate_N_valueg_above1_0_turn_base_10kph
         ) %>%
         dplyr::mutate(across(where(is.numeric), ~Winsorize(., probs = c(0, 0.9), na.rm = T))) %>%
         dplyr::filter(!is.na(prop_time_over_80kph_base_10kph))
@@ -112,7 +112,7 @@ for(veh_subset in c("all", "stickers")){
                    label = label)) +
         geom_tile(color = "white") +
         geom_text() +
-        geom_hline(yintercept = 4.5, color = "black") +
+        #geom_hline(yintercept = 4.5, color = "black") +
         scale_fill_gradient2(low = "dodgerblue",
                              high = "darkorange",
                              mid = "white",
@@ -132,7 +132,7 @@ for(veh_subset in c("all", "stickers")){
                                   paste0("viol_speed_cor_veh_",veh_subset,
                                          "_cmntfilter",comment_filter,
                                          "_dstnctpass",distinct_pass,".png")),
-             height = 6, width = 9)
+             height = 4, width = 9)
       
     }
   }

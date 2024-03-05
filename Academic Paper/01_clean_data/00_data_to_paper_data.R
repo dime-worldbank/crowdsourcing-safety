@@ -71,6 +71,15 @@ fb_df <- readRDS(file.path(db_dir, "Data", "Rider Feedback - All", "FinalData",
                            "Rider Feedback - All",
                            "rider_feedback.Rds"))
 
+qr_regnos <- award_info_df %>%
+  dplyr::filter(shortcode_on_sticker %in% "no",
+                qr_code_on_sticker %in% "yes") %>%
+  pull(regno) %>%
+  unique()
+
+# shortcode entry from vehicle without shotcode; not possible!
+fb_df <- fb_df[ !((fb_df$response_method %in% "shortcode") & (fb_df$regno %in% qr_regnos)),]
+
 fb_df <- fb_df %>%
   # PSV Number not entered
   dplyr::filter(!(is.na(psv_num) & regno == "UNKNOWN")) %>%
