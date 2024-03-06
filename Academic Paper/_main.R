@@ -1,7 +1,7 @@
 # Crowdsourcing Safety Paper
 
-DELETE_OUTPUTS <- F
-RUN_CODE <- F
+DELETE_OUTPUTS <- T
+RUN_CODE <- T
 
 # Filepaths --------------------------------------------------------------------
 
@@ -109,9 +109,11 @@ if(RUN_CODE){
   source(file.path(git_analysis_dir, "feedback_versions_sample_sizes.R"))
   source(file.path(git_analysis_dir, "telematics_distribution.R"))
   source(file.path(git_analysis_dir, "telematics_indicators_unsafe_feedback.R"))
+  source(file.path(git_analysis_dir, "telematics_route_summary.R"))
   source(file.path(git_analysis_dir, "telematics_sticker_regression.R"))
   source(file.path(git_analysis_dir, "telematics_sum_stat.R"))
   source(file.path(git_analysis_dir, "telematics_variables_correlation.R"))
+  
 }
 
 

@@ -1,16 +1,12 @@
 # Identify Cheating
 
-for(type in c("main", "wunknown")){
+for(type in c("main")){
   for(comment_filter in c(TRUE, FALSE)){
     for(distinct_pass in c(TRUE, FALSE)){
       
       # Load data --------------------------------------------------------------------
       if(type == "main"){
         fb_df <- readRDS(file.path(data_dir, "RawData", "passenger_feedback.Rds"))
-      }
-      
-      if(type == "wunknown"){
-        fb_df <- readRDS(file.path(data_dir, "RawData", "passenger_feedback_wunknown.Rds"))
       }
       
       # Filter based on comments ---------------------------------------------------

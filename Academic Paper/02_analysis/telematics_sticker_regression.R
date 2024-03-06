@@ -16,30 +16,10 @@ veh_df$route[is.na(veh_df$route)] <- "Other"
 table(veh_df$route)
 veh_df$route %>% unique() %>% length()
 
-lm1 <- feols(prop_time_over_80kph_base_10kph ~ sticker, data = veh_df)
-lm2 <- feols(prop_time_over_90kph_base_10kph ~ sticker, data = veh_df)
-lm3 <- feols(prop_time_over_100kph_base_10kph ~ sticker, data = veh_df)
-lm4 <- feols(prop_time_over_90kph_base_80kph ~ sticker, data = veh_df)
-lm5 <- feols(prop_time_over_100kph_base_80kph ~ sticker, data = veh_df)
-lm6 <- feols(rate_N_valueg_above0_5_base_10kph ~ sticker, data = veh_df)
-
-lm1_r <- feols(prop_time_over_80kph_base_10kph ~ sticker | route, data = veh_df)
-lm2_r <- feols(prop_time_over_90kph_base_10kph ~ sticker | route, data = veh_df)
-lm3_r <- feols(prop_time_over_100kph_base_10kph ~ sticker | route, data = veh_df)
-lm4_r <- feols(prop_time_over_90kph_base_80kph ~ sticker | route, data = veh_df)
-lm5_r <- feols(prop_time_over_100kph_base_80kph ~ sticker | route, data = veh_df)
-lm6_r <- feols(rate_N_valueg_above0_5_base_10kph ~ sticker | route, data = veh_df)
-
 run_reg <- function(var){
   veh_df$var <- veh_df[[var]]
   
   bind_rows(
-    feols(var ~ sticker, data = veh_df) %>% 
-      confint() %>% 
-      clean_names() %>%
-      tail(1) %>%
-      mutate(fe = "No"),
-    
     feols(var ~ sticker | route, data = veh_df) %>% 
       confint() %>% 
       clean_names() %>%
@@ -65,34 +45,32 @@ lm_df <- map_df(c("prop_time_over_80kph_base_10kph",
     variable == "prop_time_over_100kph_base_80kph" ~ "Prop. Time over 100km/h,\nwhen >80 km/h",
     variable == "rate_N_valueg_above0_5_base_10kph" ~ "N Harsh Violations\nper Hour"
   ) %>%
-    factor(levels = c("Prop. Time over 80km/h",
+    factor(levels = rev(c("Prop. Time over 80km/h",
            "Prop. Time over 90km/h",
            "Prop. Time over 100km/h",
            "Prop. Time over 90km/h,\nwhen >80 km/h",
            "Prop. Time over 100km/h,\nwhen >80 km/h",
-           "N Harsh Violations\nper Hour")))
+           "N Harsh Violations\nper Hour"))))
 
 lm_df %>%
   ggplot(aes(xmin = x2_5_percent,
              xmax = x97_5_percent,
              x = b,
-             #color = fe,
-             y = fe)) +
+             y = variable_clean)) +
   geom_vline(xintercept = 0, color = "gray") +
   geom_linerange() +
   geom_point() +
-  facet_wrap(~variable_clean,
-             scales = "free_x") +
   labs(x = "Coef (+/- 95% CI)",
-       y = "Route\nFE") +
+       y = NULL) +
   theme_classic2() +
   theme(strip.background = element_blank(),
         strip.text = element_text(face = "bold"),
-        axis.title.y = element_text(angle = 0, vjust = 0.5),
+        axis.text = element_text(color = "black"),
+        #axis.title.y = element_text(angle = 0, vjust = 0.5),
         legend.position = "none") 
 
 ggsave(filename = file.path(figures_dir, "reg_sticker_150.png"),
-       height = 3, width = 8)
+       height = 4, width = 4)
 
 
 

@@ -65,7 +65,7 @@ for(comment_filter in c(TRUE, FALSE)){
     
     fb_sum_df <- fb_df %>%
       dplyr::filter(regno != "UNKNOWN") %>%
-      dplyr::mutate(q_safety_prop_unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Not very safe"),
+      dplyr::mutate(q_safety_prop_unsafe = (q_safety_rating == "Not safe") | (q_safety_rating == "Very not safe"),
                     q_safety_prop_safe   = (q_safety_rating == "Safe") | (q_safety_rating == "Very safe"),
                     q_speed_rating_v1_fast = (q_speed_rating_v1 == "Fast") | (q_speed_rating_v1 == "Dangerously fast"),
                     q_speed_rating_v1_dfast = (q_speed_rating_v1 == "Dangerously fast"),
@@ -155,22 +155,19 @@ for(comment_filter in c(TRUE, FALSE)){
       }
     }
     
-    sensor_df <- sensor_df %>%
-      filter(distance_minmax_latlon_daily_km >= 50) 
+    ## Numeric vars: NA is distance less than 50 km/h
+    num_vars <- sensor_df %>%
+      dplyr::select(where(is.numeric)) %>%
+      names()
+    
+    num_vars <- num_vars[!(num_vars %>% str_detect("distance"))]
+    
+    for(var_i in num_vars){
+      sensor_df[[var_i]][which(sensor_df$distance_minmax_latlon_daily_km < 50)] <- NA
+    }
     
     sensor_sum_df <- sensor_df %>%
-      # dplyr::mutate(prop_time_over_80kph_base_10kph = set_na(time_over_80kph_secs / time_over_10kph_secs, time_over_10kph_secs),
-      #               prop_time_over_80kph_base_50kph = set_na(time_over_80kph_secs / time_over_50kph_secs, time_over_50kph_secs),
-      #               
-      #               rate_N_valueg_above0_4_base_10kph = set_na(N_valueg_above0_4 / time_over_10kph_secs, time_over_10kph_secs),
-      #               rate_N_valueg_above0_4_base_50kph = set_na(N_valueg_above0_4 / time_over_50kph_secs, time_over_50kph_secs),
-      #               
-      #               rate_N_valueg_above0_5_base_10kph = set_na(N_valueg_above0_5 / time_over_10kph_secs, time_over_10kph_secs),
-      #               rate_N_valueg_above0_5_base_50kph = set_na(N_valueg_above0_5 / time_over_50kph_secs, time_over_50kph_secs),
-      #               
-      #               rate_N_valueg_above1_0_base_10kph = set_na(N_valueg_above1_0 / time_over_10kph_secs, time_over_10kph_secs),
-      #               rate_N_valueg_above1_0_base_50kph = set_na(N_valueg_above1_0 / time_over_50kph_secs, time_over_50kph_secs)) %>%
-    group_by(regno) %>%
+      group_by(regno) %>%
       dplyr::summarise(across(where(is.numeric), mean, na.rm = T)) %>%
       ungroup() 
     

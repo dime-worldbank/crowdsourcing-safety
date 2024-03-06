@@ -2,7 +2,7 @@
 
 set.seed(142)
 
-for(type in c("main", "wunknown")){
+for(type in c("main")){
   for(comment_filter in c(TRUE, FALSE)){
     for(distinct_pass in c(TRUE, FALSE)){
       

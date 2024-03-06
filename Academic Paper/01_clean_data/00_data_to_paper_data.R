@@ -71,6 +71,11 @@ fb_df <- readRDS(file.path(db_dir, "Data", "Rider Feedback - All", "FinalData",
                            "Rider Feedback - All",
                            "rider_feedback.Rds"))
 
+fb_df$q_safety_rating <- fb_df$q_safety_rating %>%
+  as.character() %>%
+  str_replace_all("Not very safe", "Very not safe") %>%
+  factor(levels = c("Very safe", "Safe", "Not safe", "Very not safe"))
+
 qr_regnos <- award_info_df %>%
   dplyr::filter(shortcode_on_sticker %in% "no",
                 qr_code_on_sticker %in% "yes") %>%
