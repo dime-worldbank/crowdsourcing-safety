@@ -1,3 +1,0 @@
-# Top Vehicles
-
-# Load data ---------------
