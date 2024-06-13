@@ -1,7 +1,7 @@
 # Telematics Figure
 
 # Load data --------------------------------------------------------------------
-veh_df    <- readRDS(file.path(ap_data_dir, "FinalData", "vehicle_level_all202.Rds"))
+veh_df    <- readRDS(file.path(ap_data_dir, "FinalData", "vehicle_level_all202_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 sensor_df <- readRDS(file.path(ap_data_dir, "RawData", "sensor_day.Rds"))
 
 veh_df <- veh_df %>%
@@ -86,7 +86,7 @@ p_speed <- sensor_week_df %>%
            fill = "firebrick4") +
   labs(x = NULL,
        y = "Percent",
-       title = "B. Percent of time driving over 100 km/h, vehicles with highest proportions") +
+       title = "B. Percent of time driving over 100 km/h, vehicles with highest percentages") +
   scale_y_continuous(limits = c(0, 0.65), labels = scales::percent) +
   scale_x_date(date_breaks = "6 months", date_labels = "%b") + 
   theme_classic2() +
@@ -109,7 +109,7 @@ p_harsh <- sensor_week_df %>%
            fill = "firebrick4") +
   labs(x = NULL,
        y = "Rate",
-       title = "C. Number of harsh violation events per hour, vehicles with highest rates") +
+       title = "C. Harsh driving violation rates (number of harsh violation events per hour), vehicles with highest rates") +
   scale_y_continuous(limits = c(0, 0.21)) +
   scale_x_date(date_breaks = "6 months", date_labels = "%b") + 
   theme_classic2() +

@@ -29,27 +29,27 @@ rank_df <- bind_rows(
     head(2)
 ) %>%
   distinct(regno, .keep_all = T) %>%
-  select(regno, n_feedback,
-         
-         q_safety_prop_unsafe, q_speed_rating_v2_vfast, comment_driver_sntmt_code_avg,
-         
-         prop_time_over_80kph_base_10kph,
-         prop_time_over_100kph_base_10kph,
-         
-         rate_N_valueg_above0_5_base_10kph) 
+  dplyr::select(regno, n_feedback,
+                
+                q_safety_prop_unsafe, q_speed_rating_v2_vfast, comment_driver_sntmt_code_avg,
+                
+                prop_time_over_80kph_base_10kph,
+                prop_time_over_100kph_base_10kph,
+                
+                rate_N_valueg_above0_5_base_10kph) 
 
 veh_all_rank_df <- veh_all_df %>%
-  select(regno,
-         
-         prop_time_over_80kph_base_10kph,
-         prop_time_over_100kph_base_10kph,
-         
-         rate_N_valueg_above0_5_base_10kph) %>%
+  dplyr::select(regno,
+                
+                prop_time_over_80kph_base_10kph,
+                prop_time_over_100kph_base_10kph,
+                
+                rate_N_valueg_above0_5_base_10kph) %>%
   mutate(across(where(is.numeric), ~ rank(.x))) %>%
   rename_with(~ paste0(.x, "_rank"), where(is.numeric))
 
 veh_rank_df <- veh_df %>%
-  select(regno,
+  dplyr::select(regno,
          
          q_safety_prop_unsafe, 
          q_speed_rating_v2_vfast, 
@@ -127,7 +127,7 @@ p <- rank_df %>%
   cols_label(n_feedback = "N Feedback",
              q_safety_prop_unsafe_table = "Percent Rate Unsafe",
              q_speed_rating_v2_vfast_table = "Percent Rate Very Fast",
-             comment_driver_sntmt_code_avg_table = "Driving Sentiment",
+             comment_driver_sntmt_code_avg_table = "Driving Polarity",
              prop_time_over_80kph_base_10kph_table = "Percent time > 80km/h",
              prop_time_over_100kph_base_10kph_table = "Percent time > 100km/h",
              rate_N_valueg_above0_5_base_10kph_table = "Harsh driving rate") %>%
@@ -161,7 +161,7 @@ make_hist <- function(df,
     data.frame(var = median(df$var),
                regno = "Median")
   )
-
+  
   df %>%
     ggplot(aes(x = var)) +
     geom_histogram(fill = "gray80",
@@ -180,8 +180,8 @@ make_hist <- function(df,
 }
 
 p1 <- make_hist(veh_all_df,
-          "prop_time_over_80kph_base_10kph",
-          "Proportion of time exceed 80 km/h")
+                "prop_time_over_80kph_base_10kph",
+                "Proportion of time exceed 80 km/h")
 
 p2 <- make_hist(veh_all_df,
                 "prop_time_over_100kph_base_10kph",

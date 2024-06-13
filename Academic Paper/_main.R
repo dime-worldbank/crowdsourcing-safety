@@ -1,7 +1,7 @@
 # Crowdsourcing Safety Paper
 
-DELETE_OUTPUTS <- T
-RUN_CODE <- T
+DELETE_OUTPUTS <- F
+RUN_CODE <- F
 
 # Filepaths --------------------------------------------------------------------
 
@@ -73,6 +73,7 @@ library(fixest)
 library(purrr)
 library(tibble)
 library(did)
+library(chatgpt)
 #library(cleanNLP)
 #library(coreNLP)
 

@@ -1,7 +1,7 @@
 # Figures
 
 # Load data --------------------------------------------------------------------
-fb_df  <- readRDS(file.path(ap_data_dir, "FinalData", "passenger_feedback_valid_class.Rds"))
+fb_df  <- readRDS(file.path(ap_data_dir, "FinalData", "passenger_feedback_valid_class_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 # Comments word cloud ----------------------------------------------------------
 set.seed(42)
@@ -44,6 +44,8 @@ word_freq_clean <- bind_rows(
   arrange(-freq)
 
 #word_freq_sum <- word_freq[1:150,]
+
+word_freq_clean$color[word_freq_clean$word == "government"] <- "#7F7F7F"
 
 wordcloud2(data = word_freq_clean,
            size = 0.15,
