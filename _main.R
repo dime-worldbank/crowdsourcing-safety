@@ -4,10 +4,10 @@
 ## PARAMETERS
 
 # Whether to delete all outputs (figures, table, processed data)
-DELETE_OUTPUTS <- T
+DELETE_OUTPUTS <- F
 
 # Whether to run code
-RUN_CODE <- T
+RUN_CODE <- F
 
 # Filepaths --------------------------------------------------------------------
 
@@ -92,8 +92,9 @@ if(RUN_CODE){
   git_clean_data_dir <- file.path(git_dir, "01_clean_data")
   
   source(file.path(git_clean_data_dir, "01_feedback_outliers.R"))
-  source(file.path(git_clean_data_dir, "02_classify_feedback.R"))
-  source(file.path(git_clean_data_dir, "03_make_vehicle_level_data.R"))
+  source(file.path(git_clean_data_dir, "02_classify_feedback_gpt.R"))
+  source(file.path(git_clean_data_dir, "03_classify_feedback.R"))
+  source(file.path(git_clean_data_dir, "04_make_vehicle_level_data.R"))
   
   # Passenger feedback analysis ------------------------------------------------
   git_analysis_dir <- file.path(git_dir, "02_analysis")
