@@ -3,7 +3,6 @@
 # https://platform.openai.com/
 
 # Load data --------------------------------------------------------------------
-<<<<<<< HEAD
 df <- readRDS(file.path(data_dir, "FinalData", 
                         paste0("passenger_feedback_valid_",
                                "main", "_",
@@ -13,9 +12,6 @@ df <- readRDS(file.path(data_dir, "FinalData",
                                "dstnctpass",
                                TRUE,
                                ".Rds")))
-=======
-fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
->>>>>>> 1c3ec44b8a3c5979b8fee116e8ca792acfdefc3e
 
 # Prep dataset -----------------------------------------------------------------
 ## Cleanup comment variable
