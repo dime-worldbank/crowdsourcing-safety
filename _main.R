@@ -15,7 +15,7 @@ RUN_CODE <- F
 if(Sys.info()[["user"]] == "robmarty"){
   data_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback/Academic Paper/Data"
   git_dir  <- "~/Documents/Github/crowdsourcing-safety"
-  #overleaf_dir <- "~/Dropbox/Apps/Overleaf/Crowdsourcing Safety Kenya Matatu Passenger Safety Project"
+  overleaf_dir <- "~/Dropbox/Apps/Overleaf/Crowdsourcing Safety Kenya Matatu Passenger Safety Project"
 }
 
 # Ruiwen (WB Computer)
@@ -24,11 +24,11 @@ if(Sys.info()[["user"]] == "wb575963"){
   git_dir <- "C:/Users/wb575963/Github/crowdsourcing-safety"
 }
 
-#tables_dir  <- file.path(overleaf_dir, "tables")
-#figures_dir <- file.path(overleaf_dir, "figures")
+tables_dir  <- file.path(overleaf_dir, "tables")
+figures_dir <- file.path(overleaf_dir, "figures")
 
-tables_dir  <- file.path(git_dir, "output", "tables")
-figures_dir <- file.path(git_dir, "output", "figures")
+#tables_dir  <- file.path(git_dir, "output", "tables")
+#figures_dir <- file.path(git_dir, "output", "figures")
 
 # Packages ---------------------------------------------------------------------
 #renv::init(project = github_dir)

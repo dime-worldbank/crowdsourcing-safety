@@ -6,7 +6,9 @@ require(caret)
 
 set.seed(42)
 
-ai_name <- "AI (chatGPT-4o)"
+ai_name_cat <- "AI (chatGPT-4o)\nDriving Safety Category"
+ai_name_4o <- "AI (chatGPT-4o)"
+ai_name_35 <- "AI (chatGPT-3.5)"
 ml_name <- "Machine learning (SVM)"
 nlp_name <- "NLP sentiment classification\n(sentimentr)"
 
@@ -15,12 +17,12 @@ nlp_name <- "NLP sentiment classification\n(sentimentr)"
 
 fb_df <- readRDS(file.path(data_dir, "FinalData", 
                         paste0("passenger_feedback_valid_class_",
-                               type, "_",
+                               "main", "_",
                                "cmntfilter",
-                               comment_filter,
+                               FALSE,
                                "_",
                                "dstnctpass",
-                               distinct_pass,
+                               TRUE,
                                ".Rds")))
 
 # Prep dataset -----------------------------------------------------------------
@@ -46,13 +48,23 @@ fb_df <- fb_df %>%
 fb_df$comment_driver_sntmt_code[(fb_df$comment_driver_sntmt_relev %in% 0) & 
                                   is.na(fb_df$comment_driver_sntmt_code)] <- 3
 
+fb_df <- fb_df %>%
+  dplyr::mutate(chatgpt_4o_cat_pos = case_when(
+    chatgpt_4o_cat_1p %in% TRUE ~ 1, 
+    chatgpt_4o_cat_1n %in% TRUE ~ 2,
+    TRUE ~ 3
+  ))
+
 ## Unique comment
 fb_df <- fb_df %>%
   dplyr::mutate(q_comment = q_comment %>%
                   tolower()) %>%
-  dplyr::select(q_comment, comment_driver_sntmt_code, 
+  dplyr::select(q_comment, 
+                comment_driver_sntmt_code, 
                 sentiment_snmtr, 
-                comment_driver_gpt_code) %>%
+                comment_driver_gpt_4o_code,
+                comment_driver_gpt_35_code,
+                chatgpt_4o_cat_pos) %>%
   distinct(q_comment, .keep_all = T) %>%
   dplyr::filter(!is.na(q_comment))
 
@@ -142,6 +154,10 @@ make_results <- function(y_pred, y_test){
 }
 
 # Make metrics -----------------------------------------------------------------
+fb_df$all_one <- 1
+make_results(fb_df$all_one,
+             fb_df$comment_driver_sntmt_code)
+
 metrics_all_df <- bind_rows(
   make_results(results_df$y_pred,
                results_df$y_test) %>%
@@ -151,9 +167,17 @@ metrics_all_df <- bind_rows(
                fb_df$comment_driver_sntmt_code) %>%
     mutate(alg = nlp_name),
   
-  make_results(fb_df$comment_driver_gpt_code,
+  make_results(fb_df$comment_driver_gpt_4o_code,
                fb_df$comment_driver_sntmt_code) %>%
-    mutate(alg = ai_name)
+    mutate(alg = ai_name_4o),
+  
+  make_results(fb_df$comment_driver_gpt_35_code,
+               fb_df$comment_driver_sntmt_code) %>%
+    mutate(alg = ai_name_35),
+  
+  make_results(fb_df$chatgpt_4o_cat_pos,
+               fb_df$comment_driver_sntmt_code) %>%
+    mutate(alg = ai_name_cat)
 )
 
 metrics_all_df <- metrics_all_df %>%
@@ -169,23 +193,28 @@ metrics_all_df <- metrics_all_df %>%
                 name = name %>%
                   str_replace_all("_", " "),
                 alg = alg %>%
-                  factor(levels = c(ai_name,
+                  factor(levels = c(ai_name_cat,
+                                    ai_name_4o,
+                                    ai_name_35,
                                     ml_name,
                                     nlp_name)) %>%
                   fct_rev())
 
 # Overall results --------------------------------------------------------------
 metrics_all_df %>%
+  dplyr::filter(alg != ai_name_cat) %>%
   ggplot(aes(x = class_str,
              y = value,
              fill = alg)) +
   geom_col(position = position_dodge(width = 0.9), color = "black") +
   geom_text(aes(label = round(value, 2)), 
             position = position_dodge(width = 0.9), 
-            vjust = -0.5) +
+            vjust = -0.5,
+            size = 3) +
   facet_wrap(~name) +
   scale_fill_manual(values = c("gray",
                                "darkorange",
+                               "green2",
                                "forestgreen")) +
   labs(x = NULL,
        y = NULL,
@@ -198,7 +227,7 @@ metrics_all_df %>%
 
 ggsave(filename = file.path(figures_dir,
                             "class_comments_results.png"),
-       height = 4, width = 12)
+       height = 4, width = 14)
 
 # Example comments -------------------------------------------------------------
 results_lim_df <- results_df %>%
@@ -208,7 +237,7 @@ fb_lim_df <- fb_df %>%
   dplyr::select(q_comment,
                 comment_driver_sntmt_code,
                 sentiment_snmtr_code,
-                comment_driver_gpt_code)
+                comment_driver_gpt_4o_code)
 
 comment_df <- fb_lim_df %>%
   left_join(results_lim_df, by = "q_comment") %>%
@@ -217,7 +246,7 @@ comment_df <- fb_lim_df %>%
                 comment_driver_sntmt_code,
                 sentiment_snmtr_code,
                 svm_pred,
-                comment_driver_gpt_code)
+                comment_driver_gpt_4o_code)
 
 # 1 = safe
 # 2 = unsafe
@@ -225,9 +254,38 @@ comment_df <- fb_lim_df %>%
 
 comment_df %>%
   dplyr::filter(q_comment %>%
-                  str_detect("fast")) %>%
+                  str_detect("nice")) %>%
   head()
 
+# chatGPT Category Results -----------------------------------------------------
+metrics_all_df %>%
+  dplyr::filter(alg %in% c(ai_name_cat,
+                           ai_name_35,
+                           ai_name_4o)) %>%
+  ggplot(aes(x = class_str,
+             y = value,
+             fill = alg)) +
+  geom_col(position = position_dodge(width = 0.9), color = "black") +
+  geom_text(aes(label = round(value, 2)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5,
+            size = 3) +
+  facet_wrap(~name) +
+  scale_fill_manual(values = c("green2",
+                               "forestgreen",
+                               "darkorange")) +
+  labs(x = NULL,
+       y = NULL,
+       fill = "Algorithm") +
+  ylim(0, 1) +
+  theme_classic2() +
+  theme(axis.text = element_text(color = "black"),
+        strip.background = element_blank(),
+        strip.text = element_text(face = "bold")) 
+
+ggsave(filename = file.path(figures_dir,
+                            "class_comments_results_chatGPTonly.png"),
+       height = 4, width = 14)
 
 # Make metrics by length of comments -------------------------------------------
 # results_df <- results_df %>%

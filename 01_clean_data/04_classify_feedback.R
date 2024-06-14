@@ -118,11 +118,49 @@ for(type in c("main")){
         dplyr::select(uid, q_comment_id)
       
       ## Ratings
-      chatgpt_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", "chatgpt_classification.Rds"))
+      chatgpt_4o_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
+                                         "chatgpt_classification_2_gpt-4o.Rds"))
       
-      chatgpt_df <- chatgpt_df %>%
+      chatgpt_35_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
+                                         "chatgpt_classification_3_gpt-3.5-turbo.Rds"))
+      
+      chatgpt_4o_category_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
+                                                  "chatgpt_category_1_gpt-4o.Rds"))
+      
+      chatgpt_4o_df <- chatgpt_4o_df %>%
         dplyr::select(q_comment_id, q_comment_rating) %>%
-        dplyr::mutate(q_comment_rating = q_comment_rating %>% as.numeric())
+        dplyr::mutate(q_comment_rating = q_comment_rating %>% as.numeric()) %>%
+        dplyr::rename(comment_driver_gpt_4o_code = q_comment_rating)
+      
+      chatgpt_35_df <- chatgpt_35_df %>%
+        dplyr::select(q_comment_id, q_comment_rating) %>%
+        dplyr::mutate(q_comment_rating = q_comment_rating %>% as.numeric()) %>%
+        dplyr::rename(comment_driver_gpt_35_code = q_comment_rating)
+      
+      chatgpt_4o_category_df <- chatgpt_4o_category_df %>%
+        dplyr::mutate(chatgpt_4o_cat_1 = q_comment_rating %>% str_detect("1"),
+                      chatgpt_4o_cat_1p = q_comment_rating %>% str_detect("1p"),
+                      chatgpt_4o_cat_1n = q_comment_rating %>% str_detect("1n"),
+                      chatgpt_4o_cat_1r = q_comment_rating %>% str_detect("1r"),
+                      
+                      chatgpt_4o_cat_2 = q_comment_rating %>% str_detect("2"),
+                      chatgpt_4o_cat_2p = q_comment_rating %>% str_detect("2p"),
+                      chatgpt_4o_cat_2n = q_comment_rating %>% str_detect("2n"),
+                      chatgpt_4o_cat_2r = q_comment_rating %>% str_detect("2r"),
+                      
+                      chatgpt_4o_cat_3 = q_comment_rating %>% str_detect("3"),
+                      chatgpt_4o_cat_3p = q_comment_rating %>% str_detect("3p"),
+                      chatgpt_4o_cat_3n = q_comment_rating %>% str_detect("3n"),
+                      chatgpt_4o_cat_3r = q_comment_rating %>% str_detect("3r"),
+                      
+                      chatgpt_4o_cat_4 = q_comment_rating %>% str_detect("4"),
+                      chatgpt_4o_cat_4p = q_comment_rating %>% str_detect("4p"),
+                      chatgpt_4o_cat_4n = q_comment_rating %>% str_detect("4n"),
+                      chatgpt_4o_cat_4r = q_comment_rating %>% str_detect("4r"),
+                      
+                      chatgpt_4o_cat_5 = q_comment_rating %>% str_detect("5")) %>%
+        dplyr::rename(chatgpt_4o_cat = q_comment_rating) %>%
+        dplyr::select(-c(uid, q_comment))
       
       # chatgpt_df <- chatgpt_df %>%
       #   group_by(q_comment_id) %>%
@@ -131,9 +169,13 @@ for(type in c("main")){
       
       ## Merge
       chatgpt_all_df <- comment_id_df %>%
-        left_join(chatgpt_df, by = "q_comment_id") %>%
-        dplyr::rename(comment_driver_gpt_code = q_comment_rating) %>%
-        dplyr::select(uid, comment_driver_gpt_code)
+        full_join(chatgpt_4o_df, by = "q_comment_id") %>%
+        full_join(chatgpt_35_df, by = "q_comment_id") %>%
+        full_join(chatgpt_4o_category_df, by = "q_comment_id") %>%
+        dplyr::select(uid, 
+                      comment_driver_gpt_4o_code,
+                      comment_driver_gpt_35_code,
+                      contains("chatgpt_4o_cat"))
       
       ## Merge with main dataframe
       df <- df %>%
