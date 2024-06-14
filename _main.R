@@ -58,7 +58,8 @@ pacman::p_load(magrittr,
                fixest,
                purrr,
                tibble,
-               did)
+               did,
+               chatgpt)
 
 # Delete outputs ---------------------------------------------------------------
 if(DELETE_OUTPUTS){

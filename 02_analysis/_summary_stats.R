@@ -109,11 +109,21 @@ mean(fb_comment_df$q_comment_clean_nchar == 0)
 
 mean(fb_comment_df$q_comment_nchar <= 2)
 
+# Installation dates -----------------------------------------------------------
+gps_install_df <- read_dta(file.path(data_dir, "RawData", "gps_install_survey.dta"))
+gps_install_df$gpssrvy_submissiondate %>% min()
+gps_install_df$gpssrvy_submissiondate %>% max()
 
+gps_sticker_install_df <- read_dta(file.path(data_dir, "RawData", "gps_vehicle_sticker_install_survey.dta"))
+gps_sticker_install_df$sticker_install_date %>% min()
+gps_sticker_install_df$sticker_install_date %>% max()
 
-
-
-
+feedback_df <- read_dta(file.path(data_dir, "RawData", "passenger_feedback.dta"))
+feedback_df %>%
+  group_by(pilot_number) %>%
+  dplyr::summarise(date_min = min(date),
+                   date_max = max(date)) %>%
+  ungroup()
 
 
 
