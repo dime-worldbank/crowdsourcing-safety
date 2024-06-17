@@ -1,5 +1,8 @@
 # Telematics Summary
 
+comment_filter <- FALSE
+distinct_pass <- TRUE
+
 for(comment_filter in c(TRUE, FALSE)){
   for(distinct_pass in c(TRUE, FALSE)){
     

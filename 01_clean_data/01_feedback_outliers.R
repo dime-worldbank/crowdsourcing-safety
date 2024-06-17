@@ -11,6 +11,7 @@ for(type in c("main")){
       
       # Filter based on comments ---------------------------------------------------
       if(comment_filter %in% T){
+        
         fb_df <- fb_df %>%
           dplyr::mutate(q_comment = q_comment %>% 
                           tolower() %>%
@@ -54,7 +55,19 @@ for(type in c("main")){
           group_by(datetime_30m, regno, response_method) %>%
           dplyr::mutate(n_feedback_30mins = n()) %>%
           ungroup() %>%
-          dplyr::filter(n_feedback_30mins <= 14)
+          dplyr::mutate(q_comment_nchar = nchar(q_comment)) %>%
+          dplyr::mutate(remove = ((n_feedback_30mins > 14) & (q_comment_nchar <= 50))) %>%
+          dplyr::filter(remove %in% F)
+          #dplyr::filter(n_feedback_30mins <= 14)
+        
+        # a <- fb_df %>%
+        #   dplyr::mutate(datetime_30m = datetime %>% floor_date(unit = "30 minutes")) %>%
+        #   group_by(datetime_30m, regno, response_method) %>%
+        #   dplyr::mutate(n_feedback_30mins = n()) %>%
+        #   ungroup() %>%
+        #   dplyr::mutate(q_comment_nchar = nchar(q_comment)) %>%
+        #   dplyr::filter((n_feedback_30mins <= 14) & (q_comment_nchar <= 50))
+
       } else{
         
         fb_df <- bind_rows(

@@ -4,7 +4,7 @@
 
 # "gpt-3.5-turbo"
 # "gpt-4o"
-CHATGPT_RUN_NUM <- 1
+CHATGPT_RUN_NUM <- 2
 CHATGPT_MODEL <- "gpt-4o"
 
 # Load data --------------------------------------------------------------------
@@ -71,12 +71,12 @@ for(i in 1:nrow(fb_unique_df)){
       try({
         fb_unique_df_i$q_comment_rating <- ask_chatgpt(fb_unique_df_i$q_comment)
         saveRDS(fb_unique_df_i, OUT_NAME)
-        Sys.sleep(4)
+        Sys.sleep(6)
         retry <- FALSE
       }, silent = TRUE)
       if(retry){
         print("Retry")
-        Sys.sleep(120)
+        Sys.sleep(180)
       }
     }
   }

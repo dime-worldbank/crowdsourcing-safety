@@ -102,6 +102,11 @@ ggsave(filename = file.path(figures_dir,
        height = 4, width = 8)
 
 # Example comments --------------------------------------------------------------
+
+fb_df %>%
+  pull(q_comment) %>%
+  str_subset("phone")
+
 #### 1 - Safety
 fb_df %>%
   dplyr::filter(chatgpt_4o_cat_1p %in% T) %>%
@@ -166,9 +171,64 @@ fb_df %>%
   pull(q_comment) %>%
   unique()
 
-# Comparing to ground truth and other classifications --------------------------
+# Other comments ---------------------------------------------------------------
+fb_df <- fb_df %>%
+  dplyr::mutate(q_comment_nchar_car = case_when(
+    q_comment_nchar <= 5 ~ "<5",
+    q_comment_nchar <= 10 ~ "6-10",
+    q_comment_nchar <= 20 ~ "11-20",
+    q_comment_nchar <= 30 ~ "21-30",
+    q_comment_nchar <= 40 ~ "31-40",
+    q_comment_nchar <= 50 ~ "41-50",
+    q_comment_nchar <= 100 ~ "51-100",
+    q_comment_nchar > 100 ~ ">100"
+  ) %>%
+    factor(levels = c("<5",
+                      "6-10",
+                      "11-20",
+                      "21-30",
+                      "31-40",
+                      "41-50",
+                      "51-100",
+                      ">100"))) 
 
+nchar_df <- fb_df %>%
+  dplyr::filter(!is.na(chatgpt_4o_cat_5)) %>%
+  mutate(type = case_when(
+    chatgpt_4o_cat_5 %in% T ~ "Topic: Other",
+    TRUE ~ "Topic: 1-4"
+  )) %>%
+  group_by(q_comment_nchar_car, type) %>%
+  dplyr::summarise(n = n()) %>%
+  ungroup() %>%
+  
+  group_by(type) %>%
+  dplyr::mutate(total = sum(n)) %>%
+  ungroup() %>%
+  
+  dplyr::mutate(prop = n / total,
+                per = round(prop*100,2) %>% paste0("%") ) #%>%
+  #pivot_wider(id_cols = q_comment_nchar_car,
+  #            names_from = type,
+  #            values_from = prop)
 
+nchar_df %>%
+  ggplot(aes(y = q_comment_nchar_car,
+             x = prop)) +
+  geom_col(fill = "dodgerblue3") +
+  geom_text(aes(label = per),
+            hjust = -0.2) +
+  labs(fill = NULL,
+       x = NULL,
+       y = "Number of\ncharacters\nin comments") +
+  scale_x_continuous(labels = scales::percent,
+                     limits = c(0, 0.6)) +
+  theme_classic2() +
+  theme(strip.background = element_blank(),
+        strip.text = element_text(face = "bold"),
+        axis.title.y = element_text(angle = 0, vjust = 0.5)) +
+  facet_wrap(~type)
 
-
-
+ggsave(filename = file.path(figures_dir,
+                            "categroy_comments_nchar.png"),
+       height = 3, width = 8)
