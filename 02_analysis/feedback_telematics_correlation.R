@@ -122,7 +122,7 @@ for(comment_filter in c(TRUE, FALSE)){
         feedback_var == "sentiment_snmtr_prop_un0_1" ~ "Comment Sentiment\n% Negative",
         feedback_var == "comment_driver_sntmt_code_compl" ~ "Positive Comment\n[Manual Code]",
         feedback_var == "comment_driver_sntmt_code_neg" ~ "Negative Comment\n[Manual Code]",
-        feedback_var == "comment_driver_sntmt_code_avg" ~ "Sentiment of\nDriving Related\nComments",
+        feedback_var == "comment_driver_sntmt_code_avg" ~ "Percent of Passenger\nComments that\nIndicate Safe Driving ",
         feedback_var == "q_safety_prop_unsafe" ~ "Percent\nRate Unsafe",
         feedback_var == "q_safety_prop_safe" ~ "Percent\nRate Safe",
         feedback_var == "q_speed_rating_v2_vfast" ~ "Percent Rate\nVery Fast",

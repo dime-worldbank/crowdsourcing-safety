@@ -2,9 +2,9 @@
 
 set.seed(142)
 
-type <- "main"
+type           <- "main"
 comment_filter <- FALSE
-distinct_pass <- TRUE
+distinct_pass  <- TRUE
 
 for(type in c("main")){
   for(comment_filter in c(TRUE, FALSE)){
@@ -119,13 +119,13 @@ for(type in c("main")){
       
       ## Ratings
       chatgpt_4o_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
-                                         "chatgpt_classification_2_gpt-4o.Rds"))
+                                         "chatgpt_classification_10_gpt-4o.Rds"))
       
       chatgpt_35_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
-                                         "chatgpt_classification_3_gpt-3.5-turbo.Rds"))
+                                         "chatgpt_classification_11_gpt-3.5-turbo.Rds"))
       
       chatgpt_4o_category_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
-                                                  "chatgpt_category_1_gpt-4o.Rds"))
+                                                  "chatgpt_category_2_gpt-4o.Rds"))
       
       chatgpt_4o_df <- chatgpt_4o_df %>%
         dplyr::select(q_comment_id, q_comment_rating) %>%

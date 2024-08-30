@@ -2,19 +2,21 @@
 
 # https://platform.openai.com/
 
-CHATGPT_RUN_NUM <- 3
-CHATGPT_MODEL <- "gpt-3.5-turbo"
+# "gpt-3.5-turbo"
+# "gpt-4o"
+CHATGPT_RUN_NUM <- 10
+CHATGPT_MODEL <- "gpt-4o"
 
 # Load data --------------------------------------------------------------------
 fb_df <- readRDS(file.path(data_dir, "FinalData", 
-                        paste0("passenger_feedback_valid_",
-                               "main", "_",
-                               "cmntfilter",
-                               FALSE,
-                               "_",
-                               "dstnctpass",
-                               TRUE,
-                               ".Rds")))
+                           paste0("passenger_feedback_valid_",
+                                  "main", "_",
+                                  "cmntfilter",
+                                  FALSE,
+                                  "_",
+                                  "dstnctpass",
+                                  TRUE,
+                                  ".Rds")))
 
 CHATGPT_RUN <- paste0(CHATGPT_RUN_NUM, "_", CHATGPT_MODEL)
 
@@ -68,13 +70,14 @@ for(i in 1:nrow(fb_unique_df)){
     while(retry){
       try({
         fb_unique_df_i$q_comment_rating <- ask_chatgpt(fb_unique_df_i$q_comment)
+        print(fb_unique_df_i$q_comment_rating)
         saveRDS(fb_unique_df_i, OUT_NAME)
-        Sys.sleep(3)
+        Sys.sleep(2)
         retry <- FALSE
       }, silent = TRUE)
       if(retry){
         print("Retry")
-        Sys.sleep(60)
+        Sys.sleep(61)
       }
     }
   }
@@ -95,3 +98,13 @@ write_csv(fb_unique_df, OUT_PATH_2)
 saveRDS(chatgpt_all_df, file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", 
                                   paste0("chatgpt_classification_",CHATGPT_RUN, ".Rds")))
 
+
+
+# a <- chatgpt_all_df[chatgpt_all_df$q_comment_rating %>% nchar() > 1,]
+# 
+# 
+# for(i in a$q_comment_id){
+#   OUT_NAME <- file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", "classification", CHATGPT_RUN,
+#                         paste0("comment_id", i, ".Rds"))
+#   file.remove(OUT_NAME)
+# }

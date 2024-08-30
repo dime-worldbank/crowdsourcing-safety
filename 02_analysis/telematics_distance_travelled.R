@@ -1,9 +1,12 @@
+# Distance Travelled
 
-# Load data --------------------------------------------------------------------
-sensor_df <- readRDS(file.path(data_dir, "RawData", "sensor_day.Rds"))
+veh_df <- readRDS(file.path(data_dir, "FinalData", 
+                  paste0("vehicle_level_stickers_telematics_",
+                         "cmntfilter",
+                         FALSE,
+                         "_",
+                         "dstnctpass",
+                         TRUE,".Rds")))
 
-sensor_df %>%
-  group_by()
-
-sensor_df$distance_minmax_latlon_daily_km
+veh_df$distance_minmax_latlon_daily_km %>% summary()
 

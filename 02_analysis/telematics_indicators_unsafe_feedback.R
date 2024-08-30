@@ -25,13 +25,13 @@ rank_df <- bind_rows(
     head(2),
   
   veh_df %>%
-    arrange(comment_driver_sntmt_code_avg) %>%
+    arrange(-comment_driver_sntmt_code_neg) %>%
     head(2)
 ) %>%
   distinct(regno, .keep_all = T) %>%
   dplyr::select(regno, n_feedback,
                 
-                q_safety_prop_unsafe, q_speed_rating_v2_vfast, comment_driver_sntmt_code_avg,
+                q_safety_prop_unsafe, q_speed_rating_v2_vfast, comment_driver_sntmt_code_neg,
                 
                 prop_time_over_80kph_base_10kph,
                 prop_time_over_100kph_base_10kph,
@@ -53,15 +53,15 @@ veh_rank_df <- veh_df %>%
          
          q_safety_prop_unsafe, 
          q_speed_rating_v2_vfast, 
-         comment_driver_sntmt_code_avg) %>%
+         comment_driver_sntmt_code_neg) %>%
   mutate(across(where(is.numeric), ~ rank(.x))) %>%
   rename_with(~ paste0(.x, "_rank"), where(is.numeric))
 
 rank_df <- rank_df %>%
   left_join(veh_rank_df, by = "regno") %>%
-  left_join(veh_all_rank_df, by = "regno") %>%
-  mutate(comment_driver_sntmt_code_avg_rank = 
-           13 - comment_driver_sntmt_code_avg_rank + 1)
+  left_join(veh_all_rank_df, by = "regno") # %>% 
+  # mutate(comment_driver_sntmt_code_neg_rank = 
+  #          13 - comment_driver_sntmt_code_neg_rank + 1)
 
 clean_var <- function(df, var, n){
   avg_val  <- df[[var]] %>% round(2)
@@ -75,7 +75,7 @@ clean_var <- function(df, var, n){
 rank_df <- rank_df %>%
   clean_var("q_safety_prop_unsafe", 13) %>%
   clean_var("q_speed_rating_v2_vfast", 13) %>%
-  clean_var("comment_driver_sntmt_code_avg", 13) %>%
+  clean_var("comment_driver_sntmt_code_neg", 13) %>%
   
   clean_var("prop_time_over_80kph_base_10kph", 25) %>%
   clean_var("prop_time_over_100kph_base_10kph", 25) %>%
@@ -91,11 +91,11 @@ p <- rank_df %>%
      auto_align = F) %>%
   cols_hide(c(q_safety_prop_unsafe, 
               q_speed_rating_v2_vfast, 
-              comment_driver_sntmt_code_avg,
+              comment_driver_sntmt_code_neg,
               
               q_safety_prop_unsafe_rank, 
               q_speed_rating_v2_vfast_rank, 
-              comment_driver_sntmt_code_avg_rank,
+              comment_driver_sntmt_code_neg_rank,
               
               prop_time_over_80kph_base_10kph,
               prop_time_over_100kph_base_10kph,
@@ -106,10 +106,10 @@ p <- rank_df %>%
               rate_N_valueg_above0_5_base_10kph_rank)) %>%
   data_color(columns = c("q_safety_prop_unsafe_rank",
                          "q_speed_rating_v2_vfast_rank",
-                         "comment_driver_sntmt_code_avg_rank"), 
+                         "comment_driver_sntmt_code_neg_rank"), 
              target_columns = c("q_safety_prop_unsafe_table",
                                 "q_speed_rating_v2_vfast_table",
-                                "comment_driver_sntmt_code_avg_table"),
+                                "comment_driver_sntmt_code_neg_table"),
              palette = "RdYlBu",
              domain = c(1,13),
              reverse = T,
@@ -127,7 +127,7 @@ p <- rank_df %>%
   cols_label(n_feedback = "N Feedback",
              q_safety_prop_unsafe_table = "Percent Rate Unsafe",
              q_speed_rating_v2_vfast_table = "Percent Rate Very Fast",
-             comment_driver_sntmt_code_avg_table = "Driving Polarity",
+             comment_driver_sntmt_code_neg_table = "Percent of Comments Indicate Unsafe Driving",
              prop_time_over_80kph_base_10kph_table = "Percent time > 80km/h",
              prop_time_over_100kph_base_10kph_table = "Percent time > 100km/h",
              rate_N_valueg_above0_5_base_10kph_table = "Harsh driving rate") %>%
@@ -139,7 +139,7 @@ p <- rank_df %>%
     label = "Passenger Feedback: Value (Ranking)",
     columns = vars(q_safety_prop_unsafe_table,
                    q_speed_rating_v2_vfast_table,
-                   comment_driver_sntmt_code_avg_table)) %>% 
+                   comment_driver_sntmt_code_neg_table)) %>% 
   tab_spanner(
     label = "Telematics: Value (Ranking)",
     columns = vars(prop_time_over_80kph_base_10kph_table,
@@ -149,49 +149,49 @@ p <- rank_df %>%
 gtsave(p, filename = file.path(figures_dir, "unsafe_vehicles_table.png"))
 
 # Histograms -------------------------------------------------------------------
-make_hist <- function(df,
-                      var,
-                      name_str){
-  
-  df$var <- df[[var]]
-  rank_df$var <- rank_df[[var]]
-  
-  rank_df <- bind_rows(
-    rank_df,
-    data.frame(var = median(df$var),
-               regno = "Median")
-  )
-  
-  df %>%
-    ggplot(aes(x = var)) +
-    geom_histogram(fill = "gray80",
-                   color = "black") +
-    geom_vline(data = rank_df,
-               aes(xintercept = var,
-                   color = regno),
-               linewidth = 0.75) +
-    labs(color = NULL,
-         y = "N Vehicles",
-         x = name_str,
-         title = name_str) +
-    scale_color_manual(values = c("black", "red", "green2", "deepskyblue")) +
-    theme_classic2() +
-    theme(plot.title = element_text(size = 12, face = "bold"))
-}
-
-p1 <- make_hist(veh_all_df,
-                "prop_time_over_80kph_base_10kph",
-                "Proportion of time exceed 80 km/h")
-
-p2 <- make_hist(veh_all_df,
-                "prop_time_over_100kph_base_10kph",
-                "Proportion of time exceed 100 km/h")
-
-p3 <- make_hist(veh_all_df,
-                "rate_N_valueg_above0_5_base_10kph",
-                "N Harsh Violations per Hour")
-
-p <- ggarrange(p1, p2, p3, nrow = 1, common.legend = T, legend = "top")
-
-ggsave(p, filename = file.path(figures_dir, "unsafe_vehicles_hist.png"),
-       height = 3, width = 10)
+# make_hist <- function(df,
+#                       var,
+#                       name_str){
+#   
+#   df$var <- df[[var]]
+#   rank_df$var <- rank_df[[var]]
+#   
+#   rank_df <- bind_rows(
+#     rank_df,
+#     data.frame(var = median(df$var),
+#                regno = "Median")
+#   )
+#   
+#   df %>%
+#     ggplot(aes(x = var)) +
+#     geom_histogram(fill = "gray80",
+#                    color = "black") +
+#     geom_vline(data = rank_df,
+#                aes(xintercept = var,
+#                    color = regno),
+#                linewidth = 0.75) +
+#     labs(color = NULL,
+#          y = "N Vehicles",
+#          x = name_str,
+#          title = name_str) +
+#     scale_color_manual(values = c("black", "red", "green2", "deepskyblue")) +
+#     theme_classic2() +
+#     theme(plot.title = element_text(size = 12, face = "bold"))
+# }
+# 
+# p1 <- make_hist(veh_all_df,
+#                 "prop_time_over_80kph_base_10kph",
+#                 "Proportion of time exceed 80 km/h")
+# 
+# p2 <- make_hist(veh_all_df,
+#                 "prop_time_over_100kph_base_10kph",
+#                 "Proportion of time exceed 100 km/h")
+# 
+# p3 <- make_hist(veh_all_df,
+#                 "rate_N_valueg_above0_5_base_10kph",
+#                 "N Harsh Violations per Hour")
+# 
+# p <- ggarrange(p1, p2, p3, nrow = 1, common.legend = T, legend = "top")
+# 
+# ggsave(p, filename = file.path(figures_dir, "unsafe_vehicles_hist.png"),
+#        height = 3, width = 10)

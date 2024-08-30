@@ -164,13 +164,13 @@ p_driving_snmtr <- veh_stack_df %>%
             size = COL_TEXT_SIZE) +
   scale_x_continuous(limits = c(-1.1, 1.1),
                      breaks = seq(-1, 1, 1),
-                     labels = c("-1 Most Negative",
-                                "0 Neutral",
-                                "1 Most Positive")) +
+                     labels = c("-1\nUnsafe",
+                                "0\nNeutral",
+                                "1\nSafe")) +
   scale_y_continuous(limits = c(0, 27)) +
   labs(x = NULL,
        y = "N Vehicles",
-       title = "E. Vehicle average of: Sentiment of driving\nrelated comments") +
+       title = "E. Vehicle average of comments indicating safe\nand unsafe driving") +
   custom_theme
 
 p_level <- ggarrange(p_safe, p_speed_alt, p_driving_snmtr, ncol = 1)
@@ -316,7 +316,7 @@ p_prop_driving_snmtr_neg <- veh_stack_sntmt_df %>%
   scale_y_continuous(limits = c(0, 27)) +
   labs(x = NULL,
        y = "N Vehicles",
-       title = "F. Percent of passengers that give negative\ncomments on driving") +
+       title = "F. Percent of passengers with comment\nindicating unsafe driving") +
   custom_theme
 
 p_prop <- ggarrange(p_prop_safe, p_prop_speed_alt, p_prop_driving_snmtr_neg, ncol = 1)

@@ -166,6 +166,8 @@ for(comment_filter in c(TRUE, FALSE)){
       sensor_df[[var_i]][which(sensor_df$distance_minmax_latlon_daily_km < 50)] <- NA
     }
     
+    sensor_df$distance_minmax_latlon_daily_km[sensor_df$distance_minmax_latlon_daily_km < 50] <- NA
+    
     sensor_sum_df <- sensor_df %>%
       group_by(regno) %>%
       dplyr::summarise(across(where(is.numeric), mean, na.rm = T)) %>%

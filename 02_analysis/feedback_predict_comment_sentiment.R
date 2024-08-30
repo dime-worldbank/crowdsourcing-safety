@@ -253,9 +253,18 @@ comment_df <- fb_lim_df %>%
 # 3 = Neutral / not relevant
 
 comment_df %>%
-  dplyr::filter(q_comment %>%
-                  str_detect("nice")) %>%
-  head()
+  filter(q_comment %in% "from my perspective the driver drives safely")
+
+comment_df %>%
+  filter(q_comment %in% "matatu is clean but very fast")
+
+comment_df %>%
+  filter(q_comment %in% "drives fast")
+
+comment_df %>%
+  filter(q_comment %in% "nice car")
+
+
 
 # chatGPT Category Results -----------------------------------------------------
 metrics_all_df %>%

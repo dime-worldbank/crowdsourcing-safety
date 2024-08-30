@@ -9,11 +9,10 @@ fb_df <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_main
 veh_df        <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 veh_stc_df    <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 veh_stc_tl_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_cmntfilterFALSE_dstnctpassTRUE.Rds"))
+veh_stc_tl_sufffeed_df <- readRDS(file.path(data_dir, "FinalData", "vehicle_level_stickers_telematics_suff_feedback_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 # N Observations ---------------------------------------------------------------
-## Raw
-nrow(fb_raw_df)
-
+## Dataset of number of surveys per person
 dup_phone <- fb_raw_df %>%
   group_by(phone_hash) %>%
   dplyr::summarise(n_responses = n()) %>%
@@ -28,44 +27,48 @@ dup_phone <- fb_raw_df %>%
   arrange(n_responses) %>%
   mutate(prop_passengers_cumsum = cumsum(prop_passengers))
 
+## Total surveys completed
+nrow(fb_raw_df)
+
+## % completed 1 survey
 dup_phone %>%
   dplyr::filter(n_responses == 1) %>%
-  pull(prop_passengers)
+  pull(prop_passengers) %>%
+  round(2)
 
+## % completed 5 or less surveys
 dup_phone %>%
   dplyr::filter(n_responses %in% 1:5) %>%
   pull(prop_passengers) %>%
-  sum()
+  sum() %>%
+  round(2)
 
+## Max surveys completed by a passengers
 dup_phone$n_responses %>% max()
 
-dup_phone %>%
+## N passengers completed between 10 and MAX surveys
+n_10_more <- dup_phone %>%
   dplyr::filter(n_responses %in% 10:50) %>%
   pull(n_passengers) %>%
   sum()
 
-dup_phone %>%
-  pull(n_passengers) %>%
-  sum()
+n_10_more
 
-178/6251
+## Prop passengers completed between 10 and MAX surveys
+round(n_10_more / sum(dup_phone$n_passengers), 2)
 
-dup_phone %>%
-  dplyr::filter(n_responses >= 20) %>%
-  dplyr::summarise(n = sum(n_passengers))
-
-## Removing duplicates
-nrow(fb_all_df)
-
-## Remove duplicates
-fb_raw_df %>%
-  distinct(phone_hash, regno, .keep_all = T) %>%
+## N observations after removing duplicates
+n_no_dups <- fb_raw_df %>%
+  distinct(phone_hash) %>%
   nrow()
 
-## Cheating
-nrow(fb_df)
+n_no_dups
 
-6386 - 4595
+## N potential cheating
+n_no_dups - nrow(fb_df)
+
+## N observations final data
+nrow(fb_df)
 
 ## Response method
 fb_df$response_method %>% table()
@@ -73,7 +76,12 @@ fb_df$response_method %>% table()
 # N feedback per vehicle -------------------------------------------------------
 ## All vehicles
 table(veh_stc_df$n_feedback == 0)
+
 veh_stc_df$n_feedback %>% summary()
+
+table(veh_stc_df$n_feedback >= 1000)
+
+table(veh_stc_df$n_feedback >= 10)
 
 ## Without QR codes
 veh_stc_noqr_df <- veh_stc_df %>%
@@ -105,9 +113,10 @@ fb_comment_df <- fb_comment_df %>%
                 q_comment_clean_nchar = nchar(q_comment_clean))
 
 # 5% just a number.
-mean(fb_comment_df$q_comment_clean_nchar == 0)
+mean(fb_comment_df$q_comment_clean_nchar == 0) %>% round(2)
 
-mean(fb_comment_df$q_comment_nchar <= 2)
+# % 2 characters or less
+mean(fb_comment_df$q_comment_nchar <= 2) %>% round(2)
 
 # Installation dates -----------------------------------------------------------
 gps_install_df <- read_dta(file.path(data_dir, "RawData", "gps_install_survey.dta"))

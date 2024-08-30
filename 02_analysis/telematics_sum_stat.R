@@ -1,4 +1,10 @@
 # Telematics Summary
+# 
+# sensor_df %>%
+#   distinct(date, reg_no_id) %>%
+#   group_by(date) %>%
+#   dplyr::summarise(n = n()) %>%
+#   ungroup()
 
 for(veh_subset in c("all", "stickers")){
   

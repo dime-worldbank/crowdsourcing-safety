@@ -71,12 +71,12 @@ for(i in 1:nrow(fb_unique_df)){
       try({
         fb_unique_df_i$q_comment_rating <- ask_chatgpt(fb_unique_df_i$q_comment)
         saveRDS(fb_unique_df_i, OUT_NAME)
-        Sys.sleep(6)
+        Sys.sleep(5)
         retry <- FALSE
       }, silent = TRUE)
       if(retry){
         print("Retry")
-        Sys.sleep(180)
+        Sys.sleep(70)
       }
     }
   }

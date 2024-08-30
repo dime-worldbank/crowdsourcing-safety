@@ -1,7 +1,10 @@
 # Figures
 
+library(wordcloud2)
+library(wordcloud)
+
 # Load data --------------------------------------------------------------------
-fb_df  <- readRDS(file.path(ap_data_dir, "FinalData", "passenger_feedback_valid_class_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
+fb_df  <- readRDS(file.path(data_dir, "FinalData", "passenger_feedback_valid_class_main_cmntfilterFALSE_dstnctpassTRUE.Rds"))
 
 # Comments word cloud ----------------------------------------------------------
 set.seed(42)
@@ -54,8 +57,28 @@ wordcloud2(data = word_freq_clean,
            shuffle = F,
            ellipticity = 0.2)
 
+set.seed(42)
+wordcloud(words = word_freq_clean$word, 
+          freq = word_freq_clean$freq,
+          scale = c(1.5, 0.1),
+          min.freq = 0,
+          max.words=200, 
+          random.order=FALSE, rot.per=0.35, 
+          ordered.colors = T,
+          colors=word_freq_clean$color)
 
-
-
-
-
+# 
+# wordcloud(word_freq_clean$word,
+#           word_freq_clean$freq)
+# # word_freq_clean_lim <- word_freq_clean
+# # 
+# # ggplot(data = word_freq_clean_lim) +
+# #   geom_text_wordcloud_area(aes(
+# #     label = word, 
+# #     size = freq
+# #   ),
+# #   color = word_freq_clean_lim$color) +
+# #   scale_size_area(max_size = 10) +
+# #   theme_minimal()
+# 
+# 
