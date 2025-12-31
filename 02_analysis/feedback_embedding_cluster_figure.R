@@ -95,7 +95,7 @@ top5_per_category_df %>%
     fill = q_comment_rating_sent,
     label = n_text,
   )) +
-  geom_col() +
+  geom_col(color = "black") +
   geom_text(nudge_x = 15, size = 3.5) +
   facet_wrap(~ q_comment_rating_num, scales = "free_y") +
   scale_fill_manual(values = c("green4", "red2", "dodgerblue")) +
