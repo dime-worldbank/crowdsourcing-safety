@@ -54,12 +54,17 @@ pacman::p_load(magrittr,
                forcats,
                tm,
                scales,
+               ggrepel,
                haven,
                fixest,
                purrr,
                tibble,
                did,
-               chatgpt)
+               chatgpt,
+               openai,
+               httr,
+               jsonlite,
+               tidytext)
 
 # Delete outputs ---------------------------------------------------------------
 if(DELETE_OUTPUTS){

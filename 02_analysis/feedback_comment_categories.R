@@ -85,8 +85,8 @@ fb_long_df %>%
             hjust = -0.05,
             position = position_dodge(width = 0.9)) +
   scale_fill_manual(values = c("dodgerblue",
-                               "red",
-                               "green3"),
+                               "red2",
+                               "green4"),
                     na.translate = F,
                     guide = guide_legend(reverse = TRUE)) +
   labs(fill = NULL,

@@ -100,11 +100,3 @@ saveRDS(chatgpt_all_df, file.path(data_dir, "FinalData ChatGPT Comment Codes", "
 
 
 
-# a <- chatgpt_all_df[chatgpt_all_df$q_comment_rating %>% nchar() > 1,]
-# 
-# 
-# for(i in a$q_comment_id){
-#   OUT_NAME <- file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs", "classification", CHATGPT_RUN,
-#                         paste0("comment_id", i, ".Rds"))
-#   file.remove(OUT_NAME)
-# }
