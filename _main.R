@@ -14,14 +14,10 @@ RUN_CODE <- F
 # Rob (Personal Comptuer)
 if(Sys.info()[["user"]] == "robmarty"){
   data_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback/Academic Paper/Data"
+  data_all_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback/Data"
+  
   git_dir  <- "~/Documents/Github/crowdsourcing-safety"
   overleaf_dir <- "~/Dropbox/Apps/Overleaf/Crowdsourcing Safety Kenya Matatu Passenger Safety Project"
-}
-
-# Ruiwen (WB Computer)
-if(Sys.info()[["user"]] == "wb575963"){
-  data_dir <- "C:/Users/wb575963/Dropbox/PSV Rider Feedback/Academic Paper/Data"
-  git_dir <- "C:/Users/wb575963/Github/crowdsourcing-safety"
 }
 
 tables_dir  <- file.path(overleaf_dir, "tables")

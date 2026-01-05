@@ -129,10 +129,10 @@ for(comment_filter in c(TRUE, FALSE)){
         TRUE ~ feedback_var
       )) %>%
       dplyr::mutate(feedback_sort = case_when(
-        feedback_var == "q_safety_rating_num" ~ 1,
-        feedback_var == "q_safety_prop_safe" ~ 2,
-        feedback_var == "q_speed_rating_v2_num" ~ 3,
-        feedback_var == "q_speed_rating_v2_vfast" ~ 4,
+        feedback_var == "q_speed_rating_v2_num" ~ 1,
+        feedback_var == "q_speed_rating_v2_vfast" ~ 2,
+        feedback_var == "q_safety_rating_num" ~ 3,
+        feedback_var == "q_safety_prop_safe" ~ 4,
         feedback_var == "sentiment_snmtr" ~ 5,
         feedback_var == "sentiment_snmtr_prop_un0_1" ~ 6,
         feedback_var == "comment_driver_sntmt_code_avg" ~ 7,
