@@ -13,6 +13,8 @@ n_valid_comments <- readRDS(file.path(data_dir, "FinalData",
   dplyr::filter(!is.na(chatgpt_4o_cat)) %>%
   nrow()
 
+file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs") %>%
+  list.files()
 cluster_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs",
                                 "fb_comments_with_embeddings_cluster_nneighbor5.Rds"))
 
@@ -29,7 +31,7 @@ cluster_df$q_comment_chatgpt_summary_lb <- sapply(
 
 top5_per_category_df <- cluster_df %>%
   group_by(q_comment_rating) %>%
-  slice_max(order_by = n_alltweets, n = 3, with_ties = FALSE) %>%
+  slice_max(order_by = n_alltweets, n = 5, with_ties = FALSE) %>%
   ungroup() %>%
   dplyr::mutate(q_comment_rating_num = q_comment_rating %>%
                   str_replace_all("n|r|p", ""),
