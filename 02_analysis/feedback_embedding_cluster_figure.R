@@ -13,10 +13,14 @@ n_valid_comments <- readRDS(file.path(data_dir, "FinalData",
   dplyr::filter(!is.na(chatgpt_4o_cat)) %>%
   nrow()
 
-file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs") %>%
-  list.files()
+# file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs") %>%
+#   list.files()
+# cluster_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs",
+#                                 "fb_comments_with_embeddings_cluster_nneighbor5.Rds"))
+
 cluster_df <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs",
-                                "fb_comments_with_embeddings_cluster_nneighbor5.Rds"))
+                  paste0("fb_comments_with_embeddings_cluster_nneighbor",6,
+                         "_ncomponents",3,".Rds")))
 
 
 cluster_df$q_comment_chatgpt_summary_lb <- sapply(
@@ -80,6 +84,21 @@ top5_per_category_df <- cluster_df %>%
                   str_replace_all("Clean car, careful and polite driver", 
                                   "Clean car, careful\nand polite driver")) %>%
   dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
+                  str_replace_all("Safe, clean, well-maintained, comfortable transport", 
+                                  "Safe, clean, well-maintained,\ncomfortable transport")) %>%
+  dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
+                  str_replace_all("Enhance and enforce COVID-19 safety", 
+                                  "Enhance and enforce\nCOVID-19 safety")) %>%
+  dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
+                  str_replace_all("Safe driving with strict COVID-19 measures", 
+                                  "Safe driving with\nstrict COVID-19 measures")) %>%
+  dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
+                  str_replace_all("Everyone should wear masks in crowds.", 
+                                  "Everyone should wear\nmasks in crowds.")) %>%
+  dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
+                  str_replace_all("Clean car and careful, professional driver", 
+                                  "Clean car and careful,\nprofessional driver")) %>%
+  dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
                   str_replace_all("a", 
                                   "a")) %>%
   dplyr::mutate(q_comment_chatgpt_summary = q_comment_chatgpt_summary %>%
@@ -98,7 +117,7 @@ top5_per_category_df %>%
     label = n_text,
   )) +
   geom_col(color = "black") +
-  geom_text(nudge_x = 15, size = 3.5) +
+  geom_text(nudge_x = 18, size = 3.5) +
   facet_wrap(~ q_comment_rating_num, scales = "free_y") +
   scale_fill_manual(values = c("green4", "red2", "dodgerblue")) +
   scale_y_reordered() +
@@ -115,4 +134,8 @@ top5_per_category_df %>%
 ggsave(file.path(figures_dir, "tweet_cluster_summaries.png"),
        width = 13,
        height = 7)
+
+# ggsave(file.path(figures_dir, "tweet_cluster_summaries.png"),
+#       width = 13,
+#       height = 7)
 
