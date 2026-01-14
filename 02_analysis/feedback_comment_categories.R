@@ -116,12 +116,12 @@ fb_df %>%
 fb_df %>%
   dplyr::filter(chatgpt_4o_cat_1n %in% T) %>%
   pull(q_comment) %>%
-  unique()
+  unique() 
 
 fb_df %>%
   dplyr::filter(chatgpt_4o_cat_1r %in% T) %>%
   pull(q_comment) %>%
-  unique()
+  unique() 
 
 
 #### 2 - COVID
