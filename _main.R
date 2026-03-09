@@ -20,6 +20,15 @@ if(Sys.info()[["user"]] == "robmarty"){
   overleaf_dir <- "~/Dropbox/Apps/Overleaf/Crowdsourcing Safety Kenya Matatu Passenger Safety Project"
 }
 
+# Rob (Bank Comptuer)
+if(Sys.info()[["user"]] == "rmarty"){
+  data_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback/Academic Paper/Data"
+  data_all_dir <- "~/Dropbox/World Bank/IEs/PSV Rider Feedback/Data"
+  
+  git_dir  <- "~/Documents/github/crowdsourcing-safety"
+  overleaf_dir <- "~/Dropbox/Apps/Overleaf/Crowdsourcing Safety Kenya Matatu Passenger Safety Project"
+}
+
 tables_dir  <- file.path(overleaf_dir, "tables")
 figures_dir <- file.path(overleaf_dir, "figures")
 

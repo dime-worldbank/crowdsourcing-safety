@@ -118,6 +118,9 @@ mean(fb_comment_df$q_comment_clean_nchar == 0) %>% round(2)
 # % 2 characters or less
 mean(fb_comment_df$q_comment_nchar <= 2) %>% round(2)
 
+# % 3 characters or less
+mean(fb_comment_df$q_comment_nchar <= 3) %>% round(2)
+
 # Installation dates -----------------------------------------------------------
 gps_install_df <- read_dta(file.path(data_dir, "RawData", "gps_install_survey.dta"))
 gps_install_df$gpssrvy_submissiondate %>% min()
