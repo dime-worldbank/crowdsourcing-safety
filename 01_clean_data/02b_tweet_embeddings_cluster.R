@@ -9,6 +9,7 @@ library(purrr)
 library(stringr)
 
 n_neighbors <- 10
+n_components <- 3
 
 # Load data --------------------------------------------------------------------
 fb_df_embed <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs",
@@ -16,14 +17,14 @@ fb_df_embed <- readRDS(file.path(data_dir, "FinalData ChatGPT Comment Codes", "o
 
 # Determine number of tweets per comment ---------------------------------------
 text_df <- readRDS(file.path(data_dir, "FinalData", 
-                           paste0("passenger_feedback_valid_class_",
-                                  "main", "_",
-                                  "cmntfilter",
-                                  FALSE,
-                                  "_",
-                                  "dstnctpass",
-                                  TRUE,
-                                  ".Rds"))) %>%
+                             paste0("passenger_feedback_valid_class_",
+                                    "main", "_",
+                                    "cmntfilter",
+                                    FALSE,
+                                    "_",
+                                    "dstnctpass",
+                                    TRUE,
+                                    ".Rds"))) %>%
   dplyr::mutate(q_comment_rating = chatgpt_4o_cat) %>%
   dplyr::filter(!is.na(chatgpt_4o_cat))
 
@@ -105,7 +106,7 @@ cluster_all_df <- map_df(unique(text_long_df$q_comment_rating), function(rating_
   message(rating_i)
   
   fb_df_embed <- text_long_df[text_long_df$q_comment_rating %in% rating_i,]
-
+  
   fb_df_embed_noid <- fb_df_embed %>%
     dplyr::select(contains("V"))
   
@@ -126,7 +127,7 @@ cluster_all_df <- map_df(unique(text_long_df$q_comment_rating), function(rating_
     X_pca,
     n_neighbors = n_neighbors,
     min_dist = 0.0,
-    n_components = 5,   # key difference vs 2D
+    n_components = n_components,   # key difference vs 2D
     metric = "cosine"
   )
   
@@ -151,7 +152,7 @@ cluster_all_df <- map_df(unique(text_long_df$q_comment_rating), function(rating_
   #### Cleanup
   fb_df_embed <- fb_df_embed %>%
     dplyr::select(-contains("V"))
-
+  
   # Aggregate clusters -----------------------------------------------------------
   
   #### Aggregate to cluster
@@ -170,9 +171,14 @@ cluster_all_df <- map_df(unique(text_long_df$q_comment_rating), function(rating_
   
   summarize_comments <- function(text) {
     
+    # prompt <- paste0(
+    #   "Summarize the following comments in 3–5 words. ",
+    #   "Be descriptive, neutral, and concise.\n\n",
+    #   text
+    # )
+    
     prompt <- paste0(
-      "Summarize the following comments in 3–5 words. ",
-      "Be descriptive, neutral, and concise.\n\n",
+      "Summarize the following comments in 6 words or fewer capturing the main theme.\n\n",
       text
     )
     
@@ -212,5 +218,6 @@ cluster_all_df <- map_df(unique(text_long_df$q_comment_rating), function(rating_
 # Export -----------------------------------------------------------------------
 saveRDS(cluster_all_df, 
         file.path(data_dir, "FinalData ChatGPT Comment Codes", "outputs",
-                  paste0("fb_comments_with_embeddings_cluster_nneighbor",n_neighbors,".Rds")))
+                  paste0("fb_comments_with_embeddings_cluster_nneighbor",n_neighbors,
+                         "_ncomponents",n_components,".Rds")))
 

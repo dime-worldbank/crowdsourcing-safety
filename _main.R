@@ -104,6 +104,8 @@ if(RUN_CODE){
   
   source(file.path(git_clean_data_dir, "01_feedback_outliers.R"))
   source(file.path(git_clean_data_dir, "02_classify_feedback_gpt.R"))
+  source(file.path(git_clean_data_dir, "02a_tweet_embeddings_gpt.R"))
+  source(file.path(git_clean_data_dir, "02b_tweet_embeddings_cluster.R"))
   source(file.path(git_clean_data_dir, "03_categorize_feedback_gpt"))
   source(file.path(git_clean_data_dir, "04_classify_feedback.R"))
   source(file.path(git_clean_data_dir, "05_make_vehicle_level_data.R"))
@@ -113,11 +115,13 @@ if(RUN_CODE){
   
   source(file.path(git_analysis_dir, "feedback_comment_categories.R"))
   source(file.path(git_analysis_dir, "feedback_distribution.R"))
+  source(file.path(git_analysis_dir, "feedback_embedding_cluster_figure.R"))
   source(file.path(git_analysis_dir, "feedback_n_survey_response_per_vehicle.R"))
   source(file.path(git_analysis_dir, "feedback_over_time.R"))
   source(file.path(git_analysis_dir, "feedback_pilot_testing.R"))
   source(file.path(git_analysis_dir, "feedback_predict_comment_sentiment.R"))
   source(file.path(git_analysis_dir, "feedback_predict_driving_sentiment.R"))
+  source(file.path(git_analysis_dir, "feedback_rush_regressions.R"))
   source(file.path(git_analysis_dir, "feedback_safety_speed_v1_crosstab.R"))
   source(file.path(git_analysis_dir, "feedback_safety_speed_v2_crosstab.R"))
   source(file.path(git_analysis_dir, "feedback_sentiment_vs_safety.R"))
